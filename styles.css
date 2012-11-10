@@ -1,0 +1,7 @@
+.course-content ul.flexsections {margin:0;}
+.course-content ul.flexsections li.section {list-style: none;margin:3px 0 2px 0;padding:0;
+border-color: #DDDDDD;border-style: solid;border-width: 1px;}
+.course-content ul.flexsections li.section .content {margin:0 40px;}
+.course-content ul.flexsections li.section .left {width:40px;float:left;text-align:center;}
+.course-content ul.flexsections li.section .right {width:40px;float:right;text-align:center;}
+.jumpmenu {text-align:center;}
