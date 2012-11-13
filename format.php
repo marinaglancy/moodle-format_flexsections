@@ -34,17 +34,11 @@ if (($marker >=0) && has_capability('moodle/course:setcurrentsection', $context)
     course_set_marker($course->id, $marker);
 }
 
-// make sure all sections are created
-$course = course_get_format($course)->get_course();
-course_create_sections_if_missing($course, range(0, $course->numsections));
+// make sure section 0 is created
+course_create_sections_if_missing($course, 0);
 
 $renderer = $PAGE->get_renderer('format_flexsections');
-
-if (!empty($displaysection)) {
-    $renderer->print_single_section_page($course, null, null, null, null, $displaysection);
-} else {
-    $renderer->print_multiple_section_page($course, null, null, null, null);
-}
+$renderer->display_section($course, $displaysection, $displaysection);
 
 // Include course format js module
 $PAGE->requires->js('/course/format/flexsections/format.js');

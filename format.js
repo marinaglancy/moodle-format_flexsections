@@ -59,8 +59,8 @@ M.course.format.process_sections = function(Y, sectionlist, response, sectionfro
     };
 
     if (response.action == 'move') {
-        // update titles in all affected sections
-        for (var i = sectionfrom; i <= sectionto; i++) {
+        // update sections titles
+        for (var i in response.sectiontitles) {
             sectionlist.item(i).one('.'+CSS.SECTIONNAME).setContent(response.sectiontitles[i]);
         }
     }
