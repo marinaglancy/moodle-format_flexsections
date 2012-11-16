@@ -23,9 +23,11 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+require_once($CFG->dirroot. '/course/format/lib.php');
 
 define('FORMAT_FLEXSECTIONS_COLLAPSED', 1);
 define('FORMAT_FLEXSECTIONS_EXPANDED', 0);
+
 /**
  * Format Flexsections base class
  *
@@ -54,7 +56,7 @@ class format_flexsections extends format_base {
     public function get_section_name($section) {
         $section = $this->get_section($section);
         if ((string)$section->name !== '') {
-            return format_string($section->name, true, array('context' => context_course::instance($course->id)));
+            return format_string($section->name, true, array('context' => context_course::instance($this->courseid)));
         } else if ($section->section == 0) {
             return get_string('section0name', 'format_flexsections');
         } else {
@@ -464,17 +466,17 @@ class format_flexsections extends format_base {
     }
 
     /**
-     * Deletes a section
+     * Moves the section content to the parent section and deletes it
      *
      * Moves all activities and subsections to the parent section (section 0
      * can never be deleted)
      *
      * @param section_info $section
      */
-    protected function delete_section($section) {
+    protected function mergeup_section($section) {
         global $DB;
         if (!$section->section) {
-            // can not delete section 0
+            // seciton 0 does not have parent
             return;
         }
         // move all modules and activities from this section to parent
@@ -513,9 +515,19 @@ class format_flexsections extends format_base {
             }
         }
         $transaction->allow_commit();
-        if (!empty($values)) {
-            rebuild_course_cache($this->courseid, true);
-        }
+        rebuild_course_cache($this->courseid, true);
+    }
+
+    /**
+     * Returns true if we are on /course/view.php page
+     *
+     * @return bool
+     */
+    public function on_course_view_page() {
+        global $PAGE;
+        return ($PAGE->has_set_url() &&
+                $PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)
+                );
     }
 
     /**
@@ -531,8 +543,7 @@ class format_flexsections extends format_base {
         if ($PAGE != $page) {
             return;
         }
-        if ($page->has_set_url() &&
-                $page->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)) {
+        if ($this->on_course_view_page()) {
             // if requested, create new section and redirect to course view page
             $addchildsection = optional_param('addchildsection', null, PARAM_INT);
             if ($addchildsection !== null) {
@@ -541,14 +552,25 @@ class format_flexsections extends format_base {
                 $url = course_get_url($this->courseid, $sectionnum, array('sr' => $sr));
                 redirect($url);
             }
-            // if requested, delete the section
-            $deletesection = optional_param('deletesection', null, PARAM_INT);
+            // if requested, merge the section content with parent and remove the section
+            $mergeup = optional_param('mergeup', null, PARAM_INT);
             $sr = optional_param('sr', null, PARAM_INT);
-            if ($deletesection) {
-                $section = $this->get_section($deletesection, MUST_EXIST);
+            if ($mergeup && confirm_sesskey()) {
+                $section = $this->get_section($mergeup, MUST_EXIST);
                 $url = course_get_url($this->courseid, $section->parent, array('sr' => $sr));
-                $this->delete_section($section);
+                $this->mergeup_section($section);
                 redirect($url);
+            }
+            // if requested, move section
+            $movesection = optional_param('movesection', null, PARAM_INT);
+            $moveparent = optional_param('moveparent', null, PARAM_INT);
+            $movebefore = optional_param('movebefore', null, PARAM_RAW);
+            if ($movesection !== null && $moveparent !== null &&
+                    $this->can_move_section_to($movesection, $moveparent, $movebefore)) {
+                // TODO ignore 'before' for now
+                $movesection = $this->get_section($movesection);
+                $this->update_section_format_options(array('id' => $movesection->id, 'parent' => $moveparent));
+                redirect(course_get_url($this->courseid, $movesection->section));
             }
             // save 'section' attribute is specified in query string
             $selectedsection = optional_param('section', null, PARAM_INT);
@@ -556,6 +578,97 @@ class format_flexsections extends format_base {
                 $this->viewcoursesection = $selectedsection;
             }
         }
+    }
+
+    /**
+     * If in section moving mode returns section number, otherwise returns null
+     *
+     * @return null|int
+     */
+    public function is_moving_section() {
+        global $PAGE;
+        if ($this->on_course_view_page() && $PAGE->user_is_editing()) {
+            return optional_param('moving', null, PARAM_INT);
+        }
+        return null;
+    }
+
+    /**
+     * Check if we can move the section to this position
+     *
+     * not allow to insert section as it's own subsection
+     * not allow to insert section directly before or after itself (it would not change anything)
+     *
+     * @param int|section_info $section
+     * @param int|section_info $parent
+     * @param null|section_info|int $before null if in the end of subsections list
+     */
+    public function can_move_section_to($section, $parent, $before = null) {
+        $section = $this->get_section($section);
+        $parent = $this->get_section($parent);
+        if ($section === null || $parent === null) {
+            return false;
+        }
+        // check that $parent is not subsection of $section
+        if ($section->section == $parent->section || $this->section_has_parent($parent, $section->section)) {
+            return false;
+        }
+
+        if ($before === '' || $before === null) {
+            $before = null;
+        } else {
+            $before = (int)$before;
+        }
+        if ($before !== null) {
+            $before = $this->get_section($before);
+            // check that it's a subsection of $parent
+            if (!$before || $before->parent !== $parent->section) {
+                return false;
+            }
+        }
+
+        if ($section->parent == $parent->section) {
+            // section's parent is not being changed
+            // do not insert section directly before or after itself
+            if ($before && $before->section == $section->section) {
+                return false;
+            }
+            $subsections = array();
+            $lastsibling = null;
+            foreach ($this->get_sections() as $num => $sibling) {
+                if ($sibling->parent == $parent->section) {
+                    if ($before && $before->section == $num) {
+                        if ($lastsibling && $lastsibling->section == $section->section) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                    $lastsibling = $sibling;
+                }
+            }
+            if ($lastsibling && !$before && $lastsibling->section == $section->section) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Moves section to the specified position
+     *
+     * @param int|section_info $section
+     * @param int|section_info $parent
+     * @param null|int|section_info $before
+     */
+    protected function move_section($section, $parent, $before = null) {
+        $section = $this->get_section($section);
+        $parent = $this->get_section($parent);
+        if (!$section || !$parent || !$this->can_move_section_to($section, $parent, $before)) {
+            return;
+        }
+        // TODO 'before' is ignored for now
+        $this->update_section_format_options(array('id' => $section->id, 'parent' => $parent->section));
     }
 
     public function course_header() {
