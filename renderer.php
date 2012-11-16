@@ -162,13 +162,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
                 print_section_add_menus($course, $sectionnum, null, false, false, $sr);
             }
             // display subsections
-            $sections = get_fast_modinfo($course)->get_section_info_all();
-            $children = array();
-            foreach ($sections as $num => $subsection) {
-                if ($subsection->parent == $sectionnum && $num != $sectionnum) {
-                    $children[] = $num;
-                }
-            }
+            $children = course_get_format($course)->get_subsections($sectionnum);
             if (!empty($children) || $movingsection) {
                 echo html_writer::start_tag('ul', array('class' => 'flexsections'));
                 foreach ($children as $num) {
