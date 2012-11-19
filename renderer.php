@@ -81,22 +81,6 @@ class format_flexsections_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Display "add section" link
-     *
-     * @param int|stdClass $course
-     * @param int $parentsection
-     * @param int $sr
-     */
-    protected function display_new_section($course, $parentsection, $sr) {
-        $url = course_get_url($course, null, array('sr' => $sr));
-        $url->param('addchildsection', $parentsection);
-        $url->param('sr', $sr);
-        echo html_writer::start_tag('div', array('class' => 'mdl-right addsection'));
-        echo html_writer::link($url, $parentsection?'Add subsection':'Add section'); // TODO
-        echo html_writer::end_tag('div');
-    }
-
-    /**
      * Display section and all its activities and subsections (called recursively)
      *
      * @param int|stdClass $course
@@ -112,11 +96,8 @@ class format_flexsections_renderer extends plugin_renderer_base {
         $movingsection = course_get_format($course)->is_moving_section();
         if ($level === 0) {
             echo html_writer::start_tag('ul', array('class' => 'flexsections'));
-            if ($movingsection) {
-                $cancelmovingurl = course_get_url($course->id, $movingsection, array('sr' => $sr));
-                echo html_writer::tag('li',
-                        html_writer::link($cancelmovingurl, 'Cancel moving'), // TODO
-                        array('class' => 'cancelmoving'));
+            if ($cancelmovingcontrol = course_get_format($course)->get_edit_control_cancelmoving()) {
+                echo $this->render($cancelmovingcontrol);
             }
             if ($section->section) {
                 $this->display_insert_section_here($course, $section->parent, $section->section);
@@ -129,14 +110,10 @@ class format_flexsections_renderer extends plugin_renderer_base {
                     'id' => 'section-'.$sectionnum));
         // display controls
         $controls = course_get_format($course)->get_section_edit_controls($section, $sr);
-        if (!$level) {
-            unset($controls['switchcollapsed']);
-            unset($controls['move']);
-        }
         if (!empty($controls)) {
             echo html_writer::start_tag('div', array('class' => 'controls'));
-            foreach ($controls as $controlclass => $control) {
-                echo ' ['. html_writer::link($control['url'], $control['text'], array('class' => $controlclass)). ']';
+            foreach ($controls as $control) {
+                echo $this->render($control);
             }
             echo html_writer::end_tag('div'); // .controls
         }
@@ -151,6 +128,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         } else {
             echo html_writer::tag('div', '', array('class' => 'summary nosummary'));
         }
+        // display section contents (activities and subsections)
         if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED || !$level) {
             // display resources and activities
             print_section($course, $section, null, null, true, "100%", false, $sr);
@@ -172,8 +150,8 @@ class format_flexsections_renderer extends plugin_renderer_base {
                 $this->display_insert_section_here($course, $section);
                 echo html_writer::end_tag('ul'); // .flexsections
             }
-            if ($PAGE->user_is_editing()) {
-                $this->display_new_section($course, $sectionnum, $sr);
+            if ($addsectioncontrol = course_get_format($course)->get_add_section_control($sectionnum)) {
+                echo $this->render($addsectioncontrol);
             }
         }
         echo html_writer::end_tag('div'); // .content
@@ -194,27 +172,30 @@ class format_flexsections_renderer extends plugin_renderer_base {
      * @param null|int|section_info $before number of section before which we want to insert (or null if in the end)
      */
     protected function display_insert_section_here($courseorid, $parent, $before = null) {
-        $beforenum = $before;
-        if ($before && is_object($before)) {
-            $beforenum = $before->section;
+        if ($control = course_get_format($courseorid)->get_edit_control_movehere($parent, $before)) {
+            echo $this->render($control);
         }
-        $movingsection = course_get_format($courseorid)->is_moving_section();
-        if ($movingsection) {
-            // check if we can move the section to this position
-            if (course_get_format($courseorid)->can_move_section_to($movingsection, $parent, $beforenum)) {
-                // display 'move here'
-                $parentnum = $parent;
-                if (is_object($parent)) {
-                    $parentnum = $parent->section;
-                }
-                $movelink = course_get_url($courseorid);
-                $movelink->params(array('movesection' => $movingsection,
-                        'moveparent' => $parentnum,
-                        'movebefore' => $beforenum));
-                echo html_writer::tag('li',
-                        html_writer::link($movelink, 'Move here'),
-                        array('class' => 'movehere'));
-            }
+    }
+
+    /**
+     * renders HTML for format_flexsections_edit_control
+     *
+     * @param format_flexsections_edit_control $control
+     * @return string
+     */
+    protected function render_format_flexsections_edit_control(format_flexsections_edit_control $control) {
+        if (!$control) {
+            return '';
         }
+        if ($control->class === 'movehere') {
+            return html_writer::tag('li', html_writer::link($control->url, $control->text), array('class' => $control->class));
+        } else if ($control->class === 'cancelmoving') {
+            return html_writer::tag('li', html_writer::link($control->url, $control->text), array('class' => $control->class));
+        } else if ($control->class === 'addsection') {
+            return html_writer::tag('div',
+                    html_writer::link($control->url, $control->text),
+                    array('class' => 'mdl-right '.$control->class));
+        }
+        return ' ['. html_writer::link($control->url, $control->text, array('class' => $control->class)). ']';
     }
 }

@@ -469,7 +469,7 @@ class format_flexsections extends format_base {
         $sectionnums = array_keys($sections);
         $sectionnum = array_pop($sectionnums) + 1;
         course_create_sections_if_missing($this->courseid, $sectionnum);
-        $this->move_section($sectionnum, $parent, $before);
+        $sectionnum = $this->move_section($sectionnum, $parent, $before);
         return $sectionnum;
     }
 
@@ -550,17 +550,15 @@ class format_flexsections extends format_base {
             $addchildsection = optional_param('addchildsection', null, PARAM_INT);
             if ($addchildsection !== null && has_capability('moodle/course:update', $context)) {
                 $sectionnum = $this->create_new_section($addchildsection);
-                $sr = optional_param('sr', null, PARAM_INT);
-                $url = course_get_url($this->courseid, $sectionnum, array('sr' => $sr));
+                $url = course_get_url($this->courseid, $sectionnum);
                 redirect($url);
             }
             // if requested, merge the section content with parent and remove the section
             $mergeup = optional_param('mergeup', null, PARAM_INT);
-            $sr = optional_param('sr', null, PARAM_INT);
             if ($mergeup && confirm_sesskey() && has_capability('moodle/course:update', $context)) {
                 $section = $this->get_section($mergeup, MUST_EXIST);
                 $this->mergeup_section($section);
-                $url = course_get_url($this->courseid, $section->parent, array('sr' => $sr));
+                $url = course_get_url($this->courseid, $section->parent);
                 redirect($url);
             }
             // if requested, move section
@@ -590,9 +588,18 @@ class format_flexsections extends format_base {
             }
             // set course marker if required
             $marker = optional_param('marker', null, PARAM_INT);
-            if ($marker !== null && has_capability('moodle/course:setcurrentsection', $context)
-                    && confirm_sesskey()) {
-                course_set_marker($this->courseid, $marker);
+            if ($marker !== null && has_capability('moodle/course:setcurrentsection', $context) && confirm_sesskey()) {
+                if ($marker > 0) {
+                    // set marker
+                    $url = course_get_url($this->courseid, $marker);
+                    course_set_marker($this->courseid, $marker);
+                    redirect($url);
+                } else if ($this->get_course()->marker) {
+                    // remove marker
+                    $url = course_get_url($this->courseid, $this->get_course()->marker);
+                    course_set_marker($this->courseid, 0);
+                    redirect($url);
+                }
             }
             // save 'section' attribute is specified in query string
             $selectedsection = optional_param('section', null, PARAM_INT);
@@ -602,7 +609,13 @@ class format_flexsections extends format_base {
         }
     }
 
-    public function get_section_edit_controls($section, $sr) {
+    /**
+     * Returns a list of all controls available for particular section on particular page
+     *
+     * @param int|section_info $section
+     * @return array of format_flexsections_edit_control
+     */
+    public function get_section_edit_controls($section) {
         global $PAGE;
         $controls = array();
         if (!$PAGE->user_is_editing()) {
@@ -617,28 +630,30 @@ class format_flexsections extends format_base {
         $course = $this->get_course();
         $context = context_course::instance($this->courseid);
         $movingsection = $this->is_moving_section();
+        $sr = $this->viewcoursesection; // section to return to
 
         // Collapse/expand
-        if (has_capability('moodle/course:update', $context)) {
-            $switchcollapsedurl = course_get_url($course, $section->section, array('sr' => $sr));
+        if (has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
+            $switchcollapsedurl = course_get_url($course, $this->viewcoursesection);
             $switchcollapsedurl->params(array('switchcollapsed' => $section->section, 'sesskey' => sesskey()));
             if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
                 $text = 'Show collapsed'; // TODO
             } else {
                 $text = 'Show expanded'; // TODO
             }
-            $controls['switchcollapsed'] = array('url' => $switchcollapsedurl, 'text' => $text);
+            $controls[] = new format_flexsections_edit_control('switchcollapsed',
+                    $switchcollapsedurl, $text);
         }
 
         // Edit section control
         if (has_capability('moodle/course:update', $context)) {
             $editurl = new moodle_url('/course/editsection.php', array('id' => $section->id, 'sr' => $sr));
-            $controls['edit'] = array('url' => $editurl, 'text' => 'Edit'); // TODO
+            $controls[] = new format_flexsections_edit_control('edit', $editurl, 'Edit'); // TODO
         }
 
         // Set marker
         if (has_capability('moodle/course:setcurrentsection', $context)) {
-            $setmarkerurl = course_get_url($course, $section->section, array('sr' => $sr));
+            $setmarkerurl = course_get_url($course, $this->viewcoursesection);
             if ($course->marker == $section->section) {
                 $marker = 0;
                 $text = 'Remove marker'; // TODO
@@ -647,29 +662,93 @@ class format_flexsections extends format_base {
                 $text = 'Set marker'; // TODO
             }
             $setmarkerurl->params(array('marker' => $marker, 'sesskey' => sesskey()));
-            $controls['marker'] = array('url' => $setmarkerurl, 'text' => $text);
+            $controls[] = new format_flexsections_edit_control('marker', $setmarkerurl, $text);
         }
 
         // Merge-up section control
         if (has_capability('moodle/course:update', $context)) {
-            $mergeupurl = course_get_url($course, $section->section, array('sr' => $sr));
-            $mergeupurl->params(array('mergeup' => $section->section, 'sesskey' => sesskey(), 'sr' => $sr));
-            $controls['mergeup'] = array('url' => $mergeupurl, 'text' => 'Merge with parent'); // TODO
+            $mergeupurl = course_get_url($course, $this->viewcoursesection);
+            $mergeupurl->params(array('mergeup' => $section->section, 'sesskey' => sesskey()));
+            $controls[] = new format_flexsections_edit_control('mergeup', $mergeupurl, 'Merge with parent'); // TODO
         }
 
         // Move section control
-        if (!$movingsection && has_capability('moodle/course:update', $context)) {
+        if (!$movingsection && has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
             $moveurl = course_get_url($course, $section->section, array('sr' => $sr));
             $moveurl->params(array('moving' => $section->section, 'sesskey' => sesskey()));
-            $controls['move'] = array('url' => $moveurl, 'text' => 'Move'); // TODO
+            $controls[] = new format_flexsections_edit_control('move', $moveurl, 'Move'); // TODO
         }
         // Cancel moving section control
         if ($movingsection === $section->section && has_capability('moodle/course:update', $context)) {
             $cancelmovingurl = course_get_url($course->id, $movingsection, array('sr' => $sr));
-            $controls['cancelmove'] = array('url' => $cancelmovingurl, 'text' => 'Cancel moving'); // TODO
+            $controls[] = new format_flexsections_edit_control('cancelmove', $cancelmovingurl, 'Cancel moving'); // TODO
         }
 
         return $controls;
+    }
+
+    /**
+     * Returns control 'Move here' for particular parent section
+     *
+     * @param int|section_info $parent
+     * @param int|section_info $before
+     * @return array of controls (0 or 1 element)
+     */
+    public function get_edit_control_movehere($parent, $before) {
+        $movingsection = $this->is_moving_section();
+        if (!$movingsection || !$this->can_move_section_to($movingsection, $parent, $before)) {
+            return null;
+        }
+
+        $beforenum = $before;
+        if ($before && is_object($before)) {
+            $beforenum = $before->section;
+        }
+        $parentnum = $parent;
+        if (is_object($parent)) {
+            $parentnum = $parent->section;
+        }
+
+        $movelink = course_get_url($this->courseid);
+        $movelink->params(array('movesection' => $movingsection, 'moveparent' => $parentnum));
+        if ($beforenum) {
+            $movelink->params(array('movebefore' => $beforenum));
+        }
+        return new format_flexsections_edit_control('movehere', $movelink, 'Move here'); // TODO
+    }
+
+    /**
+     * Returns a control to exit the section moving mode
+     *
+     * @return null|format_flexsections_edit_control
+     */
+    public function get_edit_control_cancelmoving() {
+        $movingsection = $this->is_moving_section();
+        if ($movingsection) {
+            $cancelmovingurl = course_get_url($this->courseid, $this->viewcoursesection);
+            return new format_flexsections_edit_control('cancelmoving', $cancelmovingurl, 'Cancel moving'); // TODO
+        }
+        return null;
+    }
+
+    /**
+     * Returns the control to add a (sub)section
+     *
+     * @param int|section_info $parentsection
+     * @return null|format_flexsections_edit_control
+     */
+    public function get_add_section_control($parentsection) {
+        global $PAGE;
+        if (!$PAGE->user_is_editing()) {
+            return null;
+        }
+        if (is_object($parentsection)) {
+            $parentsection = $parentsection->section;
+        }
+        $url = course_get_url($this->courseid, $this->viewcoursesection);
+        $url->param('addchildsection', $parentsection);
+        $text = $parentsection?'Add subsection':'Add section'; // TODO
+        return new format_flexsections_edit_control('addsection', $url, $text);
     }
 
     /**
@@ -924,5 +1003,23 @@ class format_flexsections_courseobj implements renderable {
     public function __construct($text, $background) {
         $this->text = $text;
         $this->background = $background;
+    }
+}
+
+/**
+ * Represents one edit control
+ *
+ * @package    format_flexsections
+ * @copyright  2012 Marina Glancy
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class format_flexsections_edit_control implements renderable {
+    public $url;
+    public $text;
+    public $class;
+    public function __construct($class, $url, $text) {
+        $this->class = $class;
+        $this->url = $url;
+        $this->text = $text;
     }
 }
