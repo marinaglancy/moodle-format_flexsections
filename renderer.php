@@ -128,59 +128,15 @@ class format_flexsections_renderer extends plugin_renderer_base {
                     (course_get_format($course)->is_section_current($section) ? ' current' : ''),
                     'id' => 'section-'.$sectionnum));
         // display controls
-        if ($PAGE->user_is_editing() && $sectionnum) {
-            /*
-            echo html_writer::tag('div', 'move me', array('class' => 'left side'));
-            echo html_writer::start_tag('div', array('class' => 'right side'));
-            echo html_writer::link(new moodle_url('/'), 'move up', array('class' => 'moveup'));
-            echo html_writer::end_tag('div'); // right side
-            */
+        $controls = course_get_format($course)->get_section_edit_controls($section, $sr);
+        if (!$level) {
+            unset($controls['switchcollapsed']);
+            unset($controls['move']);
+        }
+        if (!empty($controls)) {
             echo html_writer::start_tag('div', array('class' => 'controls'));
-
-            // Collapse/expand
-            if ($level) {
-                $switchcollapsedurl = course_get_url($course, $section->section, array('sr' => $sr));
-                $switchcollapsedurl->params(array('switchcollapsed' => $section->section, 'sesskey' => sesskey()));
-                if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
-                    echo ' ['.html_writer::link($switchcollapsedurl, 'Show collapsed').']'; // TODO
-                } else {
-                    echo ' ['.html_writer::link($switchcollapsedurl, 'Show expanded').']'; // TODO
-                }
-            }
-
-            // Edit section control
-            $editurl = new moodle_url('/course/editsection.php', array('id' => $section->id, 'sr' => $sr));
-            echo ' ['.html_writer::link($editurl, 'Edit').']'; // TODO
-
-            // Set marker
-            if (has_capability('moodle/course:setcurrentsection', context_course::instance($course->id))) {
-                $setmarkerurl = course_get_url($course, $section->section, array('sr' => $sr));
-                if ($course->marker == $section->section) {
-                    $marker = 0;
-                    $text = 'Remove marker';// TODO
-                } else {
-                    $marker = $section->section;
-                    $text = 'Set marker';// TODO
-                }
-                $setmarkerurl->params(array('marker' => $marker, 'sesskey' => sesskey()));
-                echo ' ['.html_writer::link($setmarkerurl, $text).']'; // TODO
-            }
-
-            // Merge-up section control
-            $mergeupurl = course_get_url($course, $section->section, array('sr' => $sr));
-            $mergeupurl->params(array('mergeup' => $section->section, 'sesskey' => sesskey(), 'sr' => $sr));
-            echo ' ['.html_writer::link($mergeupurl, 'Merge with parent').']'; // TODO
-
-            // Move section control
-            if ($movingsection === null && $level) {
-                $moveurl = course_get_url($course, $section->section, array('sr' => $sr));
-                $moveurl->params(array('moving' => $section->section, 'sesskey' => sesskey()));
-                echo ' ['.html_writer::link($moveurl, 'Move').']'; // TODO
-            }
-            // Cancel moving section control
-            if ($movingsection === $section->section) {
-                $cancelmovingurl = course_get_url($course->id, $movingsection, array('sr' => $sr));
-                echo ' ['.html_writer::link($cancelmovingurl, 'Cancel moving').']'; // TODO
+            foreach ($controls as $controlclass => $control) {
+                echo ' ['. html_writer::link($control['url'], $control['text'], array('class' => $controlclass)). ']';
             }
             echo html_writer::end_tag('div'); // .controls
         }
@@ -199,6 +155,10 @@ class format_flexsections_renderer extends plugin_renderer_base {
             // display resources and activities
             print_section($course, $section, null, null, true, "100%", false, $sr);
             if ($PAGE->user_is_editing()) {
+                // a little hack to allow use drag&drop for moving activities if the section is empty
+                if (empty(get_fast_modinfo($course)->sections[$sectionnum])) {
+                    echo "<ul class=\"section img-text\">\n</ul>\n";
+                }
                 print_section_add_menus($course, $sectionnum, null, false, false, $sr);
             }
             // display subsections
