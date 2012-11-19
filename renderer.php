@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *
+ * Defines renderer for course format flexsections
  *
  * @package    format_flexsections
  * @copyright  2012 Marina Glancy
@@ -80,8 +80,15 @@ class format_flexsections_renderer extends plugin_renderer_base {
         return format_text($summarytext, $section->summaryformat, $options);
     }
 
+    /**
+     * Display "add section" link
+     *
+     * @param int|stdClass $course
+     * @param int $parentsection
+     * @param int $sr
+     */
     protected function display_new_section($course, $parentsection, $sr) {
-        $url = new moodle_url(course_get_url($course, null, array('sr' => $sr)));
+        $url = course_get_url($course, null, array('sr' => $sr));
         $url->param('addchildsection', $parentsection);
         $url->param('sr', $sr);
         echo html_writer::start_tag('div', array('class' => 'mdl-right addsection'));
@@ -89,12 +96,19 @@ class format_flexsections_renderer extends plugin_renderer_base {
         echo html_writer::end_tag('div');
     }
 
-    public function display_section($course, $sectionnum, $sr, $level = 0) {
+    /**
+     * Display section and all its activities and subsections (called recursively)
+     *
+     * @param int|stdClass $course
+     * @param int|section_info $section
+     * @param int $sr section to return to (for building links)
+     * @param int $level nested level on the page (in case of 0 also displays additional start/end html code)
+     */
+    public function display_section($course, $section, $sr, $level = 0) {
         global $PAGE;
-        if (empty($sectionnum)) {
-            $sectionnum = 0;
-        }
-        $section = get_fast_modinfo($course)->get_section_info($sectionnum);
+        $course = course_get_format($course)->get_course();
+        $section = course_get_format($course)->get_section($section);
+        $sectionnum = $section->section;
         $movingsection = course_get_format($course)->is_moving_section();
         if ($level === 0) {
             echo html_writer::start_tag('ul', array('class' => 'flexsections'));
@@ -110,7 +124,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         }
         echo html_writer::start_tag('li',
                 array('class' => "section main section-level-$level".
-                    ($movingsection === $section->section ? ' ismoving' : ''),
+                    ($movingsection === $sectionnum ? ' ismoving' : ''),
                     'id' => 'section-'.$sectionnum));
         // display controls
         if ($PAGE->user_is_editing() && $sectionnum) {
@@ -122,9 +136,20 @@ class format_flexsections_renderer extends plugin_renderer_base {
             */
             echo html_writer::start_tag('div', array('class' => 'controls'));
 
+            // Collapse/expand
+            if ($level) {
+                $switchcollapsedurl = course_get_url($course, $section->section, array('sr' => $sr));
+                $switchcollapsedurl->params(array('switchcollapsed' => $section->section, 'sesskey' => sesskey()));
+                if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
+                    echo ' ['.html_writer::link($switchcollapsedurl, 'Show collapsed').']'; // TODO
+                } else {
+                    echo ' ['.html_writer::link($switchcollapsedurl, 'Show expanded').']'; // TODO
+                }
+            }
+
             // Edit section control
             $editurl = new moodle_url('/course/editsection.php', array('id' => $section->id, 'sr' => $sr));
-            echo '['.html_writer::link($editurl, 'Edit').']'; // TODO
+            echo ' ['.html_writer::link($editurl, 'Edit').']'; // TODO
 
             // Merge-up section control
             $mergeupurl = course_get_url($course, $section->section, array('sr' => $sr));
@@ -187,13 +212,17 @@ class format_flexsections_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Displays the target div for moving section
+     * Displays the target div for moving section (in 'moving' mode only)
      *
      * @param int|stdClass $courseorid current course
      * @param int|section_info $parent new parent section
-     * @param null|int $beforenum number of section before which we want to insert (or null if in the end)
+     * @param null|int|section_info $before number of section before which we want to insert (or null if in the end)
      */
-    protected function display_insert_section_here($courseorid, $parent, $beforenum = null) {
+    protected function display_insert_section_here($courseorid, $parent, $before = null) {
+        $beforenum = $before;
+        if ($before && is_object($before)) {
+            $beforenum = $before->section;
+        }
         $movingsection = course_get_format($courseorid)->is_moving_section();
         if ($movingsection) {
             // check if we can move the section to this position

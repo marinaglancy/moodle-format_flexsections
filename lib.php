@@ -105,16 +105,26 @@ class format_flexsections extends format_base {
                 return $url;
             }
             // find the parent (or grandparent) page that is displayed on separate page
+            $url->param('section', $this->find_collapsed_parent($section->parent));
             $url->set_anchor('section-'.$sectionno);
-            while ($section->parent) {
-                $section = $this->get_section($section->parent);
-                if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
-                    $url->param('section', $section->section);
-                    return $url;
-                }
-            }
+            return $url;
         }
         return $url;
+    }
+
+    /**
+     * Returns either section or it's parent or grandparent, whoever first is collapsed
+     *
+     * @param int|section_info $section
+     * @return int
+     */
+    protected function find_collapsed_parent($section) {
+        $section = $this->get_section($section);
+        if (!$section->section || $section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
+            return $section->section;
+        } else {
+            return $this->find_collapsed_parent($section->parent);
+        }
     }
 
     /**
@@ -199,6 +209,9 @@ class format_flexsections extends format_base {
         } else if ($section->parent == $parentnum) {
             return true;
         } else if ($section->parent == 0) {
+            return false;
+        } else if ($section->parent >= $section->section) {
+            // some error
             return false;
         } else {
             return $this->section_has_parent($section->parent, $parentnum);
@@ -447,21 +460,16 @@ class format_flexsections extends format_base {
     /**
      * Create a new section under given parent
      *
-     * @param int $parentnum section number of parent
+     * @param int|section_info $parent parent section
+     * @param null|int|section_info $before
      * @return int
      */
-    public function create_new_section($parentnum = 0) {
-        global $DB;
+    public function create_new_section($parent = 0, $before = null) {
         $sections = get_fast_modinfo($this->courseid)->get_section_info_all();
         $sectionnums = array_keys($sections);
         $sectionnum = array_pop($sectionnums) + 1;
         course_create_sections_if_missing($this->courseid, $sectionnum);
-        if ($parentnum) {
-            $id = $DB->get_field('course_sections', 'id', array(
-                'course' => $this->courseid, 'section' => $sectionnum));
-            $this->update_section_format_options(
-                    array('parent' => $parentnum, 'id' => $id));
-        }
+        $this->move_section($sectionnum, $parent, $before);
         return $sectionnum;
     }
 
@@ -479,6 +487,7 @@ class format_flexsections extends format_base {
             // seciton 0 does not have parent
             return;
         }
+
         // move all modules and activities from this section to parent
         $modinfo = get_fast_modinfo($this->courseid);
         $allsections = $modinfo->get_section_info_all();
@@ -493,27 +502,15 @@ class format_flexsections extends format_base {
             $this->update_section_format_options(
                     array('id' => $subsection->id, 'parent' => $parent->section));
         }
+
+        // move the section to be removed to the end (this will re-number other sections)
+        $this->move_section($section->section, 0);
+        // delete it completely
         $params = array('courseid' => $this->courseid,
-                    'sectionid' => $section->id,
-                    'format' => $this->format);
+                    'sectionid' => $section->id);
         $transaction = $DB->start_delegated_transaction();
         $DB->delete_records('course_format_options', $params);
         $DB->delete_records('course_sections', array('id' => $section->id));
-        $values = $DB->get_fieldset_sql('SELECT section FROM {course_sections}
-            WHERE course = ? and section > ? ORDER BY section',
-                array($this->courseid, $section->section));
-        foreach ($values as $value) {
-            $DB->execute("UPDATE {course_sections} SET section = section - 1
-                WHERE course = ? and section = ?",
-                    array($this->courseid, $value));
-        }
-        foreach ($allsections as $subsection) {
-            if ($subsection->parent > $section->section) {
-                $this->update_section_format_options(
-                        array('id' => $subsection->id,
-                            'parent' => $subsection->parent-1));
-            }
-        }
         $transaction->allow_commit();
         rebuild_course_cache($this->courseid, true);
     }
@@ -557,8 +554,8 @@ class format_flexsections extends format_base {
             $sr = optional_param('sr', null, PARAM_INT);
             if ($mergeup && confirm_sesskey()) {
                 $section = $this->get_section($mergeup, MUST_EXIST);
-                $url = course_get_url($this->courseid, $section->parent, array('sr' => $sr));
                 $this->mergeup_section($section);
+                $url = course_get_url($this->courseid, $section->parent, array('sr' => $sr));
                 redirect($url);
             }
             // if requested, move section
@@ -568,6 +565,22 @@ class format_flexsections extends format_base {
             if ($movesection !== null && $moveparent !== null) {
                 $newsectionnum = $this->move_section($movesection, $moveparent, $movebefore);
                 redirect(course_get_url($this->courseid, $newsectionnum));
+            }
+            // if requested, switch collapsed attribute
+            $switchcollapsed = optional_param('switchcollapsed', null, PARAM_INT);
+            if ($switchcollapsed && confirm_sesskey() && ($section = $this->get_section($switchcollapsed))) {
+                if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
+                    $newvalue = FORMAT_FLEXSECTIONS_COLLAPSED;
+                } else {
+                    $newvalue = FORMAT_FLEXSECTIONS_EXPANDED;
+                }
+                $this->update_section_format_options(array('id' => $section->id, 'collapsed' => $newvalue));
+                if ($newvalue == FORMAT_FLEXSECTIONS_COLLAPSED) {
+                    $sr = $this->find_collapsed_parent($section->parent);
+                    redirect(course_get_url($this->courseid, $switchcollapsed, array('sr' => $sr)));
+                } else {
+                    redirect(course_get_url($this->courseid, $switchcollapsed));
+                }
             }
             // save 'section' attribute is specified in query string
             $selectedsection = optional_param('section', null, PARAM_INT);
@@ -612,7 +625,10 @@ class format_flexsections extends format_base {
         }
 
         if ($before) {
-            $before = $this->get_section((int)$before);
+            if (is_string($before)) {
+                $before = (int)$before;
+            }
+            $before = $this->get_section($before);
             // check that it's a subsection of $parent
             if (!$before || $before->parent !== $parent->section) {
                 return false;
@@ -652,7 +668,7 @@ class format_flexsections extends format_base {
      * @param int|section_info $section
      * @return array
      */
-    protected function get_subsections($section) {
+    public function get_subsections($section) {
         $sectionnum = $section;
         if (is_object($section)) {
             $sectionnum = $section->section;
@@ -664,6 +680,54 @@ class format_flexsections extends format_base {
             }
         }
         return $subsections;
+    }
+
+    /**
+     * Function recursively reorders the sections while moving one section to the new position
+     *
+     * If $movedsectionnum is not specified, function just populates the array for each (sub)section
+     * If $movedsectionnum is specified, we ignore it on the present location but add it
+     * under $movetoparentnum before $movebeforenum
+     *
+     * @param array $neworder the result or re-ordering, array (sectionid => sectionnumber)
+     * @param int|section_info $cursection
+     * @param int|section_info $movedsectionnum
+     * @param int|section_info $movetoparentnum
+     * @param int|section_info $movebeforenum
+     */
+    protected function reorder_sections(&$neworder, $cursection, $movedsectionnum = null, $movetoparentnum = null, $movebeforenum = null) {
+        // normalise arguments
+        $cursection = $this->get_section($cursection);
+        if ($movetoparentnum !== null && is_object($movetoparentnum)) {
+            $movetoparentnum = $movetoparentnum->section;
+        }
+        if ($movebeforenum !== null && is_object($movebeforenum)) {
+            $movebeforenum = $movebeforenum->section;
+        }
+        if ($movedsectionnum !== null && is_object($movedsectionnum)) {
+            $movedsectionnum = $movedsectionnum->section;
+        }
+        if ($movedsectionnum === null) {
+            $movebeforenum = $movetoparentnum = null;
+        }
+
+        // ignore section being moved
+        if ($movedsectionnum !== null && $movedsectionnum == $cursection->section) {
+            return;
+        }
+
+        // add current section to $neworder
+        $neworder[$cursection->id] = count($neworder);
+        // loop through subsections and reorder them (insert $movedsectionnum if necessary)
+        foreach ($this->get_subsections($cursection) as $subsection) {
+            if ($movebeforenum && $subsection->section == $movebeforenum) {
+                $this->reorder_sections($neworder, $movedsectionnum);
+            }
+            $this->reorder_sections($neworder, $subsection, $movedsectionnum, $movetoparentnum, $movebeforenum);
+        }
+        if (!$movebeforenum && $movetoparentnum !== null && $movetoparentnum == $cursection->section) {
+            $this->reorder_sections($neworder, $movedsectionnum);
+        }
     }
 
     /**
@@ -682,44 +746,30 @@ class format_flexsections extends format_base {
             return $newsectionnumber;
         }
 
-        // move section $section directly under $parent
-        $parentnum = $parent;
-        if (is_object($parent)) {
-            $parentnum = $parent->section;
+        // find the changes in the sections numbering
+        $origorder = array();
+        foreach ($this->get_sections() as $subsection) {
+            $origorder[$subsection->id] = $subsection->section;
         }
-        if ($section->parent != $parentnum) {
-            $this->update_section_format_options(array('id' => $section->id, 'parent' => $parentnum));
+        $neworder = array();
+        $this->reorder_sections($neworder, 0, $section->section, $parent, $before);
+        if (count($origorder) != count($neworder)) {
+            die('Error in sections hierarchy'); // TODO
         }
-
-        // now we need to reorder sections to make sure the $section is before $before
-        $siblings = $this->get_subsections($parent);
-
-        // save the current order of section numbers
-        $originalkeys = array_keys($siblings);
-
-        // rearrange the list of section numbers so that $section->section is before $before
-        $newkeys = array_keys($siblings);
-        array_splice($newkeys, array_search($section->section, $newkeys), 1);
-        if (empty($before)) {
-            $newkeys[] = $section->section;
-        } else {
-            if (is_object($before)) { $before = $before->section; }
-            $idx = array_search($before, $newkeys);
-            array_splice($newkeys, $idx, 0, $section->section);
-        }
-
-        // build array of required changes in section number
-        // $changes[sectionid] = array('old' => oldsectionnumber, 'new' => newsectionnumber);
         $changes = array();
-        foreach ($originalkeys as $i => $num) {
-            if ($num != $newkeys[$i]) {
-                $changes[$siblings[$newkeys[$i]]->id] = array('old' => $newkeys[$i], 'new' => $num);
+        foreach ($origorder as $id => $num) {
+            if ($num != $neworder[$id]) {
+                $changes[$id] = array('old' => $num, 'new' => $neworder[$id]);
+                if ($num == $section->section) {
+                    $newsectionnumber = $neworder[$id];
+                }
             }
-            if ($num == $section->section) {
-                $newsectionnumber = $newkeys[$i];
+            if ((is_object($parent) && $num == $parent->section) || $num === $parent) {
+                $newparentnum = $neworder[$id];
             }
         }
-        if (empty($changes)) {
+
+        if (empty($changes) && $newparentnum == $section->parent) {
             return $newsectionnumber;
         }
 
@@ -732,6 +782,9 @@ class format_flexsections extends format_base {
                     $changeparent[$subsection->id] = $change['new'];
                 }
             }
+        }
+        if ($section->parent != $newparentnum) {
+            $changeparent[$section->id] = $newparentnum;
         }
 
         // Update all in database in one transaction
