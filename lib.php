@@ -503,6 +503,10 @@ class format_flexsections extends format_base {
                     array('id' => $subsection->id, 'parent' => $parent->section));
         }
 
+        if ($this->get_course()->marker == $section->section) {
+            course_set_marker($this->courseid, 0);
+        }
+
         // move the section to be removed to the end (this will re-number other sections)
         $this->move_section($section->section, 0);
         // delete it completely
@@ -581,6 +585,12 @@ class format_flexsections extends format_base {
                 } else {
                     redirect(course_get_url($this->courseid, $switchcollapsed));
                 }
+            }
+            // set course marker if required
+            $marker = optional_param('marker', null, PARAM_INT);
+            if ($marker !== null && has_capability('moodle/course:setcurrentsection',
+                    context_course::instance($this->courseid)) && confirm_sesskey()) {
+                course_set_marker($this->courseid, $marker);
             }
             // save 'section' attribute is specified in query string
             $selectedsection = optional_param('section', null, PARAM_INT);
@@ -763,6 +773,9 @@ class format_flexsections extends format_base {
                 if ($num == $section->section) {
                     $newsectionnumber = $neworder[$id];
                 }
+                if ($num && $this->get_course()->marker == $num) {
+                    $changemarker = $neworder[$id];
+                }
             }
             if ((is_object($parent) && $num == $parent->section) || $num === $parent) {
                 $newparentnum = $neworder[$id];
@@ -802,6 +815,9 @@ class format_flexsections extends format_base {
         }
         $transaction->allow_commit();
         rebuild_course_cache($this->courseid, true);
+        if (isset($changemarker)) {
+            course_set_marker($this->courseid, $changemarker);
+        }
         return $newsectionnumber;
     }
 

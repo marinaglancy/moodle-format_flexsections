@@ -124,7 +124,8 @@ class format_flexsections_renderer extends plugin_renderer_base {
         }
         echo html_writer::start_tag('li',
                 array('class' => "section main section-level-$level".
-                    ($movingsection === $sectionnum ? ' ismoving' : ''),
+                    ($movingsection === $sectionnum ? ' ismoving' : '').
+                    (course_get_format($course)->is_section_current($section) ? ' current' : ''),
                     'id' => 'section-'.$sectionnum));
         // display controls
         if ($PAGE->user_is_editing() && $sectionnum) {
@@ -150,6 +151,20 @@ class format_flexsections_renderer extends plugin_renderer_base {
             // Edit section control
             $editurl = new moodle_url('/course/editsection.php', array('id' => $section->id, 'sr' => $sr));
             echo ' ['.html_writer::link($editurl, 'Edit').']'; // TODO
+
+            // Set marker
+            if (has_capability('moodle/course:setcurrentsection', context_course::instance($course->id))) {
+                $setmarkerurl = course_get_url($course, $section->section, array('sr' => $sr));
+                if ($course->marker == $section->section) {
+                    $marker = 0;
+                    $text = 'Remove marker';// TODO
+                } else {
+                    $marker = $section->section;
+                    $text = 'Set marker';// TODO
+                }
+                $setmarkerurl->params(array('marker' => $marker, 'sesskey' => sesskey()));
+                echo ' ['.html_writer::link($setmarkerurl, $text).']'; // TODO
+            }
 
             // Merge-up section control
             $mergeupurl = course_get_url($course, $section->section, array('sr' => $sr));
