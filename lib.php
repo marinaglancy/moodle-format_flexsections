@@ -77,11 +77,7 @@ class format_flexsections extends format_base {
     public function get_view_url($section, $options = array()) {
         $url = new moodle_url('/course/view.php', array('id' => $this->courseid));
 
-        if (is_object($section)) {
-            $sectionno = $section->section;
-        } else {
-            $sectionno = $section;
-        }
+        $sectionno = $this->get_section_number($section);
         if (array_key_exists('sr', $options)) {
             // return to the page for section with number $sr
             $url->param('section', $options['sr']);
@@ -307,10 +303,10 @@ class format_flexsections extends format_base {
      *     each of values is an array of block names (for left and right side columns)
      */
     public function get_default_blocks() {
-        global $CFG;
-        $format = array();
-        $format['defaultblocks'] = ':search_forums,news_items,calendar_upcoming,recent_activity';
-        return blocks_parse_default_blocks_list($format['defaultblocks']);
+        return array(
+            BLOCK_POS_LEFT => array(),
+            BLOCK_POS_RIGHT => array('search_forums', 'news_items', 'calendar_upcoming', 'recent_activity')
+        );
     }
 
     /**
@@ -321,90 +317,6 @@ class format_flexsections extends format_base {
      */
     public function course_format_options($foreditform = false) {
         return array();
-        static $courseformatoptions = false;
-        if ($courseformatoptions === false) {
-            $courseconfig = get_config('moodlecourse');
-            $courseformatoptions = array(
-                'numsections' => array(
-                    'default' => $courseconfig->numsections,
-                    'type' => PARAM_INT,
-                ),
-                'hiddensections' => array(
-                    'default' => $courseconfig->hiddensections,
-                    'type' => PARAM_INT,
-                ),
-                'coursedisplay' => array(
-                    'default' => $courseconfig->coursedisplay,
-                    'type' => PARAM_INT,
-                ),
-            );
-        }
-        if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
-            $courseconfig = get_config('moodlecourse');
-            $sectionmenu = array();
-            for ($i = 0; $i <= $courseconfig->maxsections; $i++) {
-                $sectionmenu[$i] = "$i";
-            }
-            $courseformatoptionsedit = array(
-                'numsections' => array(
-                    'label' => new lang_string('numberweeks'),
-                    'element_type' => 'select',
-                    'element_attributes' => array($sectionmenu),
-                ),
-                'hiddensections' => array(
-                    'label' => new lang_string('hiddensections'),
-                    'help' => 'hiddensections',
-                    'help_component' => 'moodle',
-                    'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            0 => new lang_string('hiddensectionscollapsed'),
-                            1 => new lang_string('hiddensectionsinvisible')
-                        )
-                    ),
-                ),
-                'coursedisplay' => array(
-                    'label' => new lang_string('coursedisplay'),
-                    'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            COURSE_DISPLAY_SINGLEPAGE => new lang_string('coursedisplay_single'),
-                            COURSE_DISPLAY_MULTIPAGE => new lang_string('coursedisplay_multi')
-                        )
-                    ),
-                    'help' => 'coursedisplay',
-                    'help_component' => 'moodle',
-                )
-            );
-            $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
-        }
-        return $courseformatoptions;
-    }
-
-    /**
-     * Updates format options for a course
-     *
-     * Legacy course formats may assume that course format options
-     * ('coursedisplay', 'numsections' and 'hiddensections') are shared between formats.
-     * Therefore we make sure to copy them from the previous format
-     *
-     * @param stdClass|array $data return value from {@link moodleform::get_data()} or array with data
-     * @param stdClass $oldcourse if this function is called from {@link update_course()}
-     *     this object contains information about the course before update
-     * @return bool whether there were any changes to the options values
-     */
-    public function update_course_format_options($data, $oldcourse = null) {
-        if ($oldcourse !== null) {
-            $data = (array)$data;
-            $oldcourse = (array)$oldcourse;
-            // TODO
-            foreach ($this->course_format_options() as $key => $unused) {
-                if (array_key_exists($key, $oldcourse) && !array_key_exists($key, $data)) {
-                    $data[$key] = $oldcourse[$key];
-                }
-            }
-        }
-        return $this->update_format_options($data);
     }
 
     /**
@@ -534,8 +446,8 @@ class format_flexsections extends format_base {
     /**
      * Allows course format to execute code on moodle_page::set_course()
      *
-     * format_flexsections processes the attributes 'addchildsection' and
-     * 'section' in the view course URL
+     * format_flexsections processes additional attributes in the view course URL
+     * to manipulate sections and redirect to course view page
      *
      * @param moodle_page $page instance of page calling set_course
      */
@@ -546,6 +458,7 @@ class format_flexsections extends format_base {
         }
         if ($this->on_course_view_page()) {
             $context = context_course::instance($this->courseid);
+
             // if requested, create new section and redirect to course view page
             $addchildsection = optional_param('addchildsection', null, PARAM_INT);
             if ($addchildsection !== null && has_capability('moodle/course:update', $context)) {
@@ -553,6 +466,7 @@ class format_flexsections extends format_base {
                 $url = course_get_url($this->courseid, $sectionnum);
                 redirect($url);
             }
+
             // if requested, merge the section content with parent and remove the section
             $mergeup = optional_param('mergeup', null, PARAM_INT);
             if ($mergeup && confirm_sesskey() && has_capability('moodle/course:update', $context)) {
@@ -561,6 +475,7 @@ class format_flexsections extends format_base {
                 $url = course_get_url($this->courseid, $section->parent);
                 redirect($url);
             }
+
             // if requested, move section
             $movesection = optional_param('movesection', null, PARAM_INT);
             $moveparent = optional_param('moveparent', null, PARAM_INT);
@@ -569,6 +484,7 @@ class format_flexsections extends format_base {
                 $newsectionnum = $this->move_section($movesection, $moveparent, $movebefore);
                 redirect(course_get_url($this->courseid, $newsectionnum));
             }
+
             // if requested, switch collapsed attribute
             $switchcollapsed = optional_param('switchcollapsed', null, PARAM_INT);
             if ($switchcollapsed && confirm_sesskey() && has_capability('moodle/course:update', $context)
@@ -586,6 +502,7 @@ class format_flexsections extends format_base {
                     redirect(course_get_url($this->courseid, $switchcollapsed));
                 }
             }
+
             // set course marker if required
             $marker = optional_param('marker', null, PARAM_INT);
             if ($marker !== null && has_capability('moodle/course:setcurrentsection', $context) && confirm_sesskey()) {
@@ -601,6 +518,7 @@ class format_flexsections extends format_base {
                     redirect($url);
                 }
             }
+
             // save 'section' attribute is specified in query string
             $selectedsection = optional_param('section', null, PARAM_INT);
             if ($selectedsection !== null && (!defined('AJAX_SCRIPT') || AJAX_SCRIPT == '0')) {
@@ -678,6 +596,7 @@ class format_flexsections extends format_base {
             $moveurl->params(array('moving' => $section->section, 'sesskey' => sesskey()));
             $controls[] = new format_flexsections_edit_control('move', $moveurl, 'Move'); // TODO
         }
+
         // Cancel moving section control
         if ($movingsection === $section->section && has_capability('moodle/course:update', $context)) {
             $cancelmovingurl = course_get_url($course->id, $movingsection, array('sr' => $sr));
@@ -700,14 +619,8 @@ class format_flexsections extends format_base {
             return null;
         }
 
-        $beforenum = $before;
-        if ($before && is_object($before)) {
-            $beforenum = $before->section;
-        }
-        $parentnum = $parent;
-        if (is_object($parent)) {
-            $parentnum = $parent->section;
-        }
+        $beforenum = $this->get_section_number($before);
+        $parentnum = $this->get_section_number($parent);
 
         $movelink = course_get_url($this->courseid);
         $movelink->params(array('movesection' => $movingsection, 'moveparent' => $parentnum));
@@ -742,9 +655,7 @@ class format_flexsections extends format_base {
         if (!$PAGE->user_is_editing()) {
             return null;
         }
-        if (is_object($parentsection)) {
-            $parentsection = $parentsection->section;
-        }
+        $parentsection = $this->get_section_number($parentsection);
         $url = course_get_url($this->courseid, $this->viewcoursesection);
         $url->param('addchildsection', $parentsection);
         $text = $parentsection?'Add subsection':'Add section'; // TODO
@@ -831,10 +742,7 @@ class format_flexsections extends format_base {
      * @return array
      */
     public function get_subsections($section) {
-        $sectionnum = $section;
-        if (is_object($section)) {
-            $sectionnum = $section->section;
-        }
+        $sectionnum = $this->get_section_number($section);
         $subsections = array();
         foreach ($this->get_sections() as $num => $subsection) {
             if ($subsection->parent == $sectionnum && $num != $sectionnum) {
@@ -842,6 +750,22 @@ class format_flexsections extends format_base {
             }
         }
         return $subsections;
+    }
+
+    /**
+     * Returns the section relative number regardless whether argument is an object or an int
+     *
+     * @param int|section_info $section
+     * @return int
+     */
+    protected function get_section_number($section) {
+        if ($section === null || $section === '') {
+            return null;
+        } else if (is_object($section)) {
+            return $section->section;
+        } else {
+            return (int)$section;
+        }
     }
 
     /**
@@ -860,15 +784,9 @@ class format_flexsections extends format_base {
     protected function reorder_sections(&$neworder, $cursection, $movedsectionnum = null, $movetoparentnum = null, $movebeforenum = null) {
         // normalise arguments
         $cursection = $this->get_section($cursection);
-        if ($movetoparentnum !== null && is_object($movetoparentnum)) {
-            $movetoparentnum = $movetoparentnum->section;
-        }
-        if ($movebeforenum !== null && is_object($movebeforenum)) {
-            $movebeforenum = $movebeforenum->section;
-        }
-        if ($movedsectionnum !== null && is_object($movedsectionnum)) {
-            $movedsectionnum = $movedsectionnum->section;
-        }
+        $movetoparentnum = $this->get_section_number($movetoparentnum);
+        $movebeforenum = $this->get_section_number($movebeforenum);
+        $movedsectionnum = $this->get_section_number($movedsectionnum);
         if ($movedsectionnum === null) {
             $movebeforenum = $movetoparentnum = null;
         }
@@ -929,7 +847,7 @@ class format_flexsections extends format_base {
                     $changemarker = $neworder[$id];
                 }
             }
-            if ((is_object($parent) && $num == $parent->section) || $num === $parent) {
+            if ($this->get_section_number($parent) === $num) {
                 $newparentnum = $neworder[$id];
             }
         }
