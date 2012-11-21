@@ -16,20 +16,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * English language file for flexsections format
  *
- *
- * @package    format_xtopics
+ * @package    format_flexsections
  * @copyright  2012 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addsection'] = 'Add section';
+$string['addsubsection'] = 'Add subsection';
+$string['cancelmoving'] = 'Cancel moving \'{$a}\'';
 $string['currentsection'] = 'This section';
-$string['sectionname'] = 'Section';
-$string['pluginname'] = 'Flexible sections format';
-$string['section0name'] = 'General';
+$string['hidefromothers'] = 'Hide topic';
+$string['mergeup'] = 'Merge with parent';
 $string['page-course-view-flexsections'] = 'Any course main page in flexsections format';
 $string['page-course-view-flexsections-x'] = 'Any course page in flexsections format';
-$string['hidefromothers'] = 'Hide topic';
+$string['pluginname'] = 'Flexible sections format';
+$string['removemarker'] = 'Do not mark as current';
+$string['section0name'] = 'General';
+$string['sectionname'] = 'Section';
+$string['setmarker'] = 'Mark as current';
+$string['showcollapsed'] = 'Show collapsed';
+$string['showexpanded'] = 'Show expanded';
 $string['showfromothers'] = 'Show topic';
-
-$string['cancelmoving'] = 'Cancel moving \'{$a}\'';

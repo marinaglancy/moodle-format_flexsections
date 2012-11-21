@@ -359,8 +359,8 @@ class format_flexsections extends format_base {
                 'element_type' => 'select',
                 'element_attributes' => array(
                     array(
-                        FORMAT_FLEXSECTIONS_EXPANDED => 'Expanded',
-                        FORMAT_FLEXSECTIONS_COLLAPSED => 'Collapsed'
+                        FORMAT_FLEXSECTIONS_EXPANDED => new lang_string('showexpanded', 'format_flexsections'),
+                        FORMAT_FLEXSECTIONS_COLLAPSED => new lang_string('showcollapsed', 'format_flexsections'),
                     )
                 ),
                 'default' => COURSE_DISPLAY_SINGLEPAGE,
@@ -561,10 +561,10 @@ class format_flexsections extends format_base {
             $switchcollapsedurl = course_get_url($course, $sr);
             $switchcollapsedurl->params(array('switchcollapsed' => $section->section, 'sesskey' => sesskey()));
             if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
-                $text = 'Show collapsed'; // TODO
+                $text = new lang_string('showcollapsed', 'format_flexsections');
                 $class = 'expanded';
             } else {
-                $text = 'Show expanded'; // TODO
+                $text = new lang_string('showexpanded', 'format_flexsections');
                 $class = 'collapsed';
             }
             $controls[] = new format_flexsections_edit_control($class, $switchcollapsedurl, $text);
@@ -575,11 +575,11 @@ class format_flexsections extends format_base {
             $setmarkerurl = course_get_url($course, $sr);
             if ($course->marker == $section->section) {
                 $marker = 0;
-                $text = 'Remove marker'; // TODO
+                $text = new lang_string('removemarker', 'format_flexsections');
                 $class = 'marked';
             } else {
                 $marker = $section->section;
-                $text = 'Set marker'; // TODO
+                $text = new lang_string('setmarker', 'format_flexsections');
                 $class = 'marker';
             }
             $setmarkerurl->params(array('marker' => $marker, 'sesskey' => sesskey()));
@@ -589,27 +589,24 @@ class format_flexsections extends format_base {
         // Edit section control
         if (has_capability('moodle/course:update', $context)) {
             $editurl = new moodle_url('/course/editsection.php', array('id' => $section->id, 'sr' => $sr));
-            $controls[] = new format_flexsections_edit_control('settings', $editurl, 'Edit'); // TODO
+            $text = new lang_string('edit');
+            $controls[] = new format_flexsections_edit_control('settings', $editurl, $text);
         }
 
         // Merge-up section control
         if (has_capability('moodle/course:update', $context)) {
             $mergeupurl = course_get_url($course, $sr);
             $mergeupurl->params(array('mergeup' => $section->section, 'sesskey' => sesskey()));
-            $controls[] = new format_flexsections_edit_control('mergeup', $mergeupurl, 'Merge with parent'); // TODO
+            $text = new lang_string('mergeup', 'format_flexsections');
+            $controls[] = new format_flexsections_edit_control('mergeup', $mergeupurl, $text);
         }
 
         // Move section control
         if (!$movingsection && has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
             $moveurl = course_get_url($course, $section->section, array('sr' => $sr));
             $moveurl->params(array('moving' => $section->section, 'sesskey' => sesskey()));
-            $controls[] = new format_flexsections_edit_control('move', $moveurl, 'Move'); // TODO
-        }
-
-        // Cancel moving section control
-        if ($movingsection === $section->section && has_capability('moodle/course:update', $context)) {
-            $cancelmovingurl = course_get_url($course->id, $movingsection, array('sr' => $sr));
-            $controls[] = new format_flexsections_edit_control('cancelmove', $cancelmovingurl, 'Cancel moving'); // TODO
+            $text = new lang_string('move');
+            $controls[] = new format_flexsections_edit_control('move', $moveurl, $text);
         }
 
         return $controls;
@@ -679,7 +676,11 @@ class format_flexsections extends format_base {
         $parentsection = $this->get_section_number($parentsection);
         $url = course_get_url($this->courseid, $this->get_viewed_section());
         $url->param('addchildsection', $parentsection);
-        $text = $parentsection?'Add subsection':'Add section'; // TODO
+        if ($parentsection) {
+            $text = new lang_string('addsubsection', 'format_flexsections');
+        } else {
+            $text = new lang_string('addsection', 'format_flexsections');
+        }
         return new format_flexsections_edit_control('addsection', $url, $text);
     }
 
