@@ -95,31 +95,43 @@ class format_flexsections_renderer extends plugin_renderer_base {
         $sectionnum = $section->section;
         $movingsection = course_get_format($course)->is_moving_section();
         if ($level === 0) {
-            echo html_writer::start_tag('ul', array('class' => 'flexsections'));
-            if ($cancelmovingcontrol = course_get_format($course)->get_edit_control_cancelmoving()) {
-                echo $this->render($cancelmovingcontrol);
+            $cancelmovingcontrols = course_get_format($course)->get_edit_controls_cancelmoving();
+            foreach ($cancelmovingcontrols as $control) {
+                echo $this->render($control);
             }
+            echo html_writer::start_tag('ul', array('class' => 'flexsections flexsections-level-0'));
             if ($section->section) {
                 $this->display_insert_section_here($course, $section->parent, $section->section);
             }
         }
         echo html_writer::start_tag('li',
-                array('class' => "section main section-level-$level".
+                array('class' => "section main".
                     ($movingsection === $sectionnum ? ' ismoving' : '').
                     (course_get_format($course)->is_section_current($section) ? ' current' : ''),
                     'id' => 'section-'.$sectionnum));
-        // display controls
+
+        // display controls except for expanded/collapsed
         $controls = course_get_format($course)->get_section_edit_controls($section, $sr);
-        if (!empty($controls)) {
-            echo html_writer::start_tag('div', array('class' => 'controls'));
-            foreach ($controls as $control) {
-                echo $this->render($control);
+        $collapsedcontrol = null;
+        $controlsstr = '';
+        foreach ($controls as $idxcontrol => $control) {
+            if ($control->class === 'expanded' || $control->class === 'collapsed') {
+                $collapsedcontrol = $control;
+            } else {
+                $controlsstr .= $this->render($control);
             }
-            echo html_writer::end_tag('div'); // .controls
         }
+        if (!empty($controlsstr)) {
+            echo html_writer::tag('div', $controlsstr, array('class' => 'controls'));
+        }
+
+        // display section content
         echo html_writer::start_tag('div', array('class' => 'content'));
-        // display section name
+        // display section name and expanded/collapsed control
         if ($sectionnum && ($title = $this->section_title($sectionnum, $course, $level == 0))) {
+            if ($collapsedcontrol) {
+                $title = $this->render($collapsedcontrol). $title;
+            }
             echo html_writer::tag('h3', $title, array('class' => 'sectionname'));
         }
         // display section description (if needed)
@@ -142,7 +154,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
             // display subsections
             $children = course_get_format($course)->get_subsections($sectionnum);
             if (!empty($children) || $movingsection) {
-                echo html_writer::start_tag('ul', array('class' => 'flexsections'));
+                echo html_writer::start_tag('ul', array('class' => 'flexsections flexsections-level-'.($level+1)));
                 foreach ($children as $num) {
                     $this->display_insert_section_here($course, $section, $num);
                     $this->display_section($course, $num, $sr, $level+1);
@@ -184,18 +196,34 @@ class format_flexsections_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_format_flexsections_edit_control(format_flexsections_edit_control $control) {
+        global $OUTPUT;
         if (!$control) {
             return '';
         }
         if ($control->class === 'movehere') {
-            return html_writer::tag('li', html_writer::link($control->url, $control->text), array('class' => $control->class));
-        } else if ($control->class === 'cancelmoving') {
-            return html_writer::tag('li', html_writer::link($control->url, $control->text), array('class' => $control->class));
+            $icon = new pix_icon('movehere', $control->text, 'moodle', array('class' => 'movetarget', 'title' => $control->text));
+            $action = new action_link($control->url, $icon, null, array('class' => $control->class));
+            return html_writer::tag('li', $OUTPUT->render($action), array('class' => 'movehere'));
+        } else if ($control->class === 'cancelmovingsection' || $control->class === 'cancelmovingactivity') {
+            return html_writer::tag('div', html_writer::link($control->url, $control->text),
+                    array('class' => 'cancelmoving '.$control->class));
         } else if ($control->class === 'addsection') {
-            return html_writer::tag('div',
-                    html_writer::link($control->url, $control->text),
-                    array('class' => 'mdl-right '.$control->class));
+            $icon = new pix_icon('t/add', '', 'moodle', array('class' => 'iconsmall'));
+            $text = $OUTPUT->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
+            $action = new action_link($control->url, $text, null, array('class' => $control->class));
+            return html_writer::tag('div', $OUTPUT->render($action), array('class' => 'mdl-right'));
+        } else if ($control->class === 'settings' || $control->class === 'marker' || $control->class === 'marked') {
+            $icon = new pix_icon('i/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
+        } else if ($control->class === 'move' || $control->class === 'expanded' || $control->class === 'collapsed') {
+            $icon = new pix_icon('t/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
+        } else if ($control->class === 'mergeup') {
+            $icon = new pix_icon('mergeup', $control->text, 'format_flexsections', array('class' => 'iconsmall', 'title' => $control->text));
         }
-        return ' ['. html_writer::link($control->url, $control->text, array('class' => $control->class)). ']';
+        if (isset($icon)) {
+            $action = new action_link($control->url, $icon, null, array('class' => $control->class));
+            return $OUTPUT->render($action);
+        }
+        // unknown control
+        return ' '. html_writer::link($control->url, $control->text, array('class' => $control->class)). '';
     }
 }

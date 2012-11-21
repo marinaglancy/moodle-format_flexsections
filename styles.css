@@ -1,7 +1,9 @@
 .course-content ul.flexsections {margin:0;}
-.course-content ul.flexsections li.section {list-style: none;margin:3px 0 2px 2em;padding:0;}
-.course-content ul.flexsections li.section-level-0 {margin-left: 0;}
-.course-content ul.flexsections li.section-level-1 {border: #DDDDDD solid 1px;padding-left:5px;}
+.course-content ul.flexsections li.section, .course-content ul.flexsections li.movehere {list-style: none;margin:3px 0 2px 1em;padding:0;}
+.course-content ul.flexsections-level-0 > li.section {margin-left: 0;}
+.course-content ul.flexsections-level-0 > li.movehere {margin-left: 0;}
+.course-content ul.flexsections-level-1 > li.section {border: #DDDDDD solid 1px;padding-left:5px;}
+.course-content ul.flexsections li.section .controls img {padding-right: 4px;}
 
 /* add extra borders in editing mode */
 body.editing .course-content ul.flexsections li.section {border: #DDDDDD solid 1px;padding-left:5px;}
@@ -9,7 +11,7 @@ body.editing .course-content ul.flexsections li.section#section-0 {border: none;
 
 /* moving section */
 .course-content ul.flexsections li.section.ismoving {background:#EEEEEE;}
-.course-content ul.flexsections li.movehere {list-style: none;margin:3px 0 2px 2em;background:yellow;border:1px solid #333333;padding-left:5px;}
-.course-content ul.flexsections li.cancelmoving {margin:3px 0 2px 0;background:#EEEEEE;border:1px solid black;text-align:center;}
+.course-content ul.flexsections li.movehere > img {padding-left:5px;}
+.course-content div.cancelmoving {margin:3px;padding:5px;background:yellow;border:1px solid black;text-align:center;position:fixed;top:0;right:0;}
 
 .jumpmenu {text-align:center;}

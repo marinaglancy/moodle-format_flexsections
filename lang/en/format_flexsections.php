@@ -31,3 +31,5 @@ $string['page-course-view-flexsections'] = 'Any course main page in flexsections
 $string['page-course-view-flexsections-x'] = 'Any course page in flexsections format';
 $string['hidefromothers'] = 'Hide topic';
 $string['showfromothers'] = 'Show topic';
+
+$string['cancelmoving'] = 'Cancel moving \'{$a}\'';
