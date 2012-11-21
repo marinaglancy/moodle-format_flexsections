@@ -35,17 +35,6 @@ require_once($CFG->dirroot.'/course/format/renderer.php');
 class format_flexsections_renderer extends plugin_renderer_base {
 
     /**
-     * Renders course header/footer
-     *
-     * @param renderable $obj
-     * @return string
-     */
-    public function render_format_flexsections_courseobj($obj) {
-        return html_writer::tag('div', "<b>{$obj->text}</b>",
-                array('style' => 'background: #'.$obj->background.'; border: 1px solid black; text-align: center; padding: 5px;'));
-    }
-
-    /**
      * Generate the section title (with link if section is collapsed)
      *
      * @param int|section_info $section
@@ -212,6 +201,11 @@ class format_flexsections_renderer extends plugin_renderer_base {
             $text = $OUTPUT->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
             $action = new action_link($control->url, $text, null, array('class' => $control->class));
             return html_writer::tag('div', $OUTPUT->render($action), array('class' => 'mdl-right'));
+        } else if ($control->class === 'backto') {
+            $icon = new pix_icon('t/up', '', 'moodle');
+            $text = $OUTPUT->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
+            return html_writer::tag('div', html_writer::link($control->url, $text),
+                    array('class' => 'header '.$control->class));
         } else if ($control->class === 'settings' || $control->class === 'marker' || $control->class === 'marked') {
             $icon = new pix_icon('i/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
         } else if ($control->class === 'move' || $control->class === 'expanded' || $control->class === 'collapsed') {

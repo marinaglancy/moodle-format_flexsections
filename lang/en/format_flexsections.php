@@ -25,6 +25,8 @@
 
 $string['addsection'] = 'Add section';
 $string['addsubsection'] = 'Add subsection';
+$string['backtocourse'] = 'Back to course \'{$a}\'';
+$string['backtosection'] = 'Back to \'{$a}\'';
 $string['cancelmoving'] = 'Cancel moving \'{$a}\'';
 $string['currentsection'] = 'This section';
 $string['hidefromothers'] = 'Hide topic';

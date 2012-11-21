@@ -911,36 +911,42 @@ class format_flexsections extends format_base {
         return $newsectionnumber;
     }
 
-    public function course_header() {
-        return new format_flexsections_courseobj('This is the course header', 'DDFFFF');
-    }
-
-    public function course_footer() {
-        return new format_flexsections_courseobj('This is the course footer', 'DDFFFF');
-    }
-
+    /**
+     * Course-specific information to be output immediately above content on any course page
+     *
+     * See {@link format_base::course_header()} for usage
+     *
+     * @return null|renderable null for no output or object with data for plugin renderer
+     */
     public function course_content_header() {
-        return new format_flexsections_courseobj('This is the course content header', 'DDDDDD');
-    }
+        global $PAGE;
 
-    public function course_content_footer() {
-        return new format_flexsections_courseobj('This is the course content footer', 'DDDDDD');
-    }
-}
+        // if we are on course view page for particular section, return 'back to parent' control
+        if ($this->get_viewed_section()) {
+            $section = $this->get_section($this->get_viewed_section());
+            if ($section->parent) {
+                $sr = $this->find_collapsed_parent($section->parent);
+                $text = new lang_string('backtosection', 'format_flexsections', $this->get_section_name($section->parent));
+            } else {
+                $sr = 0;
+                $text = new lang_string('backtocourse', 'format_flexsections', $this->get_course()->fullname);
+            }
+            $url = $this->get_view_url($section->section, array('sr' => $sr));
+            return new format_flexsections_edit_control('backto', $url, strip_tags($text));
+        }
 
-/**
- * Class storing information to be displayed in course header/footer
- *
- * @package    format_flexsections
- * @copyright  2012 Marina Glancy
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class format_flexsections_courseobj implements renderable {
-    public $background;
-    public $text;
-    public function __construct($text, $background) {
-        $this->text = $text;
-        $this->background = $background;
+        // if we are on module view page, return 'back to section' control
+        if ($PAGE->context && $PAGE->context->contextlevel == CONTEXT_MODULE && $PAGE->cm) {
+            $sectionnum = $PAGE->cm->sectionnum;
+            if ($sectionnum) {
+                $text = new lang_string('backtosection', 'format_flexsections', $this->get_section_name($sectionnum));
+            } else {
+                $text = new lang_string('backtocourse', 'format_flexsections', $this->get_course()->fullname);
+            }
+            return new format_flexsections_edit_control('backto', $this->get_view_url($sectionnum), strip_tags($text));
+        }
+
+        return parent::course_content_header();
     }
 }
 
