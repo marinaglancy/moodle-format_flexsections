@@ -1,20 +1,28 @@
-.course-content ul.flexsections {margin:0;}
-.course-content ul.flexsections li.section, .course-content ul.flexsections li.movehere {list-style: none;margin:3px 0 2px 1em;padding:0;}
-.course-content ul.flexsections-level-0 > li.section {margin-left: 0;}
-.course-content ul.flexsections-level-0 > li.movehere {margin-left: 0;}
-.course-content ul.flexsections-level-1 > li.section {border: #DDDDDD solid 1px;padding-left:5px;}
-.course-content ul.flexsections li.section .controls img {padding-right: 4px;}
+.format-flexsections .course-content ul.flexsections {margin:0;}
+.format-flexsections .course-content ul.flexsections li.section, .course-content ul.flexsections li.movehere {list-style: none;margin:3px 0 2px 1em;padding:0;}
+.format-flexsections .course-content ul.flexsections-level-0 > li.section {margin-left: 0;}
+.format-flexsections .course-content ul.flexsections-level-0 > li.movehere {margin-left: 0;}
+.format-flexsections .course-content ul.flexsections-level-1 > li.section {border: #DDDDDD solid 1px;padding-left:5px;}
+.format-flexsections .course-content ul.flexsections li.section .controls img {padding-right: 4px;}
+
+/* hidden section */
+.format-flexsections .course-content li.section.hidden > .content > h3.sectionname,
+.format-flexsections .course-content li.section.hidden > .content > h3.sectionname a,
+.format-flexsections .course-content li.section.hidden > .content > .summary,
+.format-flexsections .course-content li.section.hidden .addresourcemodchooser a,
+.format-flexsections .course-content li.section.hidden a.addsection {color:#AAAAAA;}
 
 /* add extra borders in editing mode */
-body.editing .course-content ul.flexsections li.section {border: #DDDDDD solid 1px;padding-left:5px;}
-body.editing .course-content ul.flexsections li.section#section-0 {border: none;padding-left:0;}
+body.format-flexsections.editing .course-content ul.flexsections li.section {border: #DDDDDD solid 1px;padding-left:5px;}
+body.format-flexsections.editing .course-content ul.flexsections li.section#section-0 {border: none;padding-left:0;}
 
 /* moving section */
-.course-content ul.flexsections li.section.ismoving {background:#EEEEEE;}
-.course-content ul.flexsections li.movehere > img {padding-left:5px;}
-.course-content div.cancelmoving {margin:3px;padding:5px;background:yellow;border:1px solid black;text-align:center;position:fixed;top:0;right:0;}
+.format-flexsections .course-content ul.flexsections li.section.ismoving {background:#EEEEEE;}
+.format-flexsections .course-content ul.flexsections li.movehere > img {padding-left:5px;}
+.format-flexsections .course-content div.cancelmoving {margin:3px;padding:5px;background:yellow;border:1px solid black;text-align:center;position:fixed;top:0;right:0;}
 
-.jumpmenu {text-align:center;}
+.format-flexsections .jumpmenu {text-align:center;}
 
-.header.backto {padding: 5px 10px;border: 1px solid #DDD;margin-bottom:5px;}
-.header.backto .backto-text {margin-left:10px;}
+.format-flexsections .header.backto {padding: 5px 10px;border: 1px solid #DDD;margin-bottom:5px;}
+.format-flexsections .header.backto .backto-text {margin-left:10px;}
+

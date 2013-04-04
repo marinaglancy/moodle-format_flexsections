@@ -230,7 +230,7 @@ class format_flexsections extends format_base {
 
         $sectionnode = $node->add($sectionname, $url, navigation_node::TYPE_SECTION, null, $section->id);
         $sectionnode->nodetype = navigation_node::NODETYPE_BRANCH;
-        $sectionnode->hidden = (!$section->visible || !$section->available);
+        $sectionnode->hidden = true;//(!$section->visible || !$section->available);
         if ($this->section_has_parent($navigation->includesectionnum, $section->section)
                 || $navigation->includesectionnum == $section->section) {
             $modinfo = get_fast_modinfo($this->courseid);
@@ -350,6 +350,14 @@ class format_flexsections extends format_base {
                 'label' => '',
                 'element_type' => 'hidden',
                 'default' => 0,
+                'cache' => true,
+                'cachedefault' => 0,
+            ),
+            'visibleold' => array(
+                'type' => PARAM_INT,
+                'label' => '',
+                'element_type' => 'hidden',
+                'default' => 1,
                 'cache' => true,
                 'cachedefault' => 0,
             ),
@@ -530,6 +538,73 @@ class format_flexsections extends format_base {
                     redirect($url);
                 }
             }
+
+            // change visibility if required
+            $hide = optional_param('hide', null, PARAM_INT);
+            if ($hide !== null && has_capability('moodle/course:sectionvisibility', $context) && confirm_sesskey()) {
+                $url = course_get_url($this->courseid, $hide, array('sr' => $this->get_viewed_section()));
+                $this->set_section_visible($hide, 0);
+                redirect($url);
+            }
+            $show = optional_param('show', null, PARAM_INT);
+            if ($show !== null && has_capability('moodle/course:sectionvisibility', $context) && confirm_sesskey()) {
+                $url = course_get_url($this->courseid, $show, array('sr' => $this->get_viewed_section()));
+                $this->set_section_visible($show, 1);
+                redirect($url);
+            }
+        }
+    }
+
+    /**
+     * Sets the section visible/hidden including subsections and modules
+     *
+     * @param int|stdClass|section_info $section
+     * @param int $visibility
+     * @param null|int $setvisibleold if specified in case of hiding the section,
+     *    this will be the value of visibleold for the section $section.
+     */
+    protected function set_section_visible($section, $visibility, $setvisibleold = null) {
+        $subsections = array();
+        $sectionnumber = $this->get_section_number($section);
+        if (!$sectionnumber && !$visibility) {
+            // can not hide section with number 0
+            return;
+        }
+        $section = $this->get_section($section);
+        if ($visibility && $section->parent && !$this->get_section($section->parent)->visible) {
+            // can not set section visible when parent is hidden
+            return;
+        }
+        $ch = array($section);
+        while (!empty($ch)) {
+            $chlast = $ch;
+            $ch = array();
+            foreach ($chlast as $s) {
+                // store copy of attributes to avoid rebuilding course cache when we need to access section properties
+                $subsections[] = (object)array('section' => $s->section,
+                    'id' => $s->id, 'visible' => $s->visible, 'visibleold' => $s->visibleold);
+                $ch += $this->get_subsections($s);
+            }
+        }
+        foreach ($subsections as $s) {
+            if ($s->section == $sectionnumber) {
+                set_section_visible($this->courseid, $s->section, $visibility);
+                if ($setvisibleold === null) {
+                    $setvisibleold = $visibility;
+                }
+                $this->update_section_format_options(array('id' => $s->id, 'visibleold' => $setvisibleold));
+            } else {
+                if ($visibility) {
+                    if ($s->visibleold) {
+                        set_section_visible($this->courseid, $s->section, $s->visibleold);
+                    }
+                } else {
+                    if ($s->visible) {
+                        set_section_visible($this->courseid, $s->section, $visibility);
+                        $this->update_section_format_options(array('id' => $s->id, 'visibleold' => $s->visible));
+                    }
+                }
+            }
         }
     }
 
@@ -607,6 +682,24 @@ class format_flexsections extends format_base {
             $moveurl->params(array('moving' => $section->section, 'sesskey' => sesskey()));
             $text = new lang_string('move');
             $controls[] = new format_flexsections_edit_control('move', $moveurl, $text);
+        }
+
+        if (has_capability('moodle/course:sectionvisibility', $context)) {
+            if ($section->visible) {
+                $hideurl = course_get_url($course, $sr);
+                $hideurl->params(array('hide' => $section->section, 'sesskey' => sesskey()));
+                $text = new lang_string('hide');
+                $controls[] = new format_flexsections_edit_control('hide', $hideurl, $text);
+            } else {
+                if ($section->parent && !$this->get_section($section->parent)->visible) {
+                    $controls[] = new format_flexsections_edit_control('show', null, '');
+                } else {
+                    $showurl = course_get_url($course, $sr);
+                    $showurl->params(array('show' => $section->section, 'sesskey' => sesskey()));
+                    $text = new lang_string('show');
+                    $controls[] = new format_flexsections_edit_control('show', $showurl, $text);
+                }
+            }
         }
 
         return $controls;
@@ -843,9 +936,24 @@ class format_flexsections extends format_base {
     protected function move_section($section, $parent, $before = null) {
         global $DB;
         $section = $this->get_section($section);
+        $parent = $this->get_section($parent);
         $newsectionnumber = $section->section;
         if (!$this->can_move_section_to($section, $parent, $before)) {
             return $newsectionnumber;
+        }
+        if ($section->visible != $parent->visible && $section->parent != $parent->section) {
+            // section is changing parent and new parent has different visibility than the section
+            if ($section->visible) {
+                // visible section is moved under hidden parent
+                $updatesectionvisible = 0;
+                $updatesectionvisibleold = 1;
+            } else {
+                // hidden section is moved under visible parent
+                if ($section->visibleold) {
+                    $updatesectionvisible = 1;
+                    $updatesectionvisibleold = 1;
+                }
+            }
         }
 
         // find the changes in the sections numbering
@@ -860,11 +968,11 @@ class format_flexsections extends format_base {
         }
         $changes = array();
         foreach ($origorder as $id => $num) {
+            if ($num == $section->section) {
+                $newsectionnumber = $neworder[$id];
+            }
             if ($num != $neworder[$id]) {
                 $changes[$id] = array('old' => $num, 'new' => $neworder[$id]);
-                if ($num == $section->section) {
-                    $newsectionnumber = $neworder[$id];
-                }
                 if ($num && $this->get_course()->marker == $num) {
                     $changemarker = $neworder[$id];
                 }
@@ -907,6 +1015,9 @@ class format_flexsections extends format_base {
         rebuild_course_cache($this->courseid, true);
         if (isset($changemarker)) {
             course_set_marker($this->courseid, $changemarker);
+        }
+        if (isset($updatesectionvisible)) {
+            $this->set_section_visible($newsectionnumber, $updatesectionvisible, $updatesectionvisibleold);
         }
         return $newsectionnumber;
     }

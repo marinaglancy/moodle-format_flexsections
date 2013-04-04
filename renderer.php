@@ -81,6 +81,9 @@ class format_flexsections_renderer extends plugin_renderer_base {
         global $PAGE;
         $course = course_get_format($course)->get_course();
         $section = course_get_format($course)->get_section($section);
+        if (!$section->visible && !has_capability('moodle/course:viewhiddensections', context_course::instance($course->id))) {
+            return '';
+        }
         $sectionnum = $section->section;
         $movingsection = course_get_format($course)->is_moving_section();
         if ($level === 0) {
@@ -96,7 +99,8 @@ class format_flexsections_renderer extends plugin_renderer_base {
         echo html_writer::start_tag('li',
                 array('class' => "section main".
                     ($movingsection === $sectionnum ? ' ismoving' : '').
-                    (course_get_format($course)->is_section_current($section) ? ' current' : ''),
+                    (course_get_format($course)->is_section_current($section) ? ' current' : '').
+                    ($section->visible ? '' : ' hidden'),
                     'id' => 'section-'.$sectionnum));
 
         // display controls except for expanded/collapsed
@@ -185,37 +189,43 @@ class format_flexsections_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_format_flexsections_edit_control(format_flexsections_edit_control $control) {
-        global $OUTPUT;
         if (!$control) {
             return '';
         }
         if ($control->class === 'movehere') {
             $icon = new pix_icon('movehere', $control->text, 'moodle', array('class' => 'movetarget', 'title' => $control->text));
             $action = new action_link($control->url, $icon, null, array('class' => $control->class));
-            return html_writer::tag('li', $OUTPUT->render($action), array('class' => 'movehere'));
+            return html_writer::tag('li', $this->render($action), array('class' => 'movehere'));
         } else if ($control->class === 'cancelmovingsection' || $control->class === 'cancelmovingactivity') {
             return html_writer::tag('div', html_writer::link($control->url, $control->text),
                     array('class' => 'cancelmoving '.$control->class));
         } else if ($control->class === 'addsection') {
             $icon = new pix_icon('t/add', '', 'moodle', array('class' => 'iconsmall'));
-            $text = $OUTPUT->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
+            $text = $this->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
             $action = new action_link($control->url, $text, null, array('class' => $control->class));
-            return html_writer::tag('div', $OUTPUT->render($action), array('class' => 'mdl-right'));
+            return html_writer::tag('div', $this->render($action), array('class' => 'mdl-right'));
         } else if ($control->class === 'backto') {
             $icon = new pix_icon('t/up', '', 'moodle');
-            $text = $OUTPUT->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
+            $text = $this->render($icon). html_writer::tag('span', $control->text, array('class' => $control->class.'-text'));
             return html_writer::tag('div', html_writer::link($control->url, $text),
                     array('class' => 'header '.$control->class));
         } else if ($control->class === 'settings' || $control->class === 'marker' || $control->class === 'marked') {
             $icon = new pix_icon('i/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
-        } else if ($control->class === 'move' || $control->class === 'expanded' || $control->class === 'collapsed') {
+        } else if ($control->class === 'move' || $control->class === 'expanded' || $control->class === 'collapsed' ||
+                $control->class === 'hide' || $control->class === 'show') {
             $icon = new pix_icon('t/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
         } else if ($control->class === 'mergeup') {
             $icon = new pix_icon('mergeup', $control->text, 'format_flexsections', array('class' => 'iconsmall', 'title' => $control->text));
         }
         if (isset($icon)) {
-            $action = new action_link($control->url, $icon, null, array('class' => $control->class));
-            return $OUTPUT->render($action);
+            if ($control->url) {
+                // icon with a link
+                $action = new action_link($control->url, $icon, null, array('class' => $control->class));
+                return $this->render($action);
+            } else {
+                // just icon
+                return html_writer::tag('span', $this->render($icon), array('class' => $control->class));
+            }
         }
         // unknown control
         return ' '. html_writer::link($control->url, $control->text, array('class' => $control->class)). '';
