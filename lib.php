@@ -230,7 +230,7 @@ class format_flexsections extends format_base {
 
         $sectionnode = $node->add($sectionname, $url, navigation_node::TYPE_SECTION, null, $section->id);
         $sectionnode->nodetype = navigation_node::NODETYPE_BRANCH;
-        $sectionnode->hidden = true;//(!$section->visible || !$section->available);
+        $sectionnode->hidden = !$section->visible || !$section->available;
         if ($this->section_has_parent($navigation->includesectionnum, $section->section)
                 || $navigation->includesectionnum == $section->section) {
             $modinfo = get_fast_modinfo($this->courseid);
