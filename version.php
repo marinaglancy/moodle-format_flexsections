@@ -24,6 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2013040400;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2012110900;        // Requires this Moodle version (2.4)
+$plugin->version   = 2013051400;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires  = 2013051400;        // Requires this Moodle version (2.5)
 $plugin->component = 'format_flexsections';    // Full name of the plugin (used for diagnostics).

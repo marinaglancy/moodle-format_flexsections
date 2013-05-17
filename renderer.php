@@ -27,12 +27,25 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->dirroot.'/course/format/renderer.php');
 
 /**
- * Basic renderer for topics format.
+ * Renderer for flexsections format.
  *
  * @copyright 2012 Marina Glancy
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class format_flexsections_renderer extends plugin_renderer_base {
+    /** @var core_course_renderer Stores instances of core_course_renderer */
+    protected $courserenderer = null;
+
+    /**
+     * Constructor
+     *
+     * @param moodle_page $page
+     * @param type $target
+     */
+    public function __construct(moodle_page $page, $target) {
+        parent::__construct($page, $target);
+        $this->courserenderer = $page->get_renderer('core', 'course');
+    }
 
     /**
      * Generate the section title (with link if section is collapsed)
@@ -136,13 +149,13 @@ class format_flexsections_renderer extends plugin_renderer_base {
         // display section contents (activities and subsections)
         if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED || !$level) {
             // display resources and activities
-            print_section($course, $section, null, null, true, "100%", false, $sr);
+            echo $this->courserenderer->course_section_cm_list($course, $section, $sr);
             if ($PAGE->user_is_editing()) {
                 // a little hack to allow use drag&drop for moving activities if the section is empty
                 if (empty(get_fast_modinfo($course)->sections[$sectionnum])) {
                     echo "<ul class=\"section img-text\">\n</ul>\n";
                 }
-                print_section_add_menus($course, $sectionnum, null, false, false, $sr);
+                echo $this->courserenderer->course_section_add_cm_control($course, $sectionnum, $sr);
             }
             // display subsections
             $children = course_get_format($course)->get_subsections($sectionnum);
