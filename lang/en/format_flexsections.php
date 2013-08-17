@@ -29,6 +29,7 @@ $string['backtocourse'] = 'Back to course \'{$a}\'';
 $string['backtosection'] = 'Back to \'{$a}\'';
 $string['cancelmoving'] = 'Cancel moving \'{$a}\'';
 $string['currentsection'] = 'This section';
+$string['displaycontent'] = 'Display content';
 $string['hidefromothers'] = 'Hide topic';
 $string['mergeup'] = 'Merge with parent';
 $string['page-course-view-flexsections'] = 'Any course main page in flexsections format';
