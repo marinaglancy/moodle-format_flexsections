@@ -363,7 +363,7 @@ class format_flexsections extends format_base {
             ),
             'collapsed' => array(
                 'type' => PARAM_INT,
-                'label' => 'Display content',
+                'label' => get_string('displaycontent', 'format_flexsections'),
                 'element_type' => 'select',
                 'element_attributes' => array(
                     array(
