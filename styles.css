@@ -25,4 +25,4 @@ body.format-flexsections.editing .course-content ul.flexsections li.section#sect
 
 .format-flexsections .header.backto {padding: 5px 10px;border: 1px solid #DDD;margin-bottom:5px;}
 .format-flexsections .header.backto .backto-text {margin-left:10px;}
-
+.format-flexsections div.controls a.hide{ display: inline;}
