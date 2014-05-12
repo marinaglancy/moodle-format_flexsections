@@ -628,17 +628,13 @@ class format_flexsections extends format_base {
         }
         $section = $this->get_section($section);
         $sectionnum = $section->section;
-        if (!$sectionnum) {
-            // no controls for section-0
-            return $controls;
-        }
         $course = $this->get_course();
         $context = context_course::instance($this->courseid);
         $movingsection = $this->is_moving_section();
         $sr = $this->get_viewed_section(); // section to return to
 
         // Collapse/expand
-        if (has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
+        if ($sectionnum && has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
             $switchcollapsedurl = course_get_url($course, $sr);
             $switchcollapsedurl->params(array('switchcollapsed' => $section->section, 'sesskey' => sesskey()));
             if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
@@ -652,7 +648,7 @@ class format_flexsections extends format_base {
         }
 
         // Set marker
-        if (has_capability('moodle/course:setcurrentsection', $context)) {
+        if ($sectionnum && has_capability('moodle/course:setcurrentsection', $context)) {
             $setmarkerurl = course_get_url($course, $sr);
             if ($course->marker == $section->section) {
                 $marker = 0;
@@ -675,7 +671,7 @@ class format_flexsections extends format_base {
         }
 
         // Merge-up section control
-        if (has_capability('moodle/course:update', $context)) {
+        if ($sectionnum && has_capability('moodle/course:update', $context)) {
             $mergeupurl = course_get_url($course, $sr);
             $mergeupurl->params(array('mergeup' => $section->section, 'sesskey' => sesskey()));
             $text = new lang_string('mergeup', 'format_flexsections');
@@ -683,14 +679,14 @@ class format_flexsections extends format_base {
         }
 
         // Move section control
-        if (!$movingsection && has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
+        if ($sectionnum && !$movingsection && has_capability('moodle/course:update', $context) && $sectionnum != $sr) {
             $moveurl = course_get_url($course, $section->section, array('sr' => $sr));
             $moveurl->params(array('moving' => $section->section, 'sesskey' => sesskey()));
             $text = new lang_string('move');
             $controls[] = new format_flexsections_edit_control('move', $moveurl, $text);
         }
 
-        if (has_capability('moodle/course:sectionvisibility', $context)) {
+        if ($sectionnum && has_capability('moodle/course:sectionvisibility', $context)) {
             if ($section->visible) {
                 $hideurl = course_get_url($course, $sr);
                 $hideurl->params(array('hide' => $section->section, 'sesskey' => sesskey()));
