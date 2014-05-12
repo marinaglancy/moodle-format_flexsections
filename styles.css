@@ -9,6 +9,10 @@
 .format-flexsections .course-content ul.flexsections-level-1 > li.section.main {border: #DDDDDD solid 1px;padding-left:5px;padding-right:5px;}
 .format-flexsections .course-content ul.flexsections li.section .controls img {padding-left:0.3em;padding-right:0.3em}
 
+/* Overwrite bootstrapbase styles */
+.format-flexsections .course-content ul.flexsections .controls a.hide,
+.format-flexsections .course-content ul.flexsections .controls a.show {display:inline;}
+
 /* hidden section */
 .format-flexsections .course-content li.section.hidden > .content > h3.sectionname,
 .format-flexsections .course-content li.section.hidden > .content > h3.sectionname a,
