@@ -256,11 +256,17 @@ class format_flexsections extends format_base {
      * @return null|navigation_node
      */
     protected function navigation_add_activity(navigation_node $node, $cm) {
+        global $CFG;
         if (!$cm->uservisible || $cm->modname === 'label') {
             return null;
         }
         $activityname = format_string($cm->name, true, array('context' => context_module::instance($cm->id)));
-        $action = $cm->get_url();
+        if ($CFG->version >= 2013111800) {
+            // Moodle 2.6 and above.
+            $action = $cm->url;
+        } else {
+            $action = $cm->get_url();
+        }
         if ($cm->icon) {
             $icon = new pix_icon($cm->icon, $cm->modfullname, $cm->iconcomponent);
         } else {
