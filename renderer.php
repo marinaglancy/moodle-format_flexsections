@@ -95,7 +95,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         $course = course_get_format($course)->get_course();
         $section = course_get_format($course)->get_section($section);
         $context = context_course::instance($course->id);
-        if (!$section->visible && !has_capability('moodle/course:viewhiddensections', $context)) {
+        if (!$section->uservisible) {
             return '';
         }
         $sectionnum = $section->section;
