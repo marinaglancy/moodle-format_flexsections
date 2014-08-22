@@ -76,6 +76,11 @@ class format_flexsections extends format_base {
         $url = new moodle_url('/course/view.php', array('id' => $this->courseid));
 
         $sectionno = $this->get_section_number($section);
+        $section = $this->get_section($sectionno);
+        if ($sectionno && (!$section->uservisible || !$this->is_section_real_available($section))) {
+            return empty($options['navigation']) ? $url : null;
+        }
+
         if (array_key_exists('sr', $options)) {
             // return to the page for section with number $sr
             $url->param('section', $options['sr']);
@@ -85,7 +90,6 @@ class format_flexsections extends format_base {
         } else if (!empty($options['navigation'])) {
             // this is called from navigation, create link only if this
             // section has separate page
-            $section = $this->get_section($sectionno);
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
                 $url->param('section', $sectionno);
             } else {
@@ -93,7 +97,6 @@ class format_flexsections extends format_base {
             }
         } else if ($sectionno) {
             // check if this section has separate page
-            $section = $this->get_section($sectionno);
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
                 $url->param('section', $sectionno);
                 return $url;
@@ -222,7 +225,7 @@ class format_flexsections extends format_base {
      * @return null|navigation_node
      */
     protected function navigation_add_section($navigation, navigation_node $node, $section) {
-        if (!$section->uservisible) {
+        if (!$section->uservisible || !$this->is_section_real_available($section)) {
             return null;
         }
         $sectionname = get_section_name($this->get_course(), $section);
@@ -257,7 +260,7 @@ class format_flexsections extends format_base {
      */
     protected function navigation_add_activity(navigation_node $node, $cm) {
         global $CFG;
-        if (!$cm->uservisible || $cm->modname === 'label') {
+        if (!$this->is_cm_real_uservisible($cm) || $cm->modname === 'label') {
             return null;
         }
         $activityname = format_string($cm->name, true, array('context' => context_module::instance($cm->id)));
@@ -484,6 +487,10 @@ class format_flexsections extends format_base {
         if ($this->on_course_view_page()) {
             $context = context_course::instance($this->courseid);
 
+            if (!$this->is_section_real_available($this->get_viewed_section())) {
+                throw new moodle_exception('nopermissiontoviewpage');
+            }
+
             // if requested, create new section and redirect to course view page
             $addchildsection = optional_param('addchildsection', null, PARAM_INT);
             if ($addchildsection !== null && has_capability('moodle/course:update', $context)) {
@@ -558,6 +565,19 @@ class format_flexsections extends format_base {
                 $this->set_section_visible($show, 1);
                 redirect($url);
             }
+        }
+    }
+
+    /**
+     * Allows course format to execute code on moodle_page::set_cm()
+     *
+     * Current module can be accessed as $page->cm (returns instance of cm_info)
+     *
+     * @param moodle_page $page instance of page calling set_cm
+     */
+    public function page_set_cm(moodle_page $page) {
+        if (!$this->is_cm_real_uservisible($page->cm)) {
+            throw new moodle_exception('nopermissiontoviewpage');
         }
     }
 
@@ -1060,6 +1080,39 @@ class format_flexsections extends format_base {
         }
 
         return parent::course_content_header();
+    }
+
+    /**
+     * Checks if section is really available for the current user (analyses parent section available)
+     *
+     * This function always return true for teacher who is able to see hidden sections.
+     * section_info::$available would return false but section_info::$uservisible would return true.
+     *
+     * @param int|section_info|section_info $section
+     * @return bool
+     */
+    public function is_section_real_available($section) {
+        if (($this->get_section_number($section) == 0)) {
+            // Section 0 is always available.
+            return true;
+        }
+        $context = context_course::instance($this->courseid);
+        if (has_capability('moodle/course:viewhiddensections', $context)) {
+            // For the purpose of this function only return true for teachers.
+            return true;
+        }
+        $section = $this->get_section($section);
+        return $section->available && $this->is_section_real_available($section->parent);
+    }
+
+    /**
+     * Checks if course module is really visible for the current user (analyses correct section visibility)
+     *
+     * @param cm_info $cm
+     * @return bool
+     */
+    public function is_cm_real_uservisible(cm_info $cm) {
+        return $cm->uservisible && $this->is_section_real_available($cm->sectionnum);
     }
 }
 
