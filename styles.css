@@ -8,6 +8,7 @@
 .format-flexsections .course-content ul.flexsections li.section.main {border:none;}
 .format-flexsections .course-content ul.flexsections-level-1 > li.section.main {border: #DDDDDD solid 1px;padding-left:5px;padding-right:5px;}
 .format-flexsections .course-content ul.flexsections li.section .controls img {padding-left:0.3em;padding-right:0.3em}
+.format-flexsections .course-content ul.flexsections li.section .availabilityinfo {padding-bottom: .5em;}
 
 /* Overwrite bootstrapbase styles */
 .format-flexsections .course-content ul.flexsections .controls a.hide,
