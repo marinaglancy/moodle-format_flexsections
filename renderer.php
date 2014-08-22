@@ -95,8 +95,14 @@ class format_flexsections_renderer extends plugin_renderer_base {
         $course = course_get_format($course)->get_course();
         $section = course_get_format($course)->get_section($section);
         $context = context_course::instance($course->id);
-        if (!$section->uservisible) {
-            return '';
+        $contentvisible = true;
+        if (!$section->uservisible || !course_get_format($course)->is_section_real_available($section)) {
+            if ($section->visible && !$section->available && $section->availableinfo) {
+                // Still display section but without content.
+                $contentvisible = false;
+            } else {
+                return '';
+            }
         }
         $sectionnum = $section->section;
         $movingsection = course_get_format($course)->is_moving_section();
@@ -114,7 +120,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
                 array('class' => "section main".
                     ($movingsection === $sectionnum ? ' ismoving' : '').
                     (course_get_format($course)->is_section_current($section) ? ' current' : '').
-                    ($section->visible ? '' : ' hidden'),
+                    (($section->visible && $contentvisible) ? '' : ' hidden'),
                     'id' => 'section-'.$sectionnum));
 
         // display controls except for expanded/collapsed
@@ -135,7 +141,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         // display section content
         echo html_writer::start_tag('div', array('class' => 'content'));
         // display section name and expanded/collapsed control
-        if ($sectionnum && ($title = $this->section_title($sectionnum, $course, $level == 0))) {
+        if ($sectionnum && ($title = $this->section_title($sectionnum, $course, ($level == 0) || !$contentvisible))) {
             if ($collapsedcontrol) {
                 $title = $this->render($collapsedcontrol). $title;
             }
@@ -146,13 +152,13 @@ class format_flexsections_renderer extends plugin_renderer_base {
             has_capability('moodle/course:viewhiddensections', $context));
 
         // display section description (if needed)
-        if ($summary = $this->format_summary_text($section)) {
+        if ($contentvisible && ($summary = $this->format_summary_text($section))) {
             echo html_writer::tag('div', $summary, array('class' => 'summary'));
         } else {
             echo html_writer::tag('div', '', array('class' => 'summary nosummary'));
         }
         // display section contents (activities and subsections)
-        if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED || !$level) {
+        if ($contentvisible && ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED || !$level)) {
             // display resources and activities
             echo $this->courserenderer->course_section_cm_list($course, $section, $sr);
             if ($PAGE->user_is_editing()) {
