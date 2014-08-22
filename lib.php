@@ -87,7 +87,7 @@ class format_flexsections extends format_base {
             // section has separate page
             $section = $this->get_section($sectionno);
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
-                $url->param('section', $sectionno);
+                $url->param('sectionid', $section->id);
             } else {
                 return null;
             }
@@ -95,11 +95,11 @@ class format_flexsections extends format_base {
             // check if this section has separate page
             $section = $this->get_section($sectionno);
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
-                $url->param('section', $sectionno);
+                $url->param('sectionid', $section->id);
                 return $url;
             }
             // find the parent (or grandparent) page that is displayed on separate page
-            $url->param('section', $this->find_collapsed_parent($section->parent));
+            $url->param('sectionid', $this->find_collapsed_parent($section->parent, true));
             $url->set_anchor('section-'.$sectionno);
             return $url;
         }
@@ -112,12 +112,12 @@ class format_flexsections extends format_base {
      * @param int|section_info $section
      * @return int
      */
-    protected function find_collapsed_parent($section) {
+    protected function find_collapsed_parent($section, $returnid = false) {
         $section = $this->get_section($section);
         if (!$section->section || $section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
-            return $section->section;
+            return $returnid ? $section->id : $section->section;
         } else {
-            return $this->find_collapsed_parent($section->parent);
+            return $this->find_collapsed_parent($section->parent, $returnid);
         }
     }
 
@@ -462,8 +462,9 @@ class format_flexsections extends format_base {
      * @return int
      */
     public function get_viewed_section() {
+        global $PAGE;
         if ($this->on_course_view_page()) {
-            return optional_param('section', 0, PARAM_INT);
+            return $PAGE->url->get_param('section');
         }
         return 0;
     }
