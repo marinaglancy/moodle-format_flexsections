@@ -107,7 +107,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
             }
             echo html_writer::start_tag('ul', array('class' => 'flexsections flexsections-level-0'));
             if ($section->section) {
-                $this->display_insert_section_here($course, $section->parent, $section->section);
+                $this->display_insert_section_here($course, $section->parent, $section->section, $sr);
             }
         }
         echo html_writer::start_tag('li',
@@ -167,10 +167,10 @@ class format_flexsections_renderer extends plugin_renderer_base {
             if (!empty($children) || $movingsection) {
                 echo html_writer::start_tag('ul', array('class' => 'flexsections flexsections-level-'.($level+1)));
                 foreach ($children as $num) {
-                    $this->display_insert_section_here($course, $section, $num);
+                    $this->display_insert_section_here($course, $section, $num, $sr);
                     $this->display_section($course, $num, $sr, $level+1);
                 }
-                $this->display_insert_section_here($course, $section);
+                $this->display_insert_section_here($course, $section, null, $sr);
                 echo html_writer::end_tag('ul'); // .flexsections
             }
             if ($addsectioncontrol = course_get_format($course)->get_add_section_control($sectionnum)) {
@@ -181,7 +181,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         echo html_writer::end_tag('li'); // .section
         if ($level === 0) {
             if ($section->section) {
-                $this->display_insert_section_here($course, $section->parent);
+                $this->display_insert_section_here($course, $section->parent, null, $sr);
             }
             echo html_writer::end_tag('ul'); // .flexsections
         }
@@ -194,8 +194,8 @@ class format_flexsections_renderer extends plugin_renderer_base {
      * @param int|section_info $parent new parent section
      * @param null|int|section_info $before number of section before which we want to insert (or null if in the end)
      */
-    protected function display_insert_section_here($courseorid, $parent, $before = null) {
-        if ($control = course_get_format($courseorid)->get_edit_control_movehere($parent, $before)) {
+    protected function display_insert_section_here($courseorid, $parent, $before = null, $sr = null) {
+        if ($control = course_get_format($courseorid)->get_edit_control_movehere($parent, $before, $sr)) {
             echo $this->render($control);
         }
     }

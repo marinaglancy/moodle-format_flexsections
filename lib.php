@@ -506,9 +506,14 @@ class format_flexsections extends format_base {
             $movesection = optional_param('movesection', null, PARAM_INT);
             $moveparent = optional_param('moveparent', null, PARAM_INT);
             $movebefore = optional_param('movebefore', null, PARAM_RAW);
+            $sr = optional_param('sr', null, PARAM_RAW);
+            $options = array();
+            if ($sr !== null) {
+                $options = array('sr' => $sr);
+            }
             if ($movesection !== null && $moveparent !== null && has_capability('moodle/course:update', $context)) {
                 $newsectionnum = $this->move_section($movesection, $moveparent, $movebefore);
-                redirect(course_get_url($this->courseid, $newsectionnum));
+                redirect(course_get_url($this->courseid, $newsectionnum, $options));
             }
 
             // if requested, switch collapsed attribute
@@ -522,10 +527,12 @@ class format_flexsections extends format_base {
                 }
                 $this->update_section_format_options(array('id' => $section->id, 'collapsed' => $newvalue));
                 if ($newvalue == FORMAT_FLEXSECTIONS_COLLAPSED) {
-                    $sr = $this->find_collapsed_parent($section->parent);
-                    redirect(course_get_url($this->courseid, $switchcollapsed, array('sr' => $sr)));
+                    if (!isset($options['sr'])) {
+                        $options['sr'] = $this->find_collapsed_parent($section->parent);
+                    }
+                    redirect(course_get_url($this->courseid, $switchcollapsed, $options));
                 } else {
-                    redirect(course_get_url($this->courseid, $switchcollapsed));
+                    redirect(course_get_url($this->courseid, $switchcollapsed, $options));
                 }
             }
 
@@ -715,7 +722,7 @@ class format_flexsections extends format_base {
      * @param int|section_info $before
      * @return array of controls (0 or 1 element)
      */
-    public function get_edit_control_movehere($parent, $before) {
+    public function get_edit_control_movehere($parent, $before, $sr = null) {
         $movingsection = $this->is_moving_section();
         if (!$movingsection || !$this->can_move_section_to($movingsection, $parent, $before)) {
             return null;
@@ -728,6 +735,9 @@ class format_flexsections extends format_base {
         $movelink->params(array('movesection' => $movingsection, 'moveparent' => $parentnum));
         if ($beforenum) {
             $movelink->params(array('movebefore' => $beforenum));
+        }
+        if ($sr !== null) {
+            $movelink->params(array('sr' => $sr));
         }
         $str = strip_tags(get_string('movefull', '', "'".$this->get_section_name($movingsection)."'"));
         return new format_flexsections_edit_control('movehere', $movelink, $str);
