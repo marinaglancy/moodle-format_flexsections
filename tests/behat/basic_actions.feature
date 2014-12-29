@@ -73,6 +73,7 @@ Feature: Using course in flexsections format
     And I should not see "Topic 2"
     And I should not see "Second module"
 
+  @javascript
   Scenario: Collapsing section in flexsections format
     Given I click on "Actions" "link" in the "Recent activity" "block"
     And I click on "Delete Recent activity block" "link"
@@ -84,7 +85,8 @@ Feature: Using course in flexsections format
     Then I should see "Topic 1"
     And I should see "First module"
     And I should not see "Second module"
-    #And I should see "Topic 2" in the "Navigation" "block"
+    And I expand "Topic 1" node
+    And I should see "Topic 2" in the "Navigation" "block"
     And I click on "Topic 2" "link" in the "li#section-1" "css_element"
     And I should not see "First module" in the "region-main" "region"
     And I should see "Topic 2" in the "region-main" "region"
@@ -92,6 +94,7 @@ Feature: Using course in flexsections format
     And I should see "Topic 2" in the "Navigation" "block"
     And I should see "Second module" in the "Navigation" "block"
 
+  @javascript
   Scenario: Collapsing section with subsections in flexsections format
     Given I click on "Actions" "link" in the "Recent activity" "block"
     And I click on "Delete Recent activity block" "link"
@@ -111,11 +114,27 @@ Feature: Using course in flexsections format
     And I click on "Topic 1" "link" in the "region-main" "region"
     And I should see "Topic 1" in the "region-main" "region"
     And I should see "First module" in the "region-main" "region"
-    #And I should see "First module" in the "Navigation" "block"
+    And I should see "First module" in the "Navigation" "block"
     And I should see "Topic 2" in the "region-main" "region"
     And I should see "Second module" in the "region-main" "region"
     And I should not see "Second module" in the "Navigation" "block"
-    #And expand node "Topic 2"
-    #And I should see "Second module" in the "Navigation" "block"
+    And I expand "Topic 2" node
+    And I should see "Second module" in the "Navigation" "block"
 
-
+  @javascript
+  Scenario: Merging subsection in flexsections format
+    Given I click on "Actions" "link" in the "Recent activity" "block"
+    And I click on "Delete Recent activity block" "link"
+    And I press "Yes"
+    Given I click on "Actions" "link" in the "Upcoming events" "block"
+    And I click on "Delete Upcoming events block" "link"
+    And I press "Yes"
+    When I click on "Merge with parent" "link" in the "li#section-2" "css_element"
+    Then I should see "Topic 1" in the "region-main" "region"
+    And "li#section-2" "css_element" should not exist
+    And I should not see "Topic 2"
+    And I should see "First module" in the "region-main" "region"
+    And I should see "Second module" in the "region-main" "region"
+    And I expand "Topic 1" node
+    And I should see "First module" in the "Navigation" "block"
+    And I should see "Second module" in the "Navigation" "block"
