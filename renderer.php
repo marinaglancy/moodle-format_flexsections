@@ -236,7 +236,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         } else if ($control->class === 'settings' || $control->class === 'marker' || $control->class === 'marked') {
             $icon = new pix_icon('i/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
         } else if ($control->class === 'move' || $control->class === 'expanded' || $control->class === 'collapsed' ||
-                $control->class === 'hide' || $control->class === 'show') {
+                $control->class === 'hide' || $control->class === 'show' || $control->class === 'delete') {
             $icon = new pix_icon('t/'. $control->class, $control->text, 'moodle', array('class' => 'iconsmall', 'title' => $control->text));
         } else if ($control->class === 'mergeup') {
             $icon = new pix_icon('mergeup', $control->text, 'format_flexsections', array('class' => 'iconsmall', 'title' => $control->text));
@@ -288,5 +288,22 @@ class format_flexsections_renderer extends plugin_renderer_base {
             }
         }
         return $o;
+    }
+
+    /**
+     * Displays a confirmation dialogue when deleting the section (for non-JS mode)
+     *
+     * @param stdClass $course
+     * @param int $sectionreturn
+     * @param int $deletesection
+     */
+    public function confirm_delete_section($course, $sectionreturn, $deletesection) {
+        echo $this->box_start('noticebox');
+        $courseurl = course_get_url($course, $sectionreturn);
+        $optionsyes = array('confirm' => 1, 'deletesection' => $deletesection, 'sesskey' => sesskey());
+        $formcontinue = new single_button(new moodle_url($courseurl, $optionsyes), get_string('yes'));
+        $formcancel = new single_button($courseurl, get_string('no'), 'get');
+        echo $this->confirm(get_string('confirmdelete', 'format_flexsections'), $formcontinue, $formcancel);
+        echo $this->box_end();
     }
 }

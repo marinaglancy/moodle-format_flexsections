@@ -38,7 +38,13 @@ if (($marker >=0) && has_capability('moodle/course:setcurrentsection', $context)
 course_create_sections_if_missing($course, 0);
 
 $renderer = $PAGE->get_renderer('format_flexsections');
-$renderer->display_section($course, $displaysection, $displaysection);
+if (($deletesection = optional_param('deletesection', 0, PARAM_INT)) && confirm_sesskey()) {
+    $renderer->confirm_delete_section($course, $displaysection, $deletesection);
+} else {
+    $renderer->display_section($course, $displaysection, $displaysection);
+}
 
 // Include course format js module
 $PAGE->requires->js('/course/format/flexsections/format.js');
+$PAGE->requires->string_for_js('confirmdelete', 'format_flexsections');
+$PAGE->requires->js_init_call('M.course.format.init_flexsections');

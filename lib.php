@@ -451,6 +451,55 @@ class format_flexsections extends format_base {
     }
 
     /**
+     * Completely removes a section, all subsections and activities they contain
+     *
+     * @param section_info $section
+     */
+    protected function delete_section($section) {
+        global $DB;
+        if (!$section->section) {
+            // section 0 does not have parent
+            return;
+        }
+
+        $sectionid = $section->id;
+
+        // move the section to be removed to the end (this will re-number other sections)
+        $this->move_section($section->section, 0);
+
+        $modinfo = get_fast_modinfo($this->courseid);
+        $allsections = $modinfo->get_section_info_all();
+        $section = null;
+        $sectionstodelete = array();
+        $modulestodelete = array();
+        foreach ($allsections as $sectioninfo) {
+            if ($sectioninfo->id == $sectionid) {
+                // This is the section to be deleted. Since we have already
+                // moved it to the end we know that we need to delete this section
+                // and all the following (which can only be its subsections).
+                $section = $sectioninfo;
+            }
+            if ($section) {
+                $sectionstodelete[] = $sectioninfo->id;
+                if (!empty($modinfo->sections[$sectioninfo->section])) {
+                    $modulestodelete = array_merge($modulestodelete,
+                            $modinfo->sections[$sectioninfo->section]);
+                }
+            }
+        }
+
+        foreach ($modulestodelete as $cmid) {
+            course_delete_module($cmid);
+        }
+
+        list($sectionsql, $params) = $DB->get_in_or_equal($sectionstodelete);
+        $DB->execute('DELETE FROM {course_format_options} WHERE sectionid ' . $sectionsql, $params);
+        $DB->execute('DELETE FROM {course_sections} WHERE id ' . $sectionsql, $params);
+
+        rebuild_course_cache($this->courseid, true);
+    }
+
+    /**
      * Returns true if we are on /course/view.php page
      *
      * @return bool
@@ -509,6 +558,17 @@ class format_flexsections extends format_base {
                 $section = $this->get_section($mergeup, MUST_EXIST);
                 $this->mergeup_section($section);
                 $url = course_get_url($this->courseid, $section->parent);
+                redirect($url);
+            }
+
+            // if requested, delete the section
+            $deletesection = optional_param('deletesection', null, PARAM_INT);
+            if ($deletesection && confirm_sesskey() && has_capability('moodle/course:update', $context)
+                    && optional_param('confirm', 0, PARAM_INT) == 1) {
+                $section = $this->get_section($deletesection, MUST_EXIST);
+                $parent = $section->parent;
+                $this->delete_section($section);
+                $url = course_get_url($this->courseid, $parent);
                 redirect($url);
             }
 
@@ -707,6 +767,14 @@ class format_flexsections extends format_base {
             $mergeupurl->params(array('mergeup' => $section->section, 'sesskey' => sesskey()));
             $text = new lang_string('mergeup', 'format_flexsections');
             $controls[] = new format_flexsections_edit_control('mergeup', $mergeupurl, $text);
+        }
+
+        // Delete section control
+        if ($sectionnum && has_capability('moodle/course:update', $context)) {
+            $deleteurl = course_get_url($course, $sr);
+            $deleteurl->params(array('deletesection' => $section->section, 'sesskey' => sesskey()));
+            $text = new lang_string('deletesection', 'format_flexsections');
+            $controls[] = new format_flexsections_edit_control('delete', $deleteurl, $text);
         }
 
         // Move section control
