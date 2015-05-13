@@ -449,7 +449,7 @@ class format_flexsections extends format_base {
      *
      * @param section_info $section
      */
-    protected function delete_section($section) {
+    protected function delete_section_int($section) {
         global $DB;
         if (!$section->section) {
             // section 0 does not have parent
@@ -561,7 +561,7 @@ class format_flexsections extends format_base {
                     && optional_param('confirm', 0, PARAM_INT) == 1) {
                 $section = $this->get_section($deletesection, MUST_EXIST);
                 $parent = $section->parent;
-                $this->delete_section($section);
+                $this->delete_section_int($section);
                 $url = course_get_url($this->courseid, $parent);
                 redirect($url);
             }
