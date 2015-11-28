@@ -55,11 +55,30 @@ class format_flexsections extends format_base {
         $section = $this->get_section($section);
         if ((string)$section->name !== '') {
             return format_string($section->name, true, array('context' => context_course::instance($this->courseid)));
-        } else if ($section->section == 0) {
-            return get_string('section0name', 'format_flexsections');
         } else {
-            return get_string('topic').' '.$section->section;
+            return $this->get_default_section_name($section);
         }
+    }
+
+    /**
+     * Returns the default section using format_base's implementation of get_section_name.
+     *
+     * @param int|stdClass|section_info $section Section object from database or just field course_sections section
+     * @return string The default value for the section name based on the given course format.
+     */
+    public function get_default_section_name($section) {
+        if (is_object($section)) {
+            $sectionnum = $section->section;
+        } else {
+            $sectionnum = $section;
+        }
+        if ($sectionnum == 0) {
+            // Return the general section.
+            return get_string('section0name', 'format_' . $this->format);
+        } else {
+            return get_string('topic').' '.$sectionnum;
+        }
+        return '';
     }
 
     /**
@@ -536,6 +555,12 @@ class format_flexsections extends format_base {
 
             if (!$this->is_section_real_available($this->get_viewed_section())) {
                 throw new moodle_exception('nopermissiontoviewpage');
+            }
+
+            if ($currentsectionnum = $this->get_viewed_section()) {
+                navigation_node::override_active_url(new moodle_url('/course/view.php',
+                        array('id' => $this->courseid,
+                            'sectionid' => $this->get_section($currentsectionnum)->id)));
             }
 
             // if requested, create new section and redirect to course view page

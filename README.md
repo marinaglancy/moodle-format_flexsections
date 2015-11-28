@@ -1,6 +1,17 @@
 moodle-format_flexsections
 ==========================
 
+Version 2.8.3
+-------------
+
+- Compatibility with Moodle 3.0 (still works on 2.8 and 2.9)
+- Fixed bug when section name was not displayed in the breadcrumb
+
+Version 2.8.2
+-------------
+
+- Compatibility with Moodle 2.9 (still works on 2.8)
+
 Version 2.8.1
 -------------
 
