@@ -1,6 +1,12 @@
 moodle-format_flexsections
 ==========================
 
+Version 2.8.4
+-------------
+
+- Compatibility with section name editing in Moodle 3.1 (still works on previous
+  versions)
+
 Version 2.8.3
 -------------
 

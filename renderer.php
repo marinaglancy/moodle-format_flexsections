@@ -55,6 +55,12 @@ class format_flexsections_renderer extends plugin_renderer_base {
      * @return string HTML to output.
      */
     public function section_title($section, $course, $supresslink = false) {
+        global $CFG;
+        if ((float)$CFG->version >= 2016052300) {
+            // For Moodle 3.1 or later use inplace editable for displaying section name.
+            $section = course_get_format($course)->get_section($section);
+            return $this->render(course_get_format($course)->inplace_editable_render_section_name($section, !$supresslink));
+        }
         $title = get_section_name($course, $section);
         if (!$supresslink) {
             $url = course_get_url($course, $section, array('navigation' => true));
