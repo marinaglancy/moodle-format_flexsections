@@ -1,6 +1,11 @@
 moodle-format_flexsections
 ==========================
 
+Version 3.2.0
+-------------
+
+- Release for Moodle 3.2 with passing behat tests and CSS adjustments for Boost theme
+
 Version 2.8.4
 -------------
 

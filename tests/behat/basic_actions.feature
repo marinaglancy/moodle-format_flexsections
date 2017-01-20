@@ -75,7 +75,8 @@ Feature: Using course in flexsections format
 
   @javascript
   Scenario: Collapsing section in flexsections format
-    Given I click on "Actions" "link" in the "Recent activity" "block"
+    Given I add the "Navigation" block if not present
+    And I open the "Recent activity" blocks action menu
     And I click on "Delete Recent activity block" "link"
     And I press "Yes"
     When I click on "Show collapsed" "link" in the "li#section-2" "css_element"
@@ -96,10 +97,11 @@ Feature: Using course in flexsections format
 
   @javascript
   Scenario: Collapsing section with subsections in flexsections format
-    Given I click on "Actions" "link" in the "Recent activity" "block"
+    Given I add the "Navigation" block if not present
+    And I open the "Recent activity" blocks action menu
     And I click on "Delete Recent activity block" "link"
     And I press "Yes"
-    Given I click on "Actions" "link" in the "Upcoming events" "block"
+    And I open the "Upcoming events" blocks action menu
     And I click on "Delete Upcoming events block" "link"
     And I press "Yes"
     When I click on "Show collapsed" "link" in the "li#section-1" "css_element"
@@ -121,12 +123,13 @@ Feature: Using course in flexsections format
     And I expand "Topic 2" node
     And I should see "Second module" in the "Navigation" "block"
 
-  @javascript
+  @javascript @xxx
   Scenario: Merging subsection in flexsections format
-    Given I click on "Actions" "link" in the "Recent activity" "block"
+    Given I add the "Navigation" block if not present
+    And I open the "Recent activity" blocks action menu
     And I click on "Delete Recent activity block" "link"
     And I press "Yes"
-    Given I click on "Actions" "link" in the "Upcoming events" "block"
+    Given I open the "Upcoming events" blocks action menu
     And I click on "Delete Upcoming events block" "link"
     And I press "Yes"
     When I click on "Merge with parent" "link" in the "li#section-2" "css_element"
