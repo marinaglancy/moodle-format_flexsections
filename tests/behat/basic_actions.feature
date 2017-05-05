@@ -11,15 +11,15 @@ Feature: Using course in flexsections format
       | student2 | Mary | Student | student2@example.com |
       | teacher1 | Terry | Teacher | teacher1@example.com |
     And the following "courses" exist:
-      | fullname | shortname | format |
-      | Course 1 | C1 | flexsections |
+      | fullname | shortname | format       | numsections |
+      | Course 1 | C1        | flexsections | 0           |
     And the following "course enrolments" exist:
       | user | course | role |
       | student1 | C1 | student |
       | student2 | C1 | student |
       | teacher1 | C1 | editingteacher |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should not see "Add section"
     And I turn editing mode on
     And I follow "Add section"
@@ -38,7 +38,7 @@ Feature: Using course in flexsections format
     And I should see "Second module"
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "First module"
     And I should see "Second module"
 
@@ -47,7 +47,7 @@ Feature: Using course in flexsections format
     And I should see "Second module"
     And I log out
     When I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Topic 1"
     And I should see "Topic 2"
     And I should see "First module"
@@ -57,7 +57,7 @@ Feature: Using course in flexsections format
     When I click on "Hide" "link" in the "li#section-2" "css_element"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Topic 1"
     And I should not see "Topic 2"
     And I should see "First module"
@@ -67,7 +67,7 @@ Feature: Using course in flexsections format
     When I click on "Hide" "link" in the "li#section-1" "css_element"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should not see "Topic 1"
     And I should not see "First module"
     And I should not see "Topic 2"
@@ -82,7 +82,7 @@ Feature: Using course in flexsections format
     When I click on "Show collapsed" "link" in the "li#section-2" "css_element"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Topic 1"
     And I should see "First module"
     And I should not see "Second module"
@@ -107,7 +107,7 @@ Feature: Using course in flexsections format
     When I click on "Show collapsed" "link" in the "li#section-1" "css_element"
     And I log out
     And I log in as "student1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     Then I should see "Topic 1" in the "region-main" "region"
     And I should see "Topic 1" in the "Navigation" "block"
     And I should not see "First module"
@@ -123,7 +123,7 @@ Feature: Using course in flexsections format
     And I expand "Topic 2" node
     And I should see "Second module" in the "Navigation" "block"
 
-  @javascript @xxx
+  @javascript
   Scenario: Merging subsection in flexsections format
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu

@@ -9,13 +9,13 @@ Feature: Deleting sections in flexsections format
       | username | firstname | lastname | email |
       | teacher1 | Terry | Teacher | teacher1@example.com |
     And the following "courses" exist:
-      | fullname | shortname | format |
-      | Course 1 | C1 | flexsections |
+      | fullname | shortname | format       | numsections |
+      | Course 1 | C1        | flexsections | 0           |
     And the following "course enrolments" exist:
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I should not see "Add section"
     And I turn editing mode on
     And I follow "Add section"
