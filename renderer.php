@@ -147,7 +147,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
         // display section content
         echo html_writer::start_tag('div', array('class' => 'content'));
         // display section name and expanded/collapsed control
-        if ($sectionnum && ($title = $this->section_title($sectionnum, $course, ($level == 0) || !$contentvisible))) {
+        if ($section && ($title = $this->section_title($section, $course, ($level == 0) || !$contentvisible))) {
             if ($collapsedcontrol) {
                 $title = $this->render($collapsedcontrol). $title;
             }
