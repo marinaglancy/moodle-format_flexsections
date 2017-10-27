@@ -1,14 +1,20 @@
-.format-flexsections .course-content ul.flexsections {margin:0;}
-.format-flexsections .course-content ul.flexsections li.section {list-style: none;margin:3px 0 2px 1em;padding-left:5px;padding-right:5px;}
+/* stylelint-disable */
+.format-flexsections .course-content ul.flexsections {
+    margin: 0;
+    padding: 0;
+}
+.format-flexsections .course-content ul.flexsections li.section {list-style: none;margin:3px 0 2px 1em;padding-left:5px;padding-right:0;}
 .course-content ul.flexsections li.movehere {list-style: none;margin:3px 0 2px 1em;}
 .dir-rtl.format-flexsections .course-content ul.flexsections li.section,
 .dir-rtl.course-content ul.flexsections li.movehere {margin:3px 1em 2px 0;}
 .format-flexsections .course-content ul.flexsections-level-0 > li.section {margin-left: 0;}
 .format-flexsections .course-content ul.flexsections-level-0 > li.movehere {margin-left: 0;}
 .format-flexsections .course-content ul.flexsections li.section.main {border:none;}
-.format-flexsections .course-content ul.flexsections-level-1 > li.section.main {border: #DDDDDD solid 1px;padding-left:5px;padding-right:5px;}
+.format-flexsections .course-content ul.flexsections-level-1 > li.section.main {border: #DDDDDD solid 1px;margin-left:0;padding-right:5px;}
 .format-flexsections .course-content ul.flexsections li.section .controls img {padding-left:0.3em;padding-right:0.3em}
 .format-flexsections .course-content ul.flexsections li.section .availabilityinfo {padding-bottom: .5em;}
+.format-flexsections .course-content ul.flexsections li.section ul.section {margin-left:0;margin-right:0;padding-left:0;}
+.format-flexsections .course-content ul.flexsections li.section > .content > .summary {margin-left:0;padding-left:0.2em;}
 
 /* Overwrite bootstrapbase styles */
 .format-flexsections .course-content ul.flexsections .controls a.hide,

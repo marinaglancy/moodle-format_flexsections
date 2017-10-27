@@ -84,4 +84,3 @@ Feature: Deleting sections in flexsections format
     And I should not see "Second module"
     And I should not see "Third module"
     And I should see "Fourth module"
-

@@ -1,4 +1,5 @@
+/* stylelint-disable */
 .format-flexsections .course-content ul.flexsections li.section:target {
-    padding-top: 0 !important; /* stylelint-disable declaration-no-important */
-    margin-top: 3px !important; /* stylelint-disable declaration-no-important */
+    padding-top: 0 !important;
+    margin-top: 3px !important;
 }
