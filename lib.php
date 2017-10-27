@@ -654,6 +654,28 @@ class format_flexsections extends format_base {
     }
 
     /**
+     * Adds format options elements to the course/section edit form
+     *
+     * This function is called from {@link course_edit_form::definition_after_data()}
+     *
+     * @param MoodleQuickForm $mform form the elements are added to
+     * @param bool $forsection 'true' if this is a section edit form, 'false' if this is course edit form
+     * @return array array of references to the added form elements
+     */
+    public function create_edit_form_elements(&$mform, $forsection = false) {
+        $elements = parent::create_edit_form_elements($mform, $forsection);
+        if ($forsection && ($section0 = $this->get_section(0))) {
+            // Disable/hide "collapsed" control for general section. Hiding is availabe in Moodle 3.4 and above.
+            if (method_exists($mform, 'hideIf')) {
+                $mform->hideIf('collapsed', 'id', 'eq', $section0->id);
+            } else {
+                $mform->disabledIf('collapsed', 'id', 'eq', $section0->id);
+            }
+        }
+        return $elements;
+    }
+
+    /**
      * Sets the section visible/hidden including subsections and modules
      *
      * @param int|stdClass|section_info $section
