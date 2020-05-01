@@ -1,42 +1,65 @@
-/* stylelint-disable */
 .format-flexsections .course-content ul.flexsections {
     margin: 0;
     padding: 0;
+    list-style: none;
 }
-.format-flexsections .course-content ul.flexsections li.section {list-style: none;margin:3px 0 2px 1em;padding-left:5px;padding-right:0;}
-.course-content ul.flexsections li.movehere {list-style: none;margin:3px 0 2px 1em;}
-.dir-rtl.format-flexsections .course-content ul.flexsections li.section,
-.dir-rtl.course-content ul.flexsections li.movehere {margin:3px 1em 2px 0;}
-.format-flexsections .course-content ul.flexsections-level-0 > li.section {margin-left: 0;}
-.format-flexsections .course-content ul.flexsections-level-0 > li.movehere {margin-left: 0;}
-.format-flexsections .course-content ul.flexsections li.section.main {border:none;}
-.format-flexsections .course-content ul.flexsections-level-1 > li.section.main {border: #DDDDDD solid 1px;margin-left:0;padding-right:5px;}
-.format-flexsections .course-content ul.flexsections li.section .controls img {padding-left:0.3em;padding-right:0.3em}
-.format-flexsections .course-content ul.flexsections li.section .availabilityinfo {padding-bottom: .5em;}
-.format-flexsections .course-content ul.flexsections li.section ul.section {margin-left:0;margin-right:0;padding-left:0;}
-.format-flexsections .course-content ul.flexsections li.section > .content > .summary {margin-left:0;padding-left:0.2em;}
+.format-flexsections .course-content ul.flexsections li.section {
+    padding-bottom: 0.5rem;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    margin-top: 1rem;
+}
+.course-content ul.flexsections ul.section {
+    padding-left: 0;
+    padding-right: 0;
+}
+.format-flexsections .course-content ul.flexsections-level-0 > li.section {
+    margin-left: 0;
+    padding-left: 0;
+}
+.course-content ul.flexsections li.section.main {
+    /* Cancel borders added by boost */
+    border-bottom: 0;
+}
+.format-flexsections .course-content ul.flexsections-level-1 > li.section.main {
+    border-bottom: 1px solid #dee2e6;
+}
+.format-flexsections .course-content ul.flexsections-level-1 > li.section.main:last-child {
+    border-bottom: 0;
+}
+.format-flexsections .course-content ul.flexsections li.section .controls img {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
+.format-flexsections .header.backto {
+    margin-bottom: 1rem;
+}
 
-/* Overwrite bootstrapbase styles */
-.format-flexsections .course-content ul.flexsections .controls a.hide,
-.format-flexsections .course-content ul.flexsections .controls a.show {display:inline;}
-
-/* hidden section */
+/* Hidden section. */
 .format-flexsections .course-content li.section.hidden > .content > h3.sectionname,
 .format-flexsections .course-content li.section.hidden > .content > h3.sectionname a,
 .format-flexsections .course-content li.section.hidden > .content > .summary,
 .format-flexsections .course-content li.section.hidden .addresourcemodchooser a,
-.format-flexsections .course-content li.section.hidden a.addsection {color:#AAAAAA;}
+.format-flexsections .course-content li.section.hidden a.addsection {
+    color: #aaa;
+}
 
-/* add extra borders in editing mode */
-.format-flexsections.editing .course-content ul.flexsections li.section.main {border: #DDDDDD solid 1px;}
-.format-flexsections.editing .course-content ul.flexsections li.section.main#section-0 {border: none;}
+/* Moving section */
+.format-flexsections .course-content ul.flexsections li.section.ismoving {
+    background: #eee;
+}
+.format-flexsections .course-content ul.flexsections li.movehere img {
+    padding-left: 1rem;
+}
+.format-flexsections .course-content div.cancelmoving {
+    margin: 3px;
+    padding: 5px;
+    background: yellow;
+    border: 1px solid black;
+    text-align: center;
+    position: fixed;
+    top: 100px;
+    right: 0;
+    z-index: 3;
+}
 
-/* moving section */
-.format-flexsections .course-content ul.flexsections li.section.ismoving {background:#EEEEEE;}
-.format-flexsections .course-content ul.flexsections li.movehere > img {padding-left:5px;}
-.format-flexsections .course-content div.cancelmoving {margin:3px;padding:5px;background:yellow;border:1px solid black;text-align:center;position:fixed;top:0;right:0;}
-
-.format-flexsections .jumpmenu {text-align:center;}
-
-.format-flexsections .header.backto {padding: 5px 10px;border: 1px solid #DDD;margin-bottom:5px;}
-.format-flexsections .header.backto .backto-text {margin-left:10px;}

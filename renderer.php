@@ -285,19 +285,30 @@ class format_flexsections_renderer extends plugin_renderer_base {
     protected function section_availability_message($section, $canviewhidden) {
         global $CFG;
         $o = '';
-        if (!$section->uservisible) {
-            // Note: We only get to this function if availableinfo is non-empty,
-            // so there is definitely something to print.
-            $formattedinfo = \core_availability\info::format_info(
-                $section->availableinfo, $section->course);
-            $o .= html_writer::div($formattedinfo, 'availabilityinfo');
-        } else if ($canviewhidden && !empty($CFG->enableavailability) && $section->visible) {
+        if (!$section->visible) {
+            if ($canviewhidden) {
+                $o .= $this->courserenderer->availability_info(get_string('hiddenfromstudents'), 'ishidden');
+            } else {
+                // We are here because of the setting "Hidden sections are shown in collapsed form".
+                // Student can not see the section contents but can see its name.
+                $o .= $this->courserenderer->availability_info(get_string('notavailable'), 'ishidden');
+            }
+        } else if (!$section->uservisible) {
+            if ($section->availableinfo) {
+                // Note: We only get to this function if availableinfo is non-empty,
+                // so there is definitely something to print.
+                $formattedinfo = \core_availability\info::format_info(
+                    $section->availableinfo, $section->course);
+                $o .= $this->courserenderer->availability_info($formattedinfo, 'isrestricted');
+            }
+        } else if ($canviewhidden && !empty($CFG->enableavailability)) {
+            // Check if there is an availability restriction.
             $ci = new \core_availability\info_section($section);
             $fullinfo = $ci->get_full_information();
             if ($fullinfo) {
                 $formattedinfo = \core_availability\info::format_info(
                     $fullinfo, $section->course);
-                $o .= html_writer::div($formattedinfo, 'availabilityinfo');
+                $o .= $this->courserenderer->availability_info($formattedinfo, 'isrestricted isfullinfo');
             }
         }
         return $o;

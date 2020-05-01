@@ -1257,6 +1257,10 @@ class format_flexsections extends format_base {
             $title = get_section_name($section->course, $section);
             $editlabel = new lang_string('newsectionname', 'format_flexsections', $title);
         }
+        $section = $this->get_section($section);
+        if ($linkifneeded && $section->collapsed != FORMAT_FLEXSECTIONS_COLLAPSED) {
+            $linkifneeded = false;
+        }
         return parent::inplace_editable_render_section_name($section, $linkifneeded, $editable, $edithint, $editlabel);
     }
 
