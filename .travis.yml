@@ -1,0 +1,55 @@
+language: php
+
+addons:
+  postgresql: "9.4"
+
+services:
+  - mysql
+  - postgresql
+  - docker
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.npm
+
+php:
+  - 7.2
+
+env:
+  - DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE CODECHECK=1
+  - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
+  - DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - nvm install 8.9
+  - nvm use 8.9
+  - cd ../..
+  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
+  - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+install:
+  - moodle-plugin-ci install -vvv
+  # Start Selenuim Standalone server using docker.
+  - docker run -d -p 127.0.0.1:4444:4444 --net=host -v /dev/shm:/dev/shm -v $HOME/build/moodle:$HOME/build/moodle selenium/standalone-firefox:2.53.1
+  # Start php built-in server.
+  - php -S localhost:8000 -t $HOME/build/moodle > /dev/null 2>&1 &
+  # Wait to make sure docker container is fully running.
+  - sleep 10
+
+script:
+  - test "$CODECHECK" = "1" && moodle-plugin-ci phplint || true
+  - test "$CODECHECK" = "1" && moodle-plugin-ci codechecker || true
+  - test "$CODECHECK" = "1" && moodle-plugin-ci validate || true
+  - test "$CODECHECK" = "1" && moodle-plugin-ci savepoints || true
+  - test "$CODECHECK" = "1" && moodle-plugin-ci mustache || true
+  - test "$CODECHECK" = "1" && moodle-plugin-ci grunt || true
+  - test "$CODECHECK" = "1" && moodle-plugin-ci phpdoc || true
+  - cd moodle
+  - moodle-plugin-ci phpunit
+  - vendor/bin/phpunit --fail-on-risky --disallow-test-output -v admin/tool/dataprivacy/tests/metadata_registry_test.php
+  - vendor/bin/phpunit --fail-on-risky --disallow-test-output -v lib/tests/externallib_test.php
+  - vendor/bin/phpunit --fail-on-risky --disallow-test-output -v privacy/tests/provider_test.php
+  - moodle-plugin-ci behat
