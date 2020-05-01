@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -39,6 +38,7 @@ $string['newsectionname'] = 'New name for section {$a}';
 $string['page-course-view-flexsections'] = 'Any course main page in flexsections format';
 $string['page-course-view-flexsections-x'] = 'Any course page in flexsections format';
 $string['pluginname'] = 'Flexible sections format';
+$string['privacy:metadata'] = 'The Flexible sections format plugin does not store any personal data.';
 $string['removemarker'] = 'Do not mark as current';
 $string['section0name'] = 'General';
 $string['sectionname'] = 'Topic';

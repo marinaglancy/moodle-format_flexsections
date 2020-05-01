@@ -15,17 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course format with flexible number of nested sections
+ * Privacy Subsystem implementation for format_flexsections.
  *
  * @package    format_flexsections
- * @copyright  2012 Marina Glancy
+ * @copyright  2020 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace format_flexsections\privacy;
+defined('MOODLE_INTERNAL') || die();
 
-defined('MOODLE_INTERNAL') || die;
-
-$plugin->version   = 2017102700;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2016120500;        // Requires this Moodle version.
-$plugin->release   = "3.2.2";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->component = 'format_flexsections';    // Full name of the plugin (used for diagnostics).
+/**
+ * Privacy Subsystem for format_flexsections implementing null_provider.
+ *
+ * @copyright  2020 Marina Glancy
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
