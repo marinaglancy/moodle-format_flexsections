@@ -1,6 +1,14 @@
 moodle-format_flexsections
 ==========================
 
+Version 3.5.0
+-------------
+
+- Release for Moodle 3.5 - 3.8
+- Privacy API support
+- Updated CSS for better look in current Boost theme
+- Added confirmation for "Merge with parent" action
+
 Version 3.2.2
 -------------
 
