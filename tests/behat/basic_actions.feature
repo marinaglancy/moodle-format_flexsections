@@ -86,8 +86,7 @@ Feature: Using course in flexsections format
     Then I should see "Topic 1"
     And I should see "First module"
     And I should not see "Second module"
-    And I expand "Topic 1" node
-    And I should see "Topic 2" in the "Navigation" "block"
+    And navigation node "Topic 1" should be expandable
     And I click on "Topic 2" "link" in the "li#section-1" "css_element"
     And I should not see "First module" in the "region-main" "region"
     And I should see "Topic 2" in the "region-main" "region"
@@ -133,6 +132,7 @@ Feature: Using course in flexsections format
     And I click on "Delete Upcoming events block" "link"
     And I press "Yes"
     When I click on "Merge with parent" "link" in the "li#section-2" "css_element"
+    And I click on "Yes" "button" in the "Confirm" "dialogue"
     Then I should see "Topic 1" in the "region-main" "region"
     And "li#section-2" "css_element" should not exist
     And I should not see "Topic 2"

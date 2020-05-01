@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *
+ * Included from course/view.php when course is in flexsections format
  *
  * @package    format_flexsections
  * @copyright  2012 Marina Glancy
@@ -29,12 +29,12 @@ require_once($CFG->libdir.'/completionlib.php');
 
 $context = context_course::instance($course->id);
 
-if (($marker >=0) && has_capability('moodle/course:setcurrentsection', $context) && confirm_sesskey()) {
+if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context) && confirm_sesskey()) {
     $course->marker = $marker;
     course_set_marker($course->id, $marker);
 }
 
-// make sure section 0 is created
+// Make sure section 0 is created.
 course_create_sections_if_missing($course, 0);
 
 $renderer = $PAGE->get_renderer('format_flexsections');
@@ -44,7 +44,6 @@ if (($deletesection = optional_param('deletesection', 0, PARAM_INT)) && confirm_
     $renderer->display_section($course, $displaysection, $displaysection);
 }
 
-// Include course format js module
+// Include course format js module.
 $PAGE->requires->js('/course/format/flexsections/format.js');
-$PAGE->requires->string_for_js('confirmdelete', 'format_flexsections');
-$PAGE->requires->js_init_call('M.course.format.init_flexsections');
+$PAGE->requires->js_call_amd('format_flexsections/format', 'init');

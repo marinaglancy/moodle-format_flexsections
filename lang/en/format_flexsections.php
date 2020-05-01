@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -29,6 +28,7 @@ $string['backtocourse'] = 'Back to course \'{$a}\'';
 $string['backtosection'] = 'Back to \'{$a}\'';
 $string['cancelmoving'] = 'Cancel moving \'{$a}\'';
 $string['confirmdelete'] = 'Are you sure you want to delete this section? All activities and subsections will also be deleted.';
+$string['confirmmerge'] = 'Are you sure you want to merge this section content with the parent? All activities and subsections will be moved';
 $string['currentsection'] = 'This section';
 $string['deletesection'] = 'Delete section';
 $string['displaycontent'] = 'Display content';
@@ -39,6 +39,7 @@ $string['newsectionname'] = 'New name for section {$a}';
 $string['page-course-view-flexsections'] = 'Any course main page in flexsections format';
 $string['page-course-view-flexsections-x'] = 'Any course page in flexsections format';
 $string['pluginname'] = 'Flexible sections format';
+$string['privacy:metadata'] = 'The Flexible sections format plugin does not store any personal data.';
 $string['removemarker'] = 'Do not mark as current';
 $string['section0name'] = 'General';
 $string['sectionname'] = 'Topic';
