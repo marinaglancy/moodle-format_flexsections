@@ -28,6 +28,7 @@ $string['backtocourse'] = 'Back to course \'{$a}\'';
 $string['backtosection'] = 'Back to \'{$a}\'';
 $string['cancelmoving'] = 'Cancel moving \'{$a}\'';
 $string['confirmdelete'] = 'Are you sure you want to delete this section? All activities and subsections will also be deleted.';
+$string['confirmmerge'] = 'Are you sure you want to merge this section content with the parent? All activities and subsections will be moved';
 $string['currentsection'] = 'This section';
 $string['deletesection'] = 'Delete section';
 $string['displaycontent'] = 'Display content';

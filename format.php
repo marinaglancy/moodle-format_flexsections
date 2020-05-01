@@ -46,5 +46,4 @@ if (($deletesection = optional_param('deletesection', 0, PARAM_INT)) && confirm_
 
 // Include course format js module.
 $PAGE->requires->js('/course/format/flexsections/format.js');
-$PAGE->requires->string_for_js('confirmdelete', 'format_flexsections');
-$PAGE->requires->js_init_call('M.course.format.init_flexsections');
+$PAGE->requires->js_call_amd('format_flexsections/format', 'init');
