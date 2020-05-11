@@ -46,10 +46,10 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/notification', 'core/str'
 
         return {
             init: function() {
-                $('body').on('click', 'li.section > .controls > a.delete', function(e) {
+                $('body').on('click', 'li.section > .controls > a[data-action="delete"]', function(e) {
                     confirmAction(e, 'confirmdelete');
                 });
-                $('body').on('click', 'li.section > .controls > a.mergeup', function(e) {
+                $('body').on('click', 'li.section > .controls > a[data-action="mergeup"]', function(e) {
                     confirmAction(e, 'confirmmerge');
                 });
             }

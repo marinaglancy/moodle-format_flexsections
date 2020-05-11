@@ -1291,17 +1291,17 @@ class format_flexsections_edit_control implements renderable {
     /** @var string */
     public $text;
     /** @var string */
-    public $class;
+    public $actionname;
 
     /**
      * format_flexsections_edit_control constructor.
      *
-     * @param string $class
+     * @param string $actionname
      * @param moodle_url $url
      * @param string $text
      */
-    public function __construct($class, $url, $text) {
-        $this->class = $class;
+    public function __construct($actionname, $url, $text) {
+        $this->actionname = $actionname;
         $this->url = $url;
         $this->text = $text;
     }
