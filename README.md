@@ -1,6 +1,11 @@
 moodle-format_flexsections
 ==========================
 
+Version 3.5.1
+-------------
+
+- Fixed CSS class conflict for 'show' and 'hide' actions causing them to disappear
+
 Version 3.5.0
 -------------
 
