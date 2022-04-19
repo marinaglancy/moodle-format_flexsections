@@ -24,6 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+use core_courseformat\base as course_format;
+use core_courseformat\output\section_renderer;
+
 require_once($CFG->dirroot.'/course/format/renderer.php');
 
 /**
@@ -32,7 +35,7 @@ require_once($CFG->dirroot.'/course/format/renderer.php');
  * @copyright 2012 Marina Glancy
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_flexsections_renderer extends plugin_renderer_base {
+class format_flexsections_renderer extends core_courseformat\output\section_renderer {
     /** @var core_course_renderer Stores instances of core_course_renderer */
     protected $courserenderer = null;
 
@@ -167,7 +170,11 @@ class format_flexsections_renderer extends plugin_renderer_base {
         // Display section contents (activities and subsections).
         if ($contentvisible && ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED || !$level)) {
             // Display resources and activities.
-            echo $this->courserenderer->course_section_cm_list($course, $section, $sr);
+            $format = course_get_format($course);
+            $sectionclass = $format->get_output_classname('content\\section\\cmlist');
+            $output = new $sectionclass($format, $section);
+            echo $this->render($output);
+
             if ($this->page->user_is_editing()) {
                 // A little hack to allow use drag&drop for moving activities if the section is empty.
                 if (empty(get_fast_modinfo($course)->sections[$sectionnum])) {

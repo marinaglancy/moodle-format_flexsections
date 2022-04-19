@@ -1,12 +1,10 @@
 .format-flexsections .course-content ul.flexsections {
     margin: 0;
     padding: 0;
-    list-style: none;
+    list-style: none !important;
 }
 .format-flexsections .course-content ul.flexsections li.section {
-    padding-bottom: 0.5rem;
-    margin-left: 0.5rem;
-    padding-left: 0.5rem;
+    padding: 1rem 0;
     margin-top: 1rem;
 }
 .course-content ul.flexsections ul.section {

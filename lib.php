@@ -35,7 +35,7 @@ define('FORMAT_FLEXSECTIONS_EXPANDED', 0);
  * @copyright  2012 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_flexsections extends format_base {
+class format_flexsections extends core_courseformat\base {
     /**
      * Returns true if this course format uses sections
      *
@@ -94,7 +94,7 @@ class format_flexsections extends format_base {
     public function get_view_url($section, $options = array()) {
         $url = new moodle_url('/course/view.php', array('id' => $this->courseid));
 
-        $sectionno = $this->get_section_number($section);
+        $sectionno = $this->find_section_number($section);
         $section = $this->get_section($sectionno);
         if ($sectionno && (!$section->uservisible || !$this->is_section_real_available($section))) {
             return empty($options['navigation']) ? $url : null;
@@ -342,12 +342,12 @@ class format_flexsections extends format_base {
     /**
      * Definitions of the additional options that this course format uses for section
      *
-     * See {@link format_base::course_format_options()} for return array definition.
+     * See {@link core_courseformat\base::course_format_options()} for return array definition.
      *
      * Additionally section format options may have property 'cache' set to true
      * if this option needs to be cached in {@link get_fast_modinfo()}. The 'cache' property
-     * is recommended to be set only for fields used in {@link format_base::get_section_name()},
-     * {@link format_base::extend_course_navigation()} and {@link format_base::get_view_url()}
+     * is recommended to be set only for fields used in {@link core_courseformat\base::get_section_name()},
+     * {@link core_courseformat\base::extend_course_navigation()} and {@link core_courseformat\base::get_view_url()}
      *
      * For better performance cached options are recommended to have 'cachedefault' property
      * Unlike 'default', 'cachedefault' should be static and not access get_config().
@@ -686,7 +686,7 @@ class format_flexsections extends format_base {
      */
     protected function set_section_visible($section, $visibility, $setvisibleold = null) {
         $subsections = array();
-        $sectionnumber = $this->get_section_number($section);
+        $sectionnumber = $this->find_section_number($section);
         if (!$sectionnumber && !$visibility) {
             // Can not hide section with number 0.
             return;
@@ -844,8 +844,8 @@ class format_flexsections extends format_base {
             return null;
         }
 
-        $beforenum = $this->get_section_number($before);
-        $parentnum = $this->get_section_number($parent);
+        $beforenum = $this->find_section_number($before);
+        $parentnum = $this->find_section_number($parent);
 
         $movelink = course_get_url($this->courseid);
         $movelink->params(array('movesection' => $movingsection, 'moveparent' => $parentnum));
@@ -895,7 +895,7 @@ class format_flexsections extends format_base {
         if (!$PAGE->user_is_editing()) {
             return null;
         }
-        $parentsection = $this->get_section_number($parentsection);
+        $parentsection = $this->find_section_number($parentsection);
         $url = course_get_url($this->courseid, $this->get_viewed_section());
         $url->param('addchildsection', $parentsection);
         if ($parentsection) {
@@ -986,7 +986,7 @@ class format_flexsections extends format_base {
      * @return array
      */
     public function get_subsections($section) {
-        $sectionnum = $this->get_section_number($section);
+        $sectionnum = $this->find_section_number($section);
         $subsections = array();
         foreach ($this->get_sections() as $num => $subsection) {
             if ($subsection->parent == $sectionnum && $num != $sectionnum) {
@@ -1002,11 +1002,11 @@ class format_flexsections extends format_base {
      * @param int|section_info $section
      * @return int
      */
-    protected function get_section_number($section) {
+    public function find_section_number($section) {
         if ($section === null || $section === '') {
             return null;
         } else if (is_object($section)) {
-            return $section->section;
+            return (int)$section->section;
         } else {
             return (int)$section;
         }
@@ -1029,9 +1029,9 @@ class format_flexsections extends format_base {
                                         $movetoparentnum = null, $movebeforenum = null) {
         // Normalise arguments.
         $cursection = $this->get_section($cursection);
-        $movetoparentnum = $this->get_section_number($movetoparentnum);
-        $movebeforenum = $this->get_section_number($movebeforenum);
-        $movedsectionnum = $this->get_section_number($movedsectionnum);
+        $movetoparentnum = $this->find_section_number($movetoparentnum);
+        $movebeforenum = $this->find_section_number($movebeforenum);
+        $movedsectionnum = $this->find_section_number($movedsectionnum);
         if ($movedsectionnum === null) {
             $movebeforenum = $movetoparentnum = null;
         }
@@ -1107,7 +1107,7 @@ class format_flexsections extends format_base {
                     $changemarker = $neworder[$id];
                 }
             }
-            if ($this->get_section_number($parent) === $num) {
+            if ($this->find_section_number($parent) === $num) {
                 $newparentnum = $neworder[$id];
             }
         }
@@ -1154,7 +1154,7 @@ class format_flexsections extends format_base {
     /**
      * Course-specific information to be output immediately above content on any course page
      *
-     * See {@link format_base::course_header()} for usage
+     * See {@link core_courseformat\base::course_header()} for usage
      *
      * @return null|renderable null for no output or object with data for plugin renderer
      */
@@ -1196,7 +1196,7 @@ class format_flexsections extends format_base {
      * @return bool
      */
     public function is_section_real_available($section) {
-        if (($this->get_section_number($section) == 0)) {
+        if (($this->find_section_number($section) == 0)) {
             // Section 0 is always available.
             return true;
         }
@@ -1216,7 +1216,7 @@ class format_flexsections extends format_base {
      * @return bool
      */
     public function is_section_parent_available($section) {
-        if (($this->get_section_number($section) == 0)) {
+        if (($this->find_section_number($section) == 0)) {
             // Section 0 is always available.
             return true;
         }
