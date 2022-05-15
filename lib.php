@@ -251,63 +251,6 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
-     * Definitions of the additional options that this course format uses for course.
-     *
-     * Flexsections format uses the following options:
-     * - coursedisplay
-     * - hiddensections
-     *
-     * @param bool $foreditform
-     * @return array of options
-     */
-    public function course_format_options($foreditform = false) {
-        static $courseformatoptions = false;
-        if ($courseformatoptions === false) {
-            $courseconfig = get_config('moodlecourse');
-            $courseformatoptions = [
-                'hiddensections' => [
-                    'default' => $courseconfig->hiddensections,
-                    'type' => PARAM_INT,
-                ],
-                'coursedisplay' => [
-                    'default' => $courseconfig->coursedisplay,
-                    'type' => PARAM_INT,
-                ],
-            ];
-        }
-        if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
-            $courseformatoptionsedit = [
-                'hiddensections' => [
-                    'label' => new lang_string('hiddensections'),
-                    'help' => 'hiddensections',
-                    'help_component' => 'moodle',
-                    'element_type' => 'select',
-                    'element_attributes' => [
-                        [
-                            0 => new lang_string('hiddensectionscollapsed'),
-                            1 => new lang_string('hiddensectionsinvisible')
-                        ],
-                    ],
-                ],
-                'coursedisplay' => [
-                    'label' => new lang_string('coursedisplay'),
-                    'element_type' => 'select',
-                    'element_attributes' => [
-                        [
-                            COURSE_DISPLAY_SINGLEPAGE => new lang_string('coursedisplay_single'),
-                            COURSE_DISPLAY_MULTIPAGE => new lang_string('coursedisplay_multi'),
-                        ],
-                    ],
-                    'help' => 'coursedisplay',
-                    'help_component' => 'moodle',
-                ],
-            ];
-            $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
-        }
-        return $courseformatoptions;
-    }
-
-    /**
      * Adds format options elements to the course/section edit form.
      *
      * This function is called from {@see course_edit_form::definition_after_data()}.
@@ -336,33 +279,6 @@ class format_flexsections extends core_courseformat\base {
         }
 
         return $elements;
-    }
-
-    /**
-     * Updates format options for a course.
-     *
-     * In case if course format was changed to 'flexsections', we try to copy options
-     * 'coursedisplay' and 'hiddensections' from the previous format.
-     *
-     * @param stdClass|array $data return value from {@see moodleform::get_data()} or array with data
-     * @param stdClass $oldcourse if this function is called from {@see update_course()}
-     *     this object contains information about the course before update
-     * @return bool whether there were any changes to the options values
-     */
-    public function update_course_format_options($data, $oldcourse = null) {
-        $data = (array)$data;
-        if ($oldcourse !== null) {
-            $oldcourse = (array)$oldcourse;
-            $options = $this->course_format_options();
-            foreach ($options as $key => $unused) {
-                if (!array_key_exists($key, $data)) {
-                    if (array_key_exists($key, $oldcourse)) {
-                        $data[$key] = $oldcourse[$key];
-                    }
-                }
-            }
-        }
-        return $this->update_format_options($data);
     }
 
     /**
