@@ -1,0 +1,36 @@
+.course-content ul.flexsections {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.course-content ul.flexsections li.section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.course-content ul.flexsections li.section .content {
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width: 576px) {
+    .course-content ul.flexsections li.section .summary,
+    .course-content ul.flexsections li.section .content > .availabilityinfo {
+        margin-left: 25px;
+    }
+}
+
+.course-content ul.flexsections li.section .left,
+.course-content ul.flexsections li.section .right {
+    padding: 0 6px 0;
+    text-align: right;
+    width: auto;
+}
+
+@media (max-width: 767.98px) {
+    body:not(.editing) .course-content ul.flexsections li.section .left,
+    body:not(.editing) .course-content ul.flexsections li.section .right {
+        display: none;
+    }
+}
