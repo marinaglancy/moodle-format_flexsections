@@ -16,6 +16,7 @@
 
 namespace format_flexsections\output;
 
+use core_courseformat\base as course_format;
 use core_courseformat\output\section_renderer;
 use moodle_page;
 use section_info;
@@ -65,5 +66,24 @@ class renderer extends section_renderer {
      */
     public function section_title_without_link($section, $course) {
         return $this->render(course_get_format($course)->inplace_editable_render_section_name($section, false));
+    }
+
+    /**
+     * Get the course index drawer with placeholder.
+     *
+     * The default course index is loaded after the page is ready. Format plugins can override
+     * this method to provide an alternative course index.
+     *
+     * If the format is not compatible with the course index, this method will return an empty string.
+     *
+     * @param course_format $format the course format
+     * @return String the course index HTML.
+     */
+    public function course_index_drawer(course_format $format): ?String {
+        if ($format->uses_course_index()) {
+            include_course_editor($format);
+            return $this->render_from_template('core_courseformat/local/courseindex/drawer', []);
+        }
+        return '';
     }
 }

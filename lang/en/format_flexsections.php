@@ -22,17 +22,22 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['addsections'] = 'Add topic';
-$string['currentsection'] = 'This topic';
-$string['deletesection'] = 'Delete topic';
-$string['editsection'] = 'Edit topic';
-$string['editsectionname'] = 'Edit topic name';
-$string['hidefromothers'] = 'Hide topic';
-$string['newsectionname'] = 'New name for topic {$a}';
+$string['addsections'] = 'Add section';
+$string['backtocourse'] = 'Back to course \'{$a}\'';
+$string['backtosection'] = 'Back to \'{$a}\'';
+$string['currentsection'] = 'This section';
+$string['deletesection'] = 'Delete section';
+$string['displaycontent'] = 'Display content';
+$string['editsection'] = 'Edit section';
+$string['editsectionname'] = 'Edit section name';
+$string['hidefromothers'] = 'Hide section';
+$string['newsectionname'] = 'New name for section {$a}';
 $string['page-course-view-flexsections'] = 'Any course main page in Flexible sections format';
 $string['page-course-view-flexsections-x'] = 'Any course page in Flexible sections format';
 $string['pluginname'] = 'Flexible sections format';
 $string['privacy:metadata'] = 'The Flexible sections format plugin does not store any personal data.';
 $string['section0name'] = 'General';
-$string['sectionname'] = 'Topic';
-$string['showfromothers'] = 'Show topic';
+$string['sectionname'] = 'Section';
+$string['showcollapsed'] = 'Show as a link';
+$string['showexpanded'] = 'Show on the same page';
+$string['showfromothers'] = 'Show section';

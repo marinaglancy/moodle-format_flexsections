@@ -14,22 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace format_flexsections\output\courseformat\content;
-
-use core_courseformat\output\local\content\section as section_base;
-use stdClass;
+namespace format_flexsections\output\courseformat\content\section;
 
 /**
- * Contains the section controls output class.
+ * Contains the section header output class.
  *
  * @package   format_flexsections
  * @copyright 2022 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class section extends section_base {
-
-    /** @var \format_flexsections the course format */
-    protected $format;
+class header extends \core_courseformat\output\local\content\section\header {
 
     /**
      * Template name
@@ -38,34 +32,32 @@ class section extends section_base {
      * @return string
      */
     public function get_template_name(\renderer_base $renderer): string {
-        return 'format_flexsections/local/content/section';
+        return 'format_flexsections/local/content/section/header';
     }
 
     /**
      * Data exporter
      *
      * @param \renderer_base $output
-     * @return stdClass
+     * @return \stdClass
      */
-    public function export_for_template(\renderer_base $output): stdClass {
-        $format = $this->format;
+    public function export_for_template(\renderer_base $output): \stdClass {
 
         $data = parent::export_for_template($output);
 
-        // For sections that are displayed as a link do not print list of cms or controls.
-        $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
-            && $this->format->get_viewed_section() != $this->section->section;
-
-        if (!$this->format->get_section_number() && !$showaslink) {
-            $addsectionclass = $format->get_output_classname('content\\addsection');
-            $addsection = new $addsectionclass($format);
-            $data->numsections = $addsection->export_for_template($output);
-            $data->insertafter = true;
+        if ($this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
+            // Do not display the collapse/expand caret for sections that are meant to be shown on a separate page.
+            $data->headerdisplaymultipage = true;
+            if ($this->format->get_viewed_section() != $this->section->section) {
+                // If the section is displayed as a link and we are not on this section's page, display it as a link.
+                $data->title = $output->section_title($this->section, $this->format->get_course());
+            }
         }
 
-        if ($showaslink) {
-            $data->cmlist = [];
-            $data->cmcontrols = '';
+        if (!$this->section->section) {
+            // Do not make "General" section collapsible and also do not display the header.
+            $data->headerdisplaymultipage = true;
+            $data->title = '';
         }
 
         return $data;

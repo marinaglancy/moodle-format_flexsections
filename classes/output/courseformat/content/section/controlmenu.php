@@ -26,6 +26,7 @@ namespace format_flexsections\output\courseformat\content\section;
 
 use context_course;
 use core_courseformat\output\local\content\section\controlmenu as controlmenu_base;
+use section_info;
 
 /**
  * Base class to render a course section menu.
@@ -36,7 +37,7 @@ use core_courseformat\output\local\content\section\controlmenu as controlmenu_ba
  */
 class controlmenu extends controlmenu_base {
 
-    /** @var course_format the course format class */
+    /** @var \format_flexsections the course format class */
     protected $format;
 
     /** @var section_info the course section class */
@@ -67,11 +68,12 @@ class controlmenu extends controlmenu_base {
 
         $controls = [];
         if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
+            $markerurl = new \moodle_url($url);
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
-                $url->param('marker', 0);
+                $markerurl->param('marker', 0);
                 $highlightoff = get_string('highlightoff');
                 $controls['highlight'] = [
-                    'url' => $url,
+                    'url' => $markerurl,
                     'icon' => 'i/marked',
                     'name' => $highlightoff,
                     'pixattr' => ['class' => ''],
@@ -81,16 +83,41 @@ class controlmenu extends controlmenu_base {
                     ],
                 ];
             } else {
-                $url->param('marker', $section->section);
+                $markerurl->param('marker', $section->section);
                 $highlight = get_string('highlight');
                 $controls['highlight'] = [
-                    'url' => $url,
+                    'url' => $markerurl,
                     'icon' => 'i/marker',
                     'name' => $highlight,
                     'pixattr' => ['class' => ''],
                     'attr' => [
                         'class' => 'editing_highlight',
                         'data-action' => 'setmarker'
+                    ],
+                ];
+            }
+        }
+
+        if ($section->section && has_capability('moodle/course:update', $coursecontext)) {
+            $collapseurl = new \moodle_url($url, ['switchcollapsed' => $section->section]);
+            if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
+                $controls['collapsed'] = [
+                    'url' => $collapseurl,
+                    'icon' => 't/expanded',
+                    'name' => get_string('showexpanded', 'format_flexsections'),
+                    'pixattr' => ['class' => ''],
+                    'attr' => [
+                        'class' => 'editing_collapsed',
+                    ],
+                ];
+            } else {
+                $controls['collapsed'] = [
+                    'url' => $collapseurl,
+                    'icon' => 't/collapsed',
+                    'name' => get_string('showcollapsed', 'format_flexsections'),
+                    'pixattr' => ['class' => ''],
+                    'attr' => [
+                        'class' => 'editing_collapsed',
                     ],
                 ];
             }

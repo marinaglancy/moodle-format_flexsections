@@ -54,9 +54,9 @@ Feature: Sections can be edited and deleted in flexsections format
 
   @javascript
   Scenario: Inline edit section name in flexsections format
-    When I set the field "Edit topic name" in the "Topic 1" "section" to "Midterm evaluation"
+    When I set the field "Edit section name" in the "Topic 1" "section" to "Midterm evaluation"
     Then I should not see "Topic 1" in the "region-main" "region"
-    And "New name for topic" "field" should not exist
+    And "New name for section" "field" should not exist
     And I should see "Midterm evaluation" in the "Midterm evaluation" "section"
     And I am on "Course 1" course homepage
     And I should not see "Topic 1" in the "region-main" "region"
@@ -79,13 +79,13 @@ Feature: Sections can be edited and deleted in flexsections format
 
   @javascript
   Scenario: Adding sections at the end of a flexsections format
-    When I click on "Add topic" "link" in the "Topic 5" "section"
+    When I click on "Add section" "link" in the "Topic 5" "section"
     Then I should see "Topic 6" in the "Topic 6" "section"
     And I should see "Test choice name" in the "Topic 5" "section"
 
   @javascript
   Scenario: Adding sections between sections in flexsections format
-    When I click on "Add topic" "link" in the "Topic 4" "section"
+    When I click on "Add section" "link" in the "Topic 4" "section"
     Then I should see "Topic 6" in the "Topic 6" "section"
     And I should not see "Test choice name" in the "Topic 5" "section"
     And I should see "Test choice name" in the "Topic 6" "section"

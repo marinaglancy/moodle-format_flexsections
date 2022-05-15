@@ -14,58 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace format_flexsections\output\courseformat\content;
-
-use core_courseformat\output\local\content\section as section_base;
-use stdClass;
+namespace format_flexsections\output\courseformat\state;
 
 /**
- * Contains the section controls output class.
+ * Contains the ajax update section structure.
  *
  * @package   format_flexsections
  * @copyright 2022 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class section extends section_base {
+class section extends \core_courseformat\output\local\state\section {
 
-    /** @var \format_flexsections the course format */
+    /** @var \format_flexsections the course format class */
     protected $format;
 
     /**
-     * Template name
+     * Export this data so it can be used as state object in the course editor.
      *
-     * @param \renderer_base $renderer
-     * @return string
+     * @param \renderer_base $output typically, the renderer that's calling this function
+     * @return \stdClass data context for a mustache template
      */
-    public function get_template_name(\renderer_base $renderer): string {
-        return 'format_flexsections/local/content/section';
-    }
-
-    /**
-     * Data exporter
-     *
-     * @param \renderer_base $output
-     * @return stdClass
-     */
-    public function export_for_template(\renderer_base $output): stdClass {
-        $format = $this->format;
-
+    public function export_for_template(\renderer_base $output): \stdClass {
         $data = parent::export_for_template($output);
 
         // For sections that are displayed as a link do not print list of cms or controls.
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
             && $this->format->get_viewed_section() != $this->section->section;
-
-        if (!$this->format->get_section_number() && !$showaslink) {
-            $addsectionclass = $format->get_output_classname('content\\addsection');
-            $addsection = new $addsectionclass($format);
-            $data->numsections = $addsection->export_for_template($output);
-            $data->insertafter = true;
-        }
-
         if ($showaslink) {
             $data->cmlist = [];
-            $data->cmcontrols = '';
         }
 
         return $data;
