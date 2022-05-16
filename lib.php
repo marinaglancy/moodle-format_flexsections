@@ -71,7 +71,7 @@ class format_flexsections extends core_courseformat\base {
      *
      * Use section name is specified by user. Otherwise use default ("Topic #").
      *
-     * @param int|stdClass $section Section object from database or just field section.section
+     * @param int|stdClass|section_info $section Section object from database or just field section.section
      * @return string Display name that the course format prefers, e.g. "Topic 2"
      */
     public function get_section_name($section) {
@@ -91,7 +91,7 @@ class format_flexsections extends core_courseformat\base {
      * If the section number is not 0, the base implementation of course_format::get_default_section_name which uses
      * the string with the key = 'sectionname' from the course format's lang file + the section number will be used.
      *
-     * @param stdClass $section Section object from database or just field course_sections section
+     * @param stdClass|section_info $section Section object from database or just field course_sections section
      * @return string The default value for the section name.
      */
     public function get_default_section_name($section) {

@@ -25,7 +25,6 @@
 namespace format_flexsections\output\courseformat\content\section;
 
 use context_course;
-use core_courseformat\output\local\content\section\controlmenu as controlmenu_base;
 use section_info;
 
 /**
@@ -35,7 +34,7 @@ use section_info;
  * @copyright 2022 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class controlmenu extends controlmenu_base {
+class controlmenu extends \core_courseformat\output\local\content\section\controlmenu {
 
     /** @var \format_flexsections the course format class */
     protected $format;

@@ -17,6 +17,7 @@
 namespace format_flexsections\output\courseformat;
 
 use core_courseformat\external\get_state;
+use course_modinfo;
 use stdClass;
 
 /**
@@ -33,10 +34,8 @@ class content extends \core_courseformat\output\local\content {
 
     /**
      * @var bool Flexsections format has add section after each topic.
-     *
-     * The responsible for the buttons is core_courseformat\output\local\content\section.
      */
-    protected $hasaddsection = false;
+    protected $hasaddsection = true;
 
     /**
      * Template name for this exporter
@@ -84,5 +83,71 @@ class content extends \core_courseformat\output\local\content {
         }
 
         return $data;
+    }
+
+    /**
+     * Export sections array data.
+     *
+     * TODO: this is an exact copy of the parent function because get_sections_to_display() is private
+     *
+     * @param \renderer_base $output typically, the renderer that's calling this function
+     * @return array data context for a mustache template
+     */
+    protected function export_sections(\renderer_base $output): array {
+
+        $format = $this->format;
+        $course = $format->get_course();
+        $modinfo = $this->format->get_modinfo();
+
+        // Generate section list.
+        $sections = [];
+        $stealthsections = [];
+        $numsections = $format->get_last_section_number();
+        foreach ($this->get_sections_to_display($modinfo) as $sectionnum => $thissection) {
+            // The course/view.php check the section existence but the output can be called
+            // from other parts so we need to check it.
+            if (!$thissection) {
+                throw new \moodle_exception('unknowncoursesection', 'error',
+                    course_get_url($course), format_string($course->fullname));
+            }
+
+            $section = new $this->sectionclass($format, $thissection);
+
+            if ($sectionnum > $numsections) {
+                // Activities inside this section are 'orphaned', this section will be printed as 'stealth' below.
+                if (!empty($modinfo->sections[$sectionnum])) {
+                    $stealthsections[] = $section->export_for_template($output);
+                }
+                continue;
+            }
+
+            if (!$format->is_section_visible($thissection)) {
+                continue;
+            }
+
+            $sections[] = $section->export_for_template($output);
+        }
+        if (!empty($stealthsections)) {
+            $sections = array_merge($sections, $stealthsections);
+        }
+        return $sections;
+    }
+
+    /**
+     * Return an array of sections to display.
+     *
+     * This method is used to differentiate between display a specific section
+     * or a list of them.
+     *
+     * @param course_modinfo $modinfo the current course modinfo object
+     * @return \section_info[] an array of section_info to display
+     */
+    private function get_sections_to_display(course_modinfo $modinfo): array {
+        $viewedsection = $this->format->get_viewed_section();
+        return array_values(array_filter($modinfo->get_section_info_all(), function($s) use ($viewedsection) {
+            return (!$s->section) ||
+                (!$viewedsection && !$s->parent) ||
+                ($viewedsection && $s->section == $viewedsection);
+        }));
     }
 }

@@ -23,6 +23,7 @@
  */
 
 $string['addsections'] = 'Add section';
+$string['addsubsectionfor'] = 'Add subsection for \'{$a}\'';
 $string['backtocourse'] = 'Back to course \'{$a}\'';
 $string['backtosection'] = 'Back to \'{$a}\'';
 $string['currentsection'] = 'This section';
@@ -38,6 +39,6 @@ $string['pluginname'] = 'Flexible sections format';
 $string['privacy:metadata'] = 'The Flexible sections format plugin does not store any personal data.';
 $string['section0name'] = 'General';
 $string['sectionname'] = 'Section';
-$string['showcollapsed'] = 'Show as a link';
-$string['showexpanded'] = 'Show on the same page';
+$string['showcollapsed'] = 'Display as a link';
+$string['showexpanded'] = 'Display on the same page';
 $string['showfromothers'] = 'Show section';

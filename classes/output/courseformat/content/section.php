@@ -16,7 +16,6 @@
 
 namespace format_flexsections\output\courseformat\content;
 
-use core_courseformat\output\local\content\section as section_base;
 use stdClass;
 
 /**
@@ -26,7 +25,7 @@ use stdClass;
  * @copyright 2022 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class section extends section_base {
+class section extends \core_courseformat\output\local\content\section {
 
     /** @var \format_flexsections the course format */
     protected $format;
@@ -56,18 +55,55 @@ class section extends section_base {
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
             && $this->format->get_viewed_section() != $this->section->section;
 
-        if (!$this->format->get_section_number() && !$showaslink) {
-            $addsectionclass = $format->get_output_classname('content\\addsection');
-            $addsection = new $addsectionclass($format);
-            $data->numsections = $addsection->export_for_template($output);
-            $data->insertafter = true;
-        }
-
         if ($showaslink) {
             $data->cmlist = [];
             $data->cmcontrols = '';
         }
 
+        // Add subsections.
+        if (!$showaslink) {
+            $addsection = new addsection($format, $this->section);
+            $data->numsections = $addsection->export_for_template($output);
+            $data->insertafter = true;
+            $data->numsections->subsections = $this->section->section ? $this->get_subsections($output) : [];
+        }
+
         return $data;
+    }
+
+    /**
+     * Subsections (recursive)
+     *
+     * @param \renderer_base $output
+     * @return array
+     */
+    protected function get_subsections(\renderer_base $output): array {
+        $modinfo = $this->format->get_modinfo();
+        $data = [];
+        foreach ($modinfo->get_section_info_all() as $section) {
+            if ($section->parent == $this->section->section) {
+                $d = (array)((new static($this->format, $section))->export_for_template($output)) +
+                    $this->default_section_properties();
+                $data[] = (object)$d;
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Since we display sections nested the values from the parent can propagate in templates
+     *
+     * @return array
+     */
+    protected function default_section_properties(): array {
+        return [
+            'collapsemenu' => false, 'summary' => [],
+            'insertafter' => false, 'numsections' => false,
+            'availability' => [], 'restrictionlock' => false, 'hasavailability' => false,
+            'isstealth' => false, 'ishidden' => false, 'notavailable' => false, 'hiddenfromstudents' => false,
+            'controlmenu' => [], 'cmcontrols' => '',
+            'singleheader' => [], 'header' => [],
+            'cmsummary' => [], 'onlysummary' => false, 'cmlist' => [],
+        ];
     }
 }

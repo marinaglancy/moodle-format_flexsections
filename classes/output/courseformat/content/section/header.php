@@ -44,6 +44,7 @@ class header extends \core_courseformat\output\local\content\section\header {
     public function export_for_template(\renderer_base $output): \stdClass {
 
         $data = parent::export_for_template($output);
+        $data->indenttitle = false;
 
         if ($this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
             // Do not display the collapse/expand caret for sections that are meant to be shown on a separate page.
@@ -51,6 +52,7 @@ class header extends \core_courseformat\output\local\content\section\header {
             if ($this->format->get_viewed_section() != $this->section->section) {
                 // If the section is displayed as a link and we are not on this section's page, display it as a link.
                 $data->title = $output->section_title($this->section, $this->format->get_course());
+                $data->indenttitle = $this->title_needs_indenting();
             }
         }
 
@@ -60,6 +62,24 @@ class header extends \core_courseformat\output\local\content\section\header {
             $data->title = '';
         }
 
+        $data->headerdisplaymultipage = !empty($data->headerdisplaymultipage);
         return $data;
+    }
+
+    /**
+     * Title needs indenting
+     *
+     * Title displayed as a link needs indenting if some siblings are collpased and some are not.
+     *
+     * @return bool
+     */
+    protected function title_needs_indenting(): bool {
+        $hassections = [FORMAT_FLEXSECTIONS_COLLAPSED => false, FORMAT_FLEXSECTIONS_EXPANDED => 0];
+        foreach ($this->format->get_modinfo()->get_section_info_all() as $section) {
+            if ($section->parent == $this->section->parent) {
+                $hassections[$section->collapsed] = true;
+            }
+        }
+        return $hassections[FORMAT_FLEXSECTIONS_EXPANDED] && $hassections[FORMAT_FLEXSECTIONS_COLLAPSED];
     }
 }
