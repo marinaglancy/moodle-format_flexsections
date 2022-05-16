@@ -24,8 +24,14 @@
 
 namespace format_flexsections\output\courseformat\content\section;
 
+use action_menu;
+use action_menu_link_secondary;
 use context_course;
+use moodle_url;
+use pix_icon;
+use renderer_base;
 use section_info;
+use stdClass;
 
 /**
  * Base class to render a course section menu.
@@ -122,6 +128,20 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             }
         }
 
+        if ($section->parent && has_capability('moodle/course:update', $coursecontext)) {
+            $collapseurl = new \moodle_url($url, ['mergeup' => $section->section]);
+            $controls['mergeup'] = [
+                'url' => $collapseurl,
+                'icon' => 'mergeup',
+                'iconcomponent' => 'format_flexsections',
+                'name' => get_string('mergeup', 'format_flexsections'),
+                'pixattr' => ['class' => ''],
+                'attr' => [
+                    'class' => 'editing_mergeup',
+                ],
+            ];
+        }
+
         $parentcontrols = parent::section_control_items();
 
         // If the edit key exists, we are going to insert our controls after it.
@@ -141,5 +161,52 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         } else {
             return array_merge($controls, $parentcontrols);
         }
+    }
+
+    /**
+     * Export this data so it can be used as the context for a mustache template.
+     *
+     * TODO Almost exact copy of the parent method because iconcomponent can not be specified.
+     *
+     * @param renderer_base $output typically, the renderer that's calling this function
+     * @return array data context for a mustache template
+     */
+    public function export_for_template(\renderer_base $output): stdClass {
+
+        $section = $this->section;
+
+        $controls = $this->section_control_items();
+
+        if (empty($controls)) {
+            return new stdClass();
+        }
+
+        // Convert control array into an action_menu.
+        $menu = new action_menu();
+        $icon = $output->pix_icon('i/menu', get_string('edit'));
+        $menu->set_menu_trigger($icon, 'btn btn-icon d-flex align-items-center justify-content-center');
+        $menu->attributes['class'] .= ' section-actions';
+        foreach ($controls as $value) {
+            $url = empty($value['url']) ? '' : $value['url'];
+            $icon = empty($value['icon']) ? '' : $value['icon'];
+            $name = empty($value['name']) ? '' : $value['name'];
+            $attr = empty($value['attr']) ? [] : $value['attr'];
+            $class = empty($value['pixattr']['class']) ? '' : $value['pixattr']['class'];
+            $al = new action_menu_link_secondary(
+                new moodle_url($url),
+                new pix_icon($icon, '', $value['iconcomponent'] ?? null, ['class' => "smallicon " . $class]),
+                $name,
+                $attr
+            );
+            $menu->add($al);
+        }
+
+        $data = (object)[
+            'menu' => $output->render($menu),
+            'hasmenu' => true,
+            'id' => $section->id,
+        ];
+
+        return $data;
     }
 }

@@ -32,6 +32,7 @@ $string['displaycontent'] = 'Display content';
 $string['editsection'] = 'Edit section';
 $string['editsectionname'] = 'Edit section name';
 $string['hidefromothers'] = 'Hide section';
+$string['mergeup'] = 'Merge with parent';
 $string['newsectionname'] = 'New name for section {$a}';
 $string['page-course-view-flexsections'] = 'Any course main page in Flexible sections format';
 $string['page-course-view-flexsections-x'] = 'Any course page in Flexible sections format';

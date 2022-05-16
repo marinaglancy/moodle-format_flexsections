@@ -1107,3 +1107,12 @@ function format_flexsections_inplace_editable($itemtype, $itemid, $newvalue) {
         return course_get_format($section->course)->inplace_editable_update_section_name($section, $itemtype, $newvalue);
     }
 }
+
+/**
+ * Get icon mapping for font-awesome.
+ */
+function format_flexsections_get_fontawesome_icon_map() {
+    return [
+        'format_flexsections:mergeup' => 'fa-level-up',
+    ];
+}
