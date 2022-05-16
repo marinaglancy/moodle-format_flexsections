@@ -54,7 +54,8 @@ class format_flexsections extends core_courseformat\base {
      * @return bool
      */
     public function uses_course_index() {
-        return true;
+        // TODO: course index hardcodes too many things, it needs to be re-written for format_flexsections.
+        return false;
     }
 
     /**
