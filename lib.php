@@ -163,7 +163,7 @@ class format_flexsections extends core_courseformat\base {
                 return $url;
             }
             // Find the parent (or grandparent) page that is displayed on separate page.
-            $url->param('sectionid', $this->find_collapsed_parent($section->parent, true));
+            $url->param('section', $this->find_collapsed_parent($section->parent));
             $url->set_anchor('section-'.$sectionno);
             return $url;
         }
