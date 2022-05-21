@@ -37,8 +37,16 @@ class course extends \core_courseformat\output\local\state\course {
     public function export_for_template(\renderer_base $output): \stdClass {
         $data = parent::export_for_template($output);
 
-        $data->sectionlist = array_values(array_filter($data->sectionlist,
-            [$this->format, 'is_section_displayed_on_current_page'], ARRAY_FILTER_USE_KEY));
+        $viewedsection = $this->format->get_viewed_section();
+        if ($viewedsection) {
+            $data->sectionlist = [$this->format->get_section($viewedsection)->id];
+        } else {
+            $data->sectionlist = array_values(array_filter($data->sectionlist,
+                function($sectionid) {
+                    $section = $this->format->get_modinfo()->get_section_info_by_id($sectionid);
+                    return $section && !$section->parent;
+                }));
+        }
 
         return $data;
     }

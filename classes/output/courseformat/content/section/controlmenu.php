@@ -138,11 +138,28 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
                 'pixattr' => ['class' => ''],
                 'attr' => [
                     'class' => 'editing_mergeup',
+                    'data-action-flexsections' => 'mergeup',
+                ],
+            ];
+        }
+
+        if (has_capability('moodle/course:update', $coursecontext)) {
+            $moveurl = new moodle_url('#');
+            $controls['moveflexsections'] = [
+                'url' => $moveurl,
+                'icon' => 'i/dragdrop',
+                'name' => get_string('move', 'moodle'),
+                'pixattr' => ['class' => ''],
+                'attr' => [
+                    'data-action-flexsections' => 'move',
+                    'data-id' => $section->id,
+                    'data-ctxid' => context_course::instance($this->format->get_courseid())->id,
                 ],
             ];
         }
 
         $parentcontrols = parent::section_control_items();
+        unset($parentcontrols['movesection'], $parentcontrols['moveup'], $parentcontrols['movedown']);
 
         // If the edit key exists, we are going to insert our controls after it.
         if (array_key_exists("edit", $parentcontrols)) {

@@ -444,6 +444,15 @@ class format_flexsections extends core_courseformat\base {
             return null;
         }
 
+        $mergeup = optional_param('mergeup', null, PARAM_INT);
+        if ($mergeup && has_capability('moodle/course:update', context_course::instance($this->courseid))) {
+            require_sesskey();
+            $section = $this->get_section($mergeup, MUST_EXIST);
+            $this->mergeup_section($section);
+            $url = course_get_url($this->courseid, $section->parent);
+            redirect($url);
+        }
+
         // For show/hide actions call the parent method and return the new content for .section_availability element.
         $rv = parent::section_action($section, $action, $sr);
         $renderer = $PAGE->get_renderer('format_flexsections');
@@ -536,7 +545,13 @@ class format_flexsections extends core_courseformat\base {
      */
     public function get_viewed_section() {
         if ($this->on_course_view_page()) {
-            return $this->get_caller_page_url()->get_param('section');
+            if ($s = $this->get_caller_page_url()->get_param('section')) {
+                return $s;
+            }
+            $sid = $this->get_caller_page_url()->get_param('sectionid');
+            if ($sid && ($section = $this->get_modinfo()->get_section_info_by_id($sid))) {
+                return $section->section;
+            }
         }
         return 0;
     }
@@ -593,15 +608,24 @@ class format_flexsections extends core_courseformat\base {
         }
         if ($this->on_course_view_page()) {
             $context = context_course::instance($this->courseid);
+            $currentsectionnum = $this->get_viewed_section();
+
+            // Fix the section argument.
+            if ($currentsectionnum) {
+                $sectioninfo = $this->get_modinfo()->get_section_info($currentsectionnum);
+                if (!$sectioninfo || !$sectioninfo->collapsed) {
+                    redirect(course_get_url($this->get_course(), $sectioninfo ? $this->find_collapsed_parent($sectioninfo) : null));
+                }
+            }
 
             if (!$this->is_section_real_available($this->get_viewed_section())) {
                 throw new moodle_exception('nopermissiontoviewpage');
             }
 
-            if ($currentsectionnum = $this->get_viewed_section()) {
+            if ($currentsectionnum) {
                 navigation_node::override_active_url(new moodle_url('/course/view.php',
                     array('id' => $this->courseid,
-                        'sectionid' => $this->get_section($currentsectionnum)->id)));
+                        'section' => $currentsectionnum)));
             }
 
             // If requested, create new section and redirect to course view page.
@@ -707,7 +731,7 @@ class format_flexsections extends core_courseformat\base {
      * @param null|int|section_info $before
      * @return int new section number
      */
-    protected function move_section($section, $parent, $before = null) {
+    public function move_section($section, $parent, $before = null) {
         global $DB;
         $section = $this->get_section($section);
         $parent = $this->get_section($parent);

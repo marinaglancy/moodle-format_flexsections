@@ -32,11 +32,6 @@ $format = course_get_format($course);
 $course = $format->get_course();
 $context = context_course::instance($course->id);
 
-if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context) && confirm_sesskey()) {
-    $course->marker = $marker;
-    course_set_marker($course->id, $marker);
-}
-
 // Make sure section 0 is created.
 course_create_sections_if_missing($course, 0);
 
@@ -51,3 +46,4 @@ echo $renderer->render($widget);
 
 // Include course format js module.
 $PAGE->requires->js('/course/format/flexsections/format.js');
+$PAGE->requires->js_call_amd('format_flexsections/format', 'init');

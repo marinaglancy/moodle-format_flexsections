@@ -16,9 +16,13 @@
 
 namespace format_flexsections\output;
 
+use action_link;
 use core_courseformat\base as course_format;
 use core_courseformat\output\section_renderer;
+use format_flexsections_edit_control;
+use html_writer;
 use moodle_page;
+use pix_icon;
 use section_info;
 use stdClass;
 
