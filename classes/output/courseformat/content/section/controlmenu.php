@@ -143,7 +143,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             ];
         }
 
-        if (has_capability('moodle/course:update', $coursecontext)) {
+        if (has_capability('moodle/course:update', $coursecontext) && $section->section) {
             $moveurl = new moodle_url('#');
             $controls['moveflexsections'] = [
                 'url' => $moveurl,

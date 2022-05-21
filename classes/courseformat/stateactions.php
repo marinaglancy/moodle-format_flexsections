@@ -40,32 +40,38 @@ class stateactions extends  \core_courseformat\stateactions {
      */
     public function section_move(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
                                  ?int $targetsectionid = null, ?int $targetcmid = null): void {
-        // Validate target elements.
-        if (!$targetsectionid) {
-            throw new moodle_exception("Action cm_move requires targetsectionid");
-        }
-
         $this->validate_sections($course, $ids, __FUNCTION__);
 
         $coursecontext = context_course::instance($course->id);
         require_capability('moodle/course:movesections', $coursecontext);
 
-        $modinfo = get_fast_modinfo($course);
-
-        // Target section.
-        $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
-        $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
-
-        $affectedsections = [$targetsection->section => true];
 
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
+        $modinfo = $format->get_modinfo();
 
+        // Target section.
+        $affectedsections = [];
+        if ($targetsectionid > 0) {
+            $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
+            $before = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
+            $parent = $before->parent;
+            $affectedsections[$before->section] = true;
+        } else if ($targetsectionid < 0) {
+            $this->validate_sections($course, [-$targetsectionid], __FUNCTION__);
+            $before = null;
+            $parent = $modinfo->get_section_info_by_id(-$targetsectionid, MUST_EXIST);
+        } else {
+            $before = 0;
+            $parent = 0;
+        }
+
+        // Move sections.
         $sections = $this->get_section_info($modinfo, $ids);
         foreach ($sections as $section) {
             $affectedsections[$section->section] = true;
-            if ($format->can_move_section_to($section, $targetsection->parent, $targetsection)) {
-                $format->move_section($section, $targetsection->parent, $targetsection);
+            if ($format->can_move_section_to($section, $parent, $before)) {
+                $format->move_section($section, $parent, $before);
             }
         }
 

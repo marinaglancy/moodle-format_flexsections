@@ -36,13 +36,23 @@ class section extends \core_courseformat\output\local\state\section {
      */
     public function export_for_template(\renderer_base $output): \stdClass {
         $data = parent::export_for_template($output);
+        $data->parent = $this->section->parent;
+        $data->parentid = $this->section->parent ? $this->format->get_modinfo()->get_section_info($this->section->parent)->id : 0;
 
         // For sections that are displayed as a link do not print list of cms or controls.
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
             && $this->format->get_viewed_section() != $this->section->section;
+        $data->children = [];
         if ($showaslink) {
             $data->cmlist = [];
+        } else if ($this->section->section) {
+            foreach ($this->format->get_modinfo()->get_section_info_all() as $s) {
+                if ($s->parent == $this->section->section) {
+                    $data->children[] = (new static($this->format, $s))->export_for_template($output);
+                }
+            }
         }
+        $data->haschildren = !empty($data->children);
 
         return $data;
     }

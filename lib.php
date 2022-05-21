@@ -1141,3 +1141,17 @@ function format_flexsections_get_fontawesome_icon_map() {
         'format_flexsections:mergeup' => 'fa-level-up',
     ];
 }
+
+function format_flexsections_output_fragment_section_move_target($args) {
+    /** @var context_course $context */
+    $context = $args['context'];
+    /** @var format_flexsections $format */
+    $format = ($context instanceof context_course) ? course_get_format($context->instanceid) : null;
+    if (!$format ||
+            $format->get_course()->format !== 'flexsections' ||
+            !($section = $format->get_modinfo()->get_section_info_by_id($args['sid'])) ||
+            !$section->section) {
+        return '';
+    }
+    return 'hello: '.print_r($args, true);
+}
