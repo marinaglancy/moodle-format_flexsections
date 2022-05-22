@@ -99,7 +99,7 @@ const showMoveSectionPopup = (target) => {
     const exporter = reactive.getExporter();
     const data = exporter.course(reactive.state);
     data.sectiontitle = sectionInfo.title;
-    console.log(data);
+    //console.log(data);
 
     if (data.sections.length === 1 && `${data.sections[0].singlesection}` === '1') {
         // We are on a page of a collapsed section. Do not show "move before" and "move after" controls.

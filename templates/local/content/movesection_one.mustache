@@ -54,7 +54,7 @@
                data-parents="{{parents}}"
                data-after="{{aftersectionid}}"
             >
-                {{#str}} movebeforesection, format_flexsections, {{{title}}} {{/str}} - {{parents}} - {{aftersectionid}}
+                {{#str}} movebeforesection, format_flexsections, {{{title}}} {{/str}}
             </a>
         </div>
     {{/singlesection}}
@@ -107,7 +107,6 @@
                     {{^haschildren}}
                         {{#str}} moveassubsection, format_flexsections, {{{title}}} {{/str}}
                     {{/haschildren}}
-                    - {{parents}},{{id}} - {{lastchildid}}
                 </a>
             </li>
         </ul>
