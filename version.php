@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2020051101;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2018051700;        // Requires this Moodle 3.5 or above.
-$plugin->release   = "3.5.2";
+$plugin->version   = 2022052000;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires  = 2022041900.00;        // Requires this Moodle 3.5 or above.
+$plugin->release   = "4.0.0";
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->component = 'format_flexsections';    // Full name of the plugin (used for diagnostics).
-$plugin->supported = [35, 311]; // Moodle 3.5 - 3.11 are supported. Moodle 4.0 is NOT supported!
+$plugin->supported = [400, 400];

@@ -62,10 +62,12 @@ Feature: Using course in flexsections format
     And I should not see "Second module"
 
   Scenario: Collapsing section in flexsections format
+    Given the following config values are set as admin:
+      | unaddableblocks | | theme_boost|
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu
     And I click on "Delete Recent activity block" "link"
-    And I press "Yes"
+    And I click on "Delete" "button" in the "Delete block?" "dialogue"
     When I click on "Show collapsed" "link" in the "li#section-2" "css_element"
     And I log out
     And I log in as "student1"
@@ -82,13 +84,15 @@ Feature: Using course in flexsections format
     And I should see "Second module" in the "Navigation" "block"
 
   Scenario: Collapsing section with subsections in flexsections format
+    Given the following config values are set as admin:
+      | unaddableblocks | | theme_boost|
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu
     And I click on "Delete Recent activity block" "link"
-    And I press "Yes"
+    And I click on "Delete" "button" in the "Delete block?" "dialogue"
     And I open the "Upcoming events" blocks action menu
     And I click on "Delete Upcoming events block" "link"
-    And I press "Yes"
+    And I click on "Delete" "button" in the "Delete block?" "dialogue"
     When I click on "Show collapsed" "link" in the "li#section-1" "css_element"
     And I log out
     And I log in as "student1"
@@ -109,13 +113,15 @@ Feature: Using course in flexsections format
     And I should see "Second module" in the "Navigation" "block"
 
   Scenario: Merging subsection in flexsections format
+    Given the following config values are set as admin:
+      | unaddableblocks | | theme_boost|
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu
     And I click on "Delete Recent activity block" "link"
-    And I press "Yes"
+    And I click on "Delete" "button" in the "Delete block?" "dialogue"
     Given I open the "Upcoming events" blocks action menu
     And I click on "Delete Upcoming events block" "link"
-    And I press "Yes"
+    And I click on "Delete" "button" in the "Delete block?" "dialogue"
     When I click on "Merge with parent" "link" in the "li#section-2" "css_element"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
     Then I should see "Topic 1" in the "region-main" "region"

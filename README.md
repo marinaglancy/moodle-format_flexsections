@@ -1,6 +1,11 @@
 moodle-format_flexsections
 ==========================
 
+Version 4.0.0
+-------------
+
+- Support for Moodle 4.0, however UI remains the same as in previous versions
+
 Version 3.5.2
 -------------
 

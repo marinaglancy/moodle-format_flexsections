@@ -1,7 +1,7 @@
 .format-flexsections .course-content ul.flexsections {
     margin: 0;
     padding: 0;
-    list-style: none !important;
+    list-style: none !important; /* stylelint-disable-line declaration-no-important */
 }
 .format-flexsections .course-content ul.flexsections li.section {
     padding: 1rem 0;

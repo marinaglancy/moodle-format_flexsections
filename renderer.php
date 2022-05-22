@@ -296,11 +296,11 @@ class format_flexsections_renderer extends core_courseformat\output\section_rend
         $o = '';
         if (!$section->visible) {
             if ($canviewhidden) {
-                $o .= $this->courserenderer->availability_info(get_string('hiddenfromstudents'), 'ishidden');
+                $o .= $this->availability_info(get_string('hiddenfromstudents'), 'ishidden');
             } else {
                 // We are here because of the setting "Hidden sections are shown in collapsed form".
                 // Student can not see the section contents but can see its name.
-                $o .= $this->courserenderer->availability_info(get_string('notavailable'), 'ishidden');
+                $o .= $this->availability_info(get_string('notavailable'), 'ishidden');
             }
         } else if (!$section->uservisible) {
             if ($section->availableinfo) {
@@ -308,7 +308,7 @@ class format_flexsections_renderer extends core_courseformat\output\section_rend
                 // so there is definitely something to print.
                 $formattedinfo = \core_availability\info::format_info(
                     $section->availableinfo, $section->course);
-                $o .= $this->courserenderer->availability_info($formattedinfo, 'isrestricted');
+                $o .= $this->availability_info($formattedinfo, 'isrestricted');
             }
         } else if ($canviewhidden && !empty($CFG->enableavailability)) {
             // Check if there is an availability restriction.
@@ -317,10 +317,39 @@ class format_flexsections_renderer extends core_courseformat\output\section_rend
             if ($fullinfo) {
                 $formattedinfo = \core_availability\info::format_info(
                     $fullinfo, $section->course);
-                $o .= $this->courserenderer->availability_info($formattedinfo, 'isrestricted isfullinfo');
+                $o .= $this->availability_info($formattedinfo, 'isrestricted isfullinfo');
             }
         }
         return $o;
+    }
+
+    /**
+     * Displays availability info for a course section or course module
+     *
+     * @param string $text
+     * @param string $additionalclasses
+     * @return string
+     */
+    public function availability_info($text, $additionalclasses = '') {
+
+        $data = ['text' => $text, 'classes' => $additionalclasses];
+        $additionalclasses = array_filter(explode(' ', $additionalclasses));
+
+        if (in_array('ishidden', $additionalclasses)) {
+            $data['ishidden'] = 1;
+
+        } else if (in_array('isstealth', $additionalclasses)) {
+            $data['isstealth'] = 1;
+
+        } else if (in_array('isrestricted', $additionalclasses)) {
+            $data['isrestricted'] = 1;
+
+            if (in_array('isfullinfo', $additionalclasses)) {
+                $data['isfullinfo'] = 1;
+            }
+        }
+
+        return $this->render_from_template('core/availability_info', $data);
     }
 
     /**

@@ -26,6 +26,7 @@ use testable_course_edit_form;
 /**
  * format_flexsections related unit tests
  *
+ * @covers     \format_flexsections
  * @package    format_flexsections
  * @copyright  2020 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
