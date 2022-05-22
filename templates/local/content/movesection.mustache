@@ -25,38 +25,51 @@
         "sectiontitle": "Section title",
         "sections": [
             {
-                "title": "General",
+                "title": "Section 1",
                 "id": 42,
                 "number": 1,
                 "sectionurl": "#",
-                "indexcollapsed": 0
+                "haschildren": 1,
+                "children": [
+                    {
+                        "title": "Section 2",
+                        "id": "44",
+                        "number": "2",
+                        "sectionurl": "#",
+                        "haschildren": 0,
+                        "children": []
+                    }
+                ]
             },
             {
-                "title": "City of God or Cidade de Deus",
+                "title": "Section 3",
                 "id": "43",
-                "number": "2",
+                "number": "3",
                 "sectionurl": "#",
-                "indexcollapsed": 1
+                "haschildren": 0,
+                "children": []
             }
         ]
     }
 
 }}
-<!--<p data-for="sectionname">{{#str}} movefull, moodle, {{sectiontitle}} {{/str}}:</p>-->
-<ul class="collapse-list list-unstyled ml-3" id="destination-selector" role="tree">
+<p data-for="sectionname">{{#str}} movefull, moodle, {{sectiontitle}} {{/str}}:</p>
+<div class="collapse-list" id="destination-selector" role="tree">
     {{#sections}}
         {{> format_flexsections/local/content/movesection_one }}
     {{/sections}}
-    <li>
-        <a href="#"
-           class="collapse-list-link text-truncate"
-           data-for="section"
-           data-id="0"
-           data-number="0"
-           data-parentid="0"
-        >
-            To the end
-        </a>
-    </li>
-
-</ul>
+    {{^singlesectionmode}}
+        <div>
+            <a href="#"
+               class="collapse-list-link text-truncate"
+               data-for="section"
+               data-id="0"
+               data-number="0"
+               data-parentid="0"
+               data-after="{{lastchildid}}"
+            >
+                {{#str}} movesectiontotheend, format_flexsections {{/str}}
+            </a>
+        </div>
+    {{/singlesectionmode}}
+</div>

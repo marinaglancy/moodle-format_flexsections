@@ -53,6 +53,7 @@ class section extends \core_courseformat\output\local\state\section {
             }
         }
         $data->haschildren = !empty($data->children);
+        $data->singlesection = (int)($this->section->collapsed && $this->section->section == $this->format->get_viewed_section());
 
         return $data;
     }

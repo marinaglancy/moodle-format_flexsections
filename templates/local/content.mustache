@@ -175,14 +175,38 @@
     </div>
 {{/backtosection}}
 
-{{< core_courseformat/local/content }}
-
-    {{$ core_courseformat/local/content/section }}
-        {{> format_flexsections/local/content/section }}
-    {{/ core_courseformat/local/content/section }}
-
-    {{$ core_courseformat/local/content/addsection }}
+<div id="{{uniqid}}-course-format">
+    <h2 class="accesshide">{{{title}}}</h2>
+    {{{completionhelp}}}
+    <ul class="{{format}}" data-for="course_sectionlist">
+        {{#initialsection}}
+            {{> format_flexsections/local/content/section }}
+        {{/initialsection}}
+        {{#sections}}
+            {{> format_flexsections/local/content/section }}
+        {{/sections}}
+    </ul>
+    {{#hasnavigation}}
+        <div class="single-section">
+            {{#sectionnavigation}}
+                {{> format_flexsections/local/content/section }}
+            {{/sectionnavigation}}
+            <ul class="{{format}}">
+                {{#singlesection}}
+                    {{> format_flexsections/local/content/section }}
+                {{/singlesection}}
+            </ul>
+            {{#sectionselector}}
+                {{> format_flexsections/local/content/section }}
+            {{/sectionselector}}
+        </div>
+    {{/hasnavigation}}
+    {{#numsections}}
         {{> format_flexsections/local/content/addsection }}
-    {{/ core_courseformat/local/content/addsection }}
-
-{{/ core_courseformat/local/content }}
+    {{/numsections}}
+</div>
+{{#js}}
+    require(['format_flexsections/local/content'], function(component) {
+        component.init('{{uniqid}}-course-format', {}, {{sectionreturn}});
+    });
+{{/js}}

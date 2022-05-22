@@ -43,43 +43,74 @@
 
 }}
 {{#number}}
-    <li>
-        <a href="#"
-           class="collapse-list-link text-truncate"
-           data-for="section"
-           data-id="{{id}}"
-           data-number="{{number}}"
-           data-parentid="{{parentid}}"
+    {{^singlesection}}
+        <div>
+            <a href="#{{id}}"
+               class="collapse-list-link text-truncate"
+               data-for="section"
+               data-id="{{id}}"
+               data-number="{{number}}"
+               data-parentid="{{parentid}}"
+               data-parents="{{parents}}"
+               data-after="{{aftersectionid}}"
+            >
+                {{#str}} movebeforesection, format_flexsections, {{{title}}} {{/str}} - {{parents}} - {{aftersectionid}}
+            </a>
+        </div>
+    {{/singlesection}}
+    <div class="collapse-list-item d-flex p-0" id="movemodalsection{{number}}">
+        {{^singlesection}}
+        <a data-toggle="collapse"
+           href="#movemodalcollapse{{number}}"
+           aria-expanded="{{#contentcollapsed}}false{{/contentcollapsed}}{{^contentcollapsed}}true{{/contentcollapsed}}"
+           aria-controls="movemodalcollapse{{number}}"
+           class="collapse-list-link icons-collapse-expand {{#contentcollapsed}}collapsed{{/contentcollapsed}}"
         >
-            Before '{{{title}}}'
+                <span class="collapsed-icon icon-no-margin mr-1"
+                      data-toggle="tooltip" title="{{#str}} expand, core {{/str}}">
+                    {{#pix}} t/collapsed, core {{/pix}}
+                    <span class="sr-only">{{#str}} expand, core {{/str}}</span>
+                </span>
+            <span class="expanded-icon icon-no-margin mr-1"
+                  data-toggle="tooltip" title="{{#str}} collapse, core {{/str}}">
+                    {{#pix}} t/expanded, core {{/pix}}
+                <span class="sr-only">{{#str}} collapse, core {{/str}}</span>
+                </span>
         </a>
-    </li>
-    <li>
+        {{/singlesection}}
         {{{title}}}
-        <ul class="list-unstyled ml-3">
+    </div>
+    <div id="movemodalcollapse{{number}}"
+         class="collapse-list-item-content collapse {{^contentcollapsed}}show{{/contentcollapsed}} pl-3"
+         aria-labelledby="movemodalsection{{number}}"
+         role="group"
+    >
+        <ul class="unlist">
             {{#haschildren}}
                 {{#children}}
                         {{> format_flexsections/local/content/movesection_one }}
                 {{/children}}
             {{/haschildren}}
             <li>
-                <a href="#"
+                <a href="#-{{id}}"
                    class="collapse-list-link text-truncate"
                    data-for="section"
                    data-id="-{{id}}"
                    data-number="{{number}}"
-                   data-parentid="{{parentid}}"
+                   data-parentid="{{id}}"
+                   data-parents="{{parents}},{{id}}"
+                   data-after="{{lastchildid}}"
                 >
                     {{#haschildren}}
-                        As the last subsection of '{{{title}}}'
+                        {{#str}} moveendofsection, format_flexsections, {{{title}}} {{/str}}
                     {{/haschildren}}
                     {{^haschildren}}
-                        As a subsection of '{{{title}}}'
+                        {{#str}} moveassubsection, format_flexsections, {{{title}}} {{/str}}
                     {{/haschildren}}
+                    - {{parents}},{{id}} - {{lastchildid}}
                 </a>
             </li>
-
         </ul>
-    </li>
+    </div>
 {{/number}}
 

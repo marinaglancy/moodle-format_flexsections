@@ -29,6 +29,11 @@ import Templates from "core/templates";
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 //import ContentTree from "../../../amd/src/local/courseeditor/contenttree";
 import Pending from "core/pending";
+//import DefaultMutations from 'core_courseformat/local/courseeditor/mutations';
+//import DefaultStateManager from 'core/local/reactive/stateManager';
+//import {Reactive} from "core/reactive";
+
+/* eslint-disable no-console */
 
 const SELECTORS = {
     SECTION_MERGEUP: 'li.section a[data-action-flexsections="mergeup"]',
@@ -40,6 +45,16 @@ const SELECTORS = {
  * Initialize module
  */
 export const init = () => {
+    const reactive = getCurrentCourseEditor();
+    //reactive.stateManager = new FlexsectionsStateManager(reactive.eventDispatch, reactive.target);
+    const myput = (stateManager, updateName, fields) => {
+        //console.log('__myput__ '+updateName);
+        //console.log(stateManager);
+        //console.log(fields);
+        stateManager.defaultPut(stateManager, updateName, fields);
+    };
+    reactive.stateManager.addUpdateTypes({"put": myput});
+
     document.addEventListener('click', e => {
         const mergeupElement = e.target.closest(SELECTORS.SECTION_MERGEUP);
         if (mergeupElement) {
@@ -51,7 +66,7 @@ export const init = () => {
         const moveElement = e.target.closest(SELECTORS.SECTION_MOVE);
         if (moveElement) {
             e.preventDefault();
-            moveSection(moveElement);
+            showMoveSectionPopup(moveElement);
             return;
         }
     });
@@ -77,48 +92,60 @@ const confirmMerge = (target) => {
     }).fail(Notification.exception);
 };
 
-const moveSection = (target) => {
-    /* eslint-disable no-console */
-    console.log(target);
-    console.log(target.getAttribute('data-ctxid'));
+const showMoveSectionPopup = (target) => {
     const reactive = getCurrentCourseEditor();
-    console.log(reactive);
     const sectionId = target.getAttribute('data-id');
     const sectionInfo = reactive.get('section', sectionId);
-    console.log(sectionInfo);
     const exporter = reactive.getExporter();
     const data = exporter.course(reactive.state);
+    data.sectiontitle = sectionInfo.title;
     console.log(data);
+
+    if (data.sections.length === 1 && `${data.sections[0].singlesection}` === '1') {
+        // We are on a page of a collapsed section. Do not show "move before" and "move after" controls.
+        data.singlesectionmode = 1;
+        data.sections[0].contentcollapsed = false;
+    }
+    const buildParents = (sections, parents) => {
+        for (var i in sections) {
+            sections[i].parents = parents;
+            sections[i].aftersectionid = (i>0) ? sections[i-1].id : 0;
+            buildParents(sections[i].children, parents + ',' + sections[i].id);
+            sections[i].lastchildid = sections[i].children.length ? sections[i].children[sections[i].children.length - 1].id : 0;
+        }
+    };
+    buildParents(data.sections, '');
+    data.lastchildid = data.sections.length ? data.sections[data.sections.length - 1].id : 0;
+
     ModalFactory.create({
         type: ModalFactory.types.CANCEL,
         title: getString('movecoursesection', 'core'),
-        //body: Templates.render('format_flexsections/local/content/movesection', data),
         large: true,
         buttons: {cancel: getString('closebuttontitle', 'core')},
         removeOnClose: true,
     })
         .then(modal => {
-            // Fragment.loadFragment('format_flexsections', 'section_move_target', target.getAttribute('data-ctxid'),
-            //         {sid: sectionId}).done((html, js) => {
-            //     modal.setBody(html);
-            //     Templates.runTemplateJS(js);
-            // });
             Templates.render('format_flexsections/local/content/movesection', data).
                 then((body) => {
                     modal.setBody(body);
-                    setupMoveSection(reactive, modal, modal.getBody()[0], sectionId);
+                    setupMoveSection(reactive, modal, modal.getBody()[0], sectionId, data);
             });
             modal.show();
             return modal;
         });
 };
 
-const setupMoveSection = (reactive, modal, modalBody, sectionId, element = null) => {
-    // Disable current element and section zero.
-    // const currentElement = modalBody.querySelector(`${SELECTORS.SECTIONLINK}[data-id='${sectionId}']`);
-    // _disableLink(currentElement);
-    // const generalSection = modalBody.querySelector(`${SELECTORS.SECTIONLINK}[data-number='0']`);
-    // _disableLink(generalSection);
+const setupMoveSection = (reactive, modal, modalBody, sectionId, data, element = null) => {
+
+    // Disable moving before or after itself or under one of its own children.
+    const links = modalBody.querySelectorAll(`${SELECTORS.SECTIONLINK}`);
+    for (let i = 0; i < links.length; ++i) {
+        const re = new RegExp(`,${sectionId},`,"g");
+        if (links[i].getAttribute('data-id') === `${sectionId}` || links[i].getAttribute('data-after') === `${sectionId}` ||
+            `${links[i].getAttribute('data-parents')},`.match(re)) {
+            _disableLink(links[i]);
+        }
+    }
 
     // Setup keyboard navigation.
     // new ContentTree(
@@ -158,17 +185,16 @@ const setupMoveSection = (reactive, modal, modalBody, sectionId, element = null)
 };
 
 /**
- * Replace an element with a copy with a different tag name.
+ * Disable link
  *
- * @param {Element} element the original element
+ * @param {Element} element
  */
-// const _disableLink = (element) => {
-//     console.log('...trying to disable '+element.getAttribute('data-id'));
-//     if (element) {
-//         element.style.pointerEvents = 'none';
-//         element.style.userSelect = 'none';
-//         element.classList.add('disabled');
-//         element.setAttribute('aria-disabled', true);
-//         element.addEventListener('click', event => event.preventDefault());
-//     }
-// };
+const _disableLink = (element) => {
+    if (element) {
+        element.style.pointerEvents = 'none';
+        element.style.userSelect = 'none';
+        element.classList.add('disabled');
+        element.setAttribute('aria-disabled', true);
+        element.addEventListener('click', event => event.preventDefault());
+    }
+};
