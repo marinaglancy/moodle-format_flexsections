@@ -14,18 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * format_flexsections related unit tests
- *
- * @package    format_flexsections
- * @copyright  2020 Marina Glancy
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace format_flexsections;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/course/lib.php');
+use context_course;
+use core_external;
+use external_api;
+use moodle_exception;
+use moodle_url;
+use testable_course_edit_form;
 
 /**
  * format_flexsections related unit tests
@@ -34,7 +30,15 @@ require_once($CFG->dirroot . '/course/lib.php');
  * @copyright  2020 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_flexsections_testcase extends advanced_testcase {
+class format_flexsections_test extends \advanced_testcase {
+
+    /**
+     * Set up before each test
+     */
+    public function setUp(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/course/lib.php');
+    }
 
     /**
      * Tests for format_flexsections::get_section_name method with default section names.
@@ -239,7 +243,7 @@ class format_flexsections_testcase extends advanced_testcase {
         course_create_sections_if_missing($course1, array(0, 1));
 
         $data = (object)['id' => $course1->id];
-        /** @var format_flexsections $format */
+        /** @var \format_flexsections $format */
         $format = course_get_format($course1);
         $format->update_course_format_options($data);
 

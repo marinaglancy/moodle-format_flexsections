@@ -1,4 +1,4 @@
-@format @format_flexsections
+@format @format_flexsections @javascript
 Feature: Using course in flexsections format
   In order to use flexsections format
   As a teacher and student
@@ -32,25 +32,13 @@ Feature: Using course in flexsections format
       | Forum name | Second module |
       | Description | Test |
 
-  @javascript
-  Scenario: Add sections and activities to flexsections format with JS on
+  Scenario: Add sections and activities to flexsections format
     Given I should see "First module"
     And I should see "Second module"
     And I log out
     When I log in as "student1"
     And I am on "Course 1" course homepage
     Then I should see "First module"
-    And I should see "Second module"
-
-  Scenario: Add sections and activities to flexsections format with JS off
-    Given I should see "First module"
-    And I should see "Second module"
-    And I log out
-    When I log in as "student1"
-    And I am on "Course 1" course homepage
-    Then I should see "Topic 1"
-    And I should see "Topic 2"
-    And I should see "First module"
     And I should see "Second module"
 
   Scenario: Hiding section in flexsections format
@@ -73,7 +61,6 @@ Feature: Using course in flexsections format
     And I should not see "Topic 2"
     And I should not see "Second module"
 
-  @javascript
   Scenario: Collapsing section in flexsections format
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu
@@ -94,7 +81,6 @@ Feature: Using course in flexsections format
     And I should see "Topic 2" in the "Navigation" "block"
     And I should see "Second module" in the "Navigation" "block"
 
-  @javascript
   Scenario: Collapsing section with subsections in flexsections format
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu
@@ -122,7 +108,6 @@ Feature: Using course in flexsections format
     And I expand "Topic 2" node
     And I should see "Second module" in the "Navigation" "block"
 
-  @javascript
   Scenario: Merging subsection in flexsections format
     Given I add the "Navigation" block if not present
     And I open the "Recent activity" blocks action menu

@@ -141,7 +141,7 @@ class format_flexsections extends format_base {
      *
      * The returned object's property (boolean)capable indicates that
      * the course format supports Moodle course ajax features.
-     * The property (array)testedbrowsers can be used as a parameter for {@link ajaxenabled()}.
+     * The property (array)testedbrowsers can be used as a parameter for {@see ajaxenabled()}.
      *
      * @return stdClass
      */
@@ -155,10 +155,10 @@ class format_flexsections extends format_base {
     /**
      * Loads all of the course sections into the navigation
      *
-     * This method is called from {@link global_navigation::load_course_sections()}
+     * This method is called from {@see global_navigation::load_course_sections()}
      *
      * When overwriting please note that navigationlib relies on using the correct values for
-     * arguments $type and $key in {@link navigation_node::add()}
+     * arguments $type and $key in {@see navigation_node::add()}
      *
      * Example of code creating a section node:
      * $sectionnode = $node->add($sectionname, $url, navigation_node::TYPE_SECTION, null, $section->id);
@@ -342,12 +342,12 @@ class format_flexsections extends format_base {
     /**
      * Definitions of the additional options that this course format uses for section
      *
-     * See {@link format_base::course_format_options()} for return array definition.
+     * See {@see format_base::course_format_options()} for return array definition.
      *
      * Additionally section format options may have property 'cache' set to true
-     * if this option needs to be cached in {@link get_fast_modinfo()}. The 'cache' property
-     * is recommended to be set only for fields used in {@link format_base::get_section_name()},
-     * {@link format_base::extend_course_navigation()} and {@link format_base::get_view_url()}
+     * if this option needs to be cached in {@see get_fast_modinfo()}. The 'cache' property
+     * is recommended to be set only for fields used in {@see format_base::get_section_name()},
+     * {@see format_base::extend_course_navigation()} and {@see format_base::get_view_url()}
      *
      * For better performance cached options are recommended to have 'cachedefault' property
      * Unlike 'default', 'cachedefault' should be static and not access get_config().
@@ -657,7 +657,7 @@ class format_flexsections extends format_base {
     /**
      * Adds format options elements to the course/section edit form
      *
-     * This function is called from {@link course_edit_form::definition_after_data()}
+     * This function is called from {@see course_edit_form::definition_after_data()}
      *
      * @param MoodleQuickForm $mform form the elements are added to
      * @param bool $forsection 'true' if this is a section edit form, 'false' if this is course edit form
@@ -1154,7 +1154,7 @@ class format_flexsections extends format_base {
     /**
      * Course-specific information to be output immediately above content on any course page
      *
-     * See {@link format_base::course_header()} for usage
+     * See {@see format_base::course_header()} for usage
      *
      * @return null|renderable null for no output or object with data for plugin renderer
      */

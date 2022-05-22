@@ -237,7 +237,7 @@ class format_flexsections_renderer extends plugin_renderer_base {
             $text = $this->render($icon). html_writer::tag('span', $control->text,
                     ['class' => $control->actionname.'-text']);
             $action = new action_link($control->url, $text, null, ['data-action' => $control->actionname]);
-            return html_writer::tag('div', $this->render($action), ['class' => 'mdl-right']);
+            return html_writer::tag('div', $this->render($action), ['class' => 'mdl-right flexsections-add-subsection']);
         } else if ($control->actionname === 'backto') {
             $icon = new pix_icon('t/up', '', 'moodle');
             $text = $this->render($icon). html_writer::tag('span', $control->text,

@@ -1,6 +1,12 @@
 moodle-format_flexsections
 ==========================
 
+Version 3.5.2
+-------------
+
+- Specified compatibility with 3.5 - 3.11
+- Added GHA and fixed coding styles issues and behat failures
+
 Version 3.5.1
 -------------
 

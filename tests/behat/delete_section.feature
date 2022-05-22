@@ -1,4 +1,4 @@
-@format @format_flexsections
+@format @format_flexsections @javascript
 Feature: Deleting sections in flexsections format
   In order to organise the content in the course
   As a teacher
@@ -27,7 +27,7 @@ Feature: Deleting sections in flexsections format
     And I add a "Forum" to section "2" and I fill the form with:
       | Forum name | Second module |
       | Description | Test |
-    And I click on "Add subsection" "link" in the "li#section-1 > .content > .mdl-right" "css_element"
+    And I click on "Add subsection" "link" in the "li#section-1 > .content > .flexsections-add-subsection" "css_element"
     And I add a "Forum" to section "3" and I fill the form with:
       | Forum name | Third module |
       | Description | Test |
@@ -38,7 +38,6 @@ Feature: Deleting sections in flexsections format
       | Description | Test |
     And I should see "Topic 5"
 
-  @javascript
   Scenario: Deleting the empty section in flexsections format
     When I click on "Delete section" "link" in the "li#section-4" "css_element"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
@@ -46,7 +45,6 @@ Feature: Deleting sections in flexsections format
     And I should see "Topic 4"
     And I should see "Fourth module"
 
-  @javascript
   Scenario: Deleting the last section in flexsections format
     When I click on "Delete section" "link" in the "li#section-5" "css_element"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
@@ -54,8 +52,7 @@ Feature: Deleting sections in flexsections format
     And I should see "Topic 4"
     And I should not see "Fourth module"
 
-  @javascript
-  Scenario: Deleting the subsection in flexsections format with JS on
+  Scenario: Deleting the subsection in flexsections format
     When I click on "Delete section" "link" in the "li#section-2" "css_element"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
     Then I should not see "Topic 5"
@@ -63,16 +60,6 @@ Feature: Deleting sections in flexsections format
     And I should not see "Second module"
     And I should see "Fourth module"
 
-  Scenario: Deleting the subsection in flexsections format with JS off
-    When I click on "Delete section" "link" in the "li#section-2" "css_element"
-    Then I should see "Are you sure"
-    And I click on "Yes" "button"
-    And I should not see "Topic 5"
-    And I should see "Topic 4"
-    And I should not see "Second module"
-    And I should see "Fourth module"
-
-  @javascript
   Scenario: Deleting the section with subsections in flexsections format
     When I click on "Delete section" "link" in the "li#section-1" "css_element"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
