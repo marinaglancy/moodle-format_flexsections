@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import Component from 'core_courseformat/local/content';
+import Component from 'core_courseformat/local/content'; // course/format/amd/src/local/content.js
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 
 export default class FlexsectionComponent extends Component {
@@ -44,9 +44,25 @@ export default class FlexsectionComponent extends Component {
         });
     }
 
-    async _fixOrder(container, neworder, selector, dettachedelements, createMethod) {
-        console.log("...... calling _fixOrder.......");
-        return super._fixOrder(container, neworder, selector, dettachedelements, createMethod);
+    /**
+     * Constructor hook.
+     *
+     * @param {Object} descriptor the component descriptor
+     */
+    create(descriptor) {
+        super.create(descriptor);
+        this.selectors.COURSE_SUBSECTIONLIST = `[data-for='course_subsectionlist']`;
+    }
+
+    /**
+     * Return the component watchers.
+     *
+     * @returns {Array} of watchers
+     */
+    getWatchers() {
+        let res = super.getWatchers();
+        res.push({watch: `course.hierarchy:updated`, handler: this._refreshCourseHierarchy});
+        return res;
     }
 
     /**
@@ -55,10 +71,80 @@ export default class FlexsectionComponent extends Component {
      * @param {Object} param
      * @param {Object} param.element details the update details.
      */
-    _refreshCourseSectionlist({element}) {
-        //eslint-disable-next-line no-console
-        console.log("__ MY _refreshCourseSectionlist");
-        super._refreshCourseSectionlist({element});
+    _refreshCourseHierarchy({element}) {
+        const hierarchy = element.hierarchy ?? [];
+        const createSection = this._createSectionItem.bind(this);
+        for (let i = 0; i<hierarchy.length; i++) {
+            const sectionlist = hierarchy[i].children;
+            const listparent = this.getElement(this.selectors.COURSE_SUBSECTIONLIST + `[data-parent='${hierarchy[i].id}']`);
+            //console.log(`i=${i}; sectionid = ${hierarchy[i].id}; children = `+sectionlist.join(','));
+            if (listparent) {
+                this._fixOrder(listparent, sectionlist, this.selectors.SECTION, this.dettachedSections, createSection);
+            }
+        }
     }
 
+    /**
+     * Fix/reorder the section or cms order.
+     *
+     * I had to override the parent method because it removes the empty container too early.
+     *
+     * @param {Element} container the HTML element to reorder.
+     * @param {Array} neworder an array with the ids order
+     * @param {string} selector the element selector
+     * @param {Object} dettachedelements a list of dettached elements
+     * @param {function} createMethod method to create missing elements
+     */
+    async _fixOrder(container, neworder, selector, dettachedelements, createMethod) {
+        if (container === undefined) {
+            return;
+        }
+
+        // Grant the list is visible (in case it was empty).
+        container.classList.remove('hidden');
+
+        // Move the elements in order at the beginning of the list.
+        neworder.forEach((itemid, index) => {
+            let item = this.getElement(selector, itemid) ?? dettachedelements[itemid] ?? createMethod(container, itemid);
+            if (item === undefined) {
+                // Missing elements cannot be sorted.
+                return;
+            }
+            // Get the current elemnt at that position.
+            const currentitem = container.children[index];
+            if (currentitem === undefined) {
+                container.append(item);
+                return;
+            }
+            if (currentitem !== item) {
+                container.insertBefore(item, currentitem);
+            }
+        });
+
+        // Dndupload add a fake element we need to keep.
+        let dndFakeActivity;
+
+        // Remove the remaining elements.
+        while (container.children.length > neworder.length) {
+            const lastchild = container.lastChild;
+            if (lastchild?.classList?.contains('dndupload-preview')) {
+                dndFakeActivity = lastchild;
+            } else {
+                dettachedelements[lastchild?.dataset?.id ?? 0] = lastchild;
+            }
+            container.removeChild(lastchild);
+        }
+
+        // Empty lists should not be visible.
+        if (!neworder.length) {
+            container.classList.add('hidden');
+            container.innerHTML = '';
+            return;
+        }
+
+        // Restore dndupload fake element.
+        if (dndFakeActivity) {
+            container.append(dndFakeActivity);
+        }
+    }
 }

@@ -39,7 +39,8 @@ class course extends \core_courseformat\output\local\state\course {
 
         $viewedsection = $this->format->get_viewed_section();
         if ($viewedsection) {
-            $data->sectionlist = [$this->format->get_section($viewedsection)->id];
+            $s = $this->format->get_section($viewedsection);
+            $data->sectionlist = [$s->id];
         } else {
             $data->sectionlist = array_values(array_filter($data->sectionlist,
                 function($sectionid) {
@@ -47,6 +48,31 @@ class course extends \core_courseformat\output\local\state\course {
                     return $section && !$section->parent;
                 }));
         }
+
+        // Build sections hierarchy.
+        $allsections = $this->format->get_modinfo()->get_section_info_all();
+        $res1 = $res2 = [];
+        $toinclude = [$viewedsection ?: 0];
+        foreach ($allsections as $s) {
+            if ($s->section && (in_array($s->parent, $toinclude) || ($viewedsection && $s->section == $viewedsection))) {
+                $children = [];
+                foreach ($allsections as $ss) {
+                    if ($ss->parent == $s->section) {
+                        $children[] = $ss->id;
+                    }
+                }
+                if ($children) {
+                    $res1[] = ['id' => $s->id, 'section' => $s->section, 'children' => $children];
+                } else {
+                    $res2[] = ['id' => $s->id, 'section' => $s->section, 'children' => $children];
+                }
+                $toinclude[] = $s->section;
+            }
+        }
+        // Function _fixOrder in lib/amd/src/local/reactive/basecomponent.js removes all existing children of empty lists
+        // too early, before saving them in the 'dettachedelements'. To avoid accidentally losing sections during
+        // reordering we pass the empty lists in the end.
+        $data->hierarchy = array_merge($res1, $res2);
 
         return $data;
     }

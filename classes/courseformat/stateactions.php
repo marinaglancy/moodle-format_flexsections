@@ -17,7 +17,6 @@
 namespace format_flexsections\courseformat;
 
 use context_course;
-use moodle_exception;
 use stdClass;
 
 /**
@@ -45,46 +44,35 @@ class stateactions extends  \core_courseformat\stateactions {
         $coursecontext = context_course::instance($course->id);
         require_capability('moodle/course:movesections', $coursecontext);
 
-
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
 
         // Target section.
-        $affectedsections = [];
         if ($targetsectionid > 0) {
             $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
             $before = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
             $parent = $before->parent;
-            $affectedsections[$before->section] = true;
         } else if ($targetsectionid < 0) {
             $this->validate_sections($course, [-$targetsectionid], __FUNCTION__);
             $before = null;
             $parent = $modinfo->get_section_info_by_id(-$targetsectionid, MUST_EXIST);
         } else {
-            $before = 0;
+            $before = null;
             $parent = 0;
         }
 
         // Move sections.
         $sections = $this->get_section_info($modinfo, $ids);
         foreach ($sections as $section) {
-            $affectedsections[$section->section] = true;
             if ($format->can_move_section_to($section, $parent, $before)) {
                 $format->move_section($section, $parent, $before);
             }
         }
 
-        // Use section_state to return the section and activities updated state.
-        $this->section_state($updates, $course, $ids, $targetsectionid);
-
         // All course sections can be renamed because of the resort.
         $allsections = $modinfo->get_section_info_all();
         foreach ($allsections as $section) {
-            // Ignore the affected sections because they are already in the updates.
-            if (isset($affectedsections[$section->section])) {
-                continue;
-            }
             $updates->add_section_put($section->id);
         }
         // The section order is at a course level.

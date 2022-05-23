@@ -39,11 +39,11 @@
     }
 }}
 
-{{#subsections}}
-    <ul>
+<ul data-for="course_subsectionlist" data-parent="{{id}}">
+    {{#subsections}}
         {{> format_flexsections/local/content/section }}
-    </ul>
-{{/subsections}}
+    {{/subsections}}
+</ul>
 
 {{#addsubsection}}
     <div class="addsubsection mdl-left py-2">
