@@ -45,15 +45,13 @@ const SELECTORS = {
  * Initialize module
  */
 export const init = () => {
-    const reactive = getCurrentCourseEditor();
-    //reactive.stateManager = new FlexsectionsStateManager(reactive.eventDispatch, reactive.target);
-    const myput = (stateManager, updateName, fields) => {
-        //console.log('__myput__ '+updateName);
-        //console.log(stateManager);
-        //console.log(fields);
-        stateManager.defaultPut(stateManager, updateName, fields);
-    };
-    reactive.stateManager.addUpdateTypes({"put": myput});
+
+    // Experiment - overriding "put" method.
+    // const reactive = getCurrentCourseEditor();
+    // const myput = (stateManager, updateName, fields) => {
+    //     stateManager.defaultPut(stateManager, updateName, fields);
+    // };
+    // reactive.stateManager.addUpdateTypes({"put": myput});
 
     document.addEventListener('click', e => {
         const mergeupElement = e.target.closest(SELECTORS.SECTION_MERGEUP);
