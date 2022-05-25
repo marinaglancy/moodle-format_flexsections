@@ -38,4 +38,12 @@ export default class extends Mutations {
         }
         stateManager.processUpdates(updates);
     }
+
+    async sectionSwitchCollapsed(stateManager, sectionId) {
+        const course = stateManager.get('course');
+        const updates = await this._callEditWebservice('section_switch_collapsed', course.id, [sectionId]);
+        console.log('__switchcollapsed');
+        console.log(updates);
+        stateManager.processUpdates(updates);
+    }
 }

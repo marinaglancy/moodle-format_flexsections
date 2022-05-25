@@ -273,4 +273,9 @@ export default class extends BaseComponent {
         event.preventDefault();
         this.reactive.dispatch('addSubSection', target.dataset.parentid ?? 0, );
     }
+
+    _requestSectionSwitchCollapsed(target, event) {
+        event.preventDefault();
+        this.reactive.dispatch('sectionSwitchCollapsed', target.dataset.id ?? 0, );
+    }
 }

@@ -105,15 +105,18 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
 
         if ($section->section && has_capability('moodle/course:update', $coursecontext)) {
             $collapseurl = new \moodle_url($url, ['switchcollapsed' => $section->section]);
+            $attrs = [
+                'data-action-flexsections' => 'sectionSwitchCollapsed',
+                'class' => 'editing_collapsed',
+                'data-id' => $section->id,
+            ];
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
                 $controls['collapsed'] = [
                     'url' => $collapseurl,
                     'icon' => 't/expanded',
                     'name' => get_string('showexpanded', 'format_flexsections'),
                     'pixattr' => ['class' => ''],
-                    'attr' => [
-                        'class' => 'editing_collapsed',
-                    ],
+                    'attr' => $attrs,
                 ];
             } else {
                 $controls['collapsed'] = [
@@ -121,9 +124,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
                     'icon' => 't/collapsed',
                     'name' => get_string('showcollapsed', 'format_flexsections'),
                     'pixattr' => ['class' => ''],
-                    'attr' => [
-                        'class' => 'editing_collapsed',
-                    ],
+                    'attr' => $attrs,
                 ];
             }
         }

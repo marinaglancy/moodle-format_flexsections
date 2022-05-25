@@ -205,4 +205,44 @@ class stateactions extends  \core_courseformat\stateactions {
         $this->course_state($updates, $course);
     }
 
+    //section_switch_collapsed
+
+
+    /**
+     * Switch collapsed state (display as link/ display on the same page)
+     *
+     * @param \core_courseformat\stateupdates $updates
+     * @param stdClass $course
+     * @param array $ids section id
+     * @param int|null $targetsectionid not used
+     * @param int|null $targetcmid not used
+     * @return void
+     */
+    public function section_switch_collapsed(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
+                                           ?int $targetsectionid = null, ?int $targetcmid = null): void {
+        $this->validate_sections($course, $ids, __FUNCTION__);
+        require_capability('moodle/course:update', context_course::instance($course->id));
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $modinfo = $format->get_modinfo();
+        foreach ($this->get_section_info($modinfo, $ids) as $section) {
+            if ($section->collapsed == FORMAT_FLEXSECTIONS_EXPANDED) {
+                $newvalue = FORMAT_FLEXSECTIONS_COLLAPSED;
+            } else {
+                $newvalue = FORMAT_FLEXSECTIONS_EXPANDED;
+            }
+            $format->update_section_format_options(['id' => $section->id, 'collapsed' => $newvalue]);
+            rebuild_course_cache($course->id, true);
+        }
+
+        // All course sections can be renamed because of the resort.
+        $modinfo = get_fast_modinfo($course->id);
+        $allsections = $modinfo->get_section_info_all();
+        foreach ($allsections as $section) {
+            $updates->add_section_put($section->id);
+        }
+        // The section order is at a course level.
+        $updates->add_course_put();
+    }
+
 }
