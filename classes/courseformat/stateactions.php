@@ -33,7 +33,10 @@ class stateactions extends  \core_courseformat\stateactions {
      * @param \core_courseformat\stateupdates $updates
      * @param stdClass $course
      * @param array $ids
-     * @param int|null $targetsectionid
+     * @param int|null $targetsectionid if positive number, move AFTER this section under the same parent
+     *     if negative number, move TO the parent with id abs($targetsectionid) as the first child
+     *     if 0, move to parent=0 as the first child
+     *     (it's quite hacky but unfortunately we can only use one argument here so have to be creative)
      * @param int|null $targetcmid
      * @return void
      */
@@ -48,17 +51,19 @@ class stateactions extends  \core_courseformat\stateactions {
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
 
-        // Target section.
+        // Parent section and position.
         if ($targetsectionid > 0) {
             $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
-            $before = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
-            $parent = $before->parent;
+            $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
+            $before = $this->find_next_section($modinfo, $targetsection);
+            $parent = $targetsection->parent;
         } else if ($targetsectionid < 0) {
             $this->validate_sections($course, [-$targetsectionid], __FUNCTION__);
-            $before = null;
+            $targetsection = $modinfo->get_section_info_by_id(-$targetsectionid, MUST_EXIST);
+            $before = $this->get_first_child($modinfo, $targetsection->section);
             $parent = $modinfo->get_section_info_by_id(-$targetsectionid, MUST_EXIST);
         } else {
-            $before = null;
+            $before = $this->get_first_child($modinfo, 0);
             $parent = 0;
         }
 
@@ -77,5 +82,26 @@ class stateactions extends  \core_courseformat\stateactions {
         }
         // The section order is at a course level.
         $updates->add_course_put();
+    }
+
+    protected function find_next_section(\course_modinfo $modinfo, \section_info $thissection): ?\section_info {
+        $found = false;
+        foreach ($modinfo->get_section_info_all() as $section) {
+            if ($found) {
+                return $section->parent == $thissection->parent ? $section : null;
+            } else if ($section->id == $thissection->id) {
+                $found = true;
+            }
+        }
+        return null;
+    }
+
+    protected function get_first_child(\course_modinfo $modinfo, int $parent): ?\section_info {
+        foreach ($modinfo->get_section_info_all() as $section) {
+            if ($section->parent == $parent && $section->section) {
+                return $section;
+            }
+        }
+        return null;
     }
 }

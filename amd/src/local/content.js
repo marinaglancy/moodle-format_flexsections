@@ -24,6 +24,8 @@
 
 import Component from 'core_courseformat/local/content'; // course/format/amd/src/local/content.js
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
+import Section from 'format_flexsections/local/content/section';
+import CmItem from 'core_courseformat/local/content/section/cmitem';
 
 export default class FlexsectionComponent extends Component {
 
@@ -36,10 +38,12 @@ export default class FlexsectionComponent extends Component {
      * @return {Component}
      */
     static init(target, selectors, sectionReturn) {
-        // Must be overridden because parent class returns "new Component" instead of returning "new this".
+
+        const courseEditor = getCurrentCourseEditor();
+
         return new FlexsectionComponent({
             element: document.getElementById(target),
-            reactive: getCurrentCourseEditor(),
+            reactive: courseEditor,
             selectors,
             sectionReturn,
         });
@@ -82,5 +86,124 @@ export default class FlexsectionComponent extends Component {
                 this._fixOrder(listparent, sectionlist, this.selectors.SECTION, this.dettachedSections, createSection);
             }
         }
+    }
+
+    /**
+     * Regenerate content indexes.
+     *
+     * This method is used when a legacy action refresh some content element.
+     *
+     * Override parent method and replace with our Section and CmItem classes.
+     */
+    _indexContents() {
+        // Find unindexed sections.
+        this._scanIndex(
+            this.selectors.SECTION,
+            this.sections,
+            (item) => {
+                return new Section(item);
+            }
+        );
+
+        // Find unindexed cms.
+        this._scanIndex(
+            this.selectors.CM,
+            this.cms,
+            (item) => {
+                return new CmItem(item);
+            }
+        );
+    }
+
+    /**
+     * Refresh the collapse/expand all sections element.
+     *
+     * @param {Object} state The state data
+     */
+    _refreshAllSectionsToggler(state) {
+        const target = this.getElement(this.selectors.TOGGLEALL);
+        if (!target) {
+            return;
+        }
+        // Check if we have all sections collapsed/expanded.
+        let allcollapsed = true;
+        let allexpanded = true;
+        const mainSection = this._mainSection(state);
+        const sections = this._getSectionsWithCollapse(state);
+        for (let i in sections) {
+            if (parseInt(sections[i].parent) === mainSection) {
+                allcollapsed = allcollapsed && sections[i].contentcollapsed;
+            }
+            allexpanded = allexpanded && !sections[i].contentcollapsed;
+        }
+        // Update control.
+        if (allcollapsed) {
+            target.classList.add(this.classes.COLLAPSED);
+            target.setAttribute('aria-expanded', false);
+        }
+        if (allexpanded) {
+            target.classList.remove(this.classes.COLLAPSED);
+            target.setAttribute('aria-expanded', true);
+        }
+    }
+
+    /**
+     * Handle the collapse/expand all sections button.
+     *
+     * Toggler click is delegated to the main course content element because new sections can
+     * appear at any moment and this way we prevent accidental double bindings.
+     *
+     * @param {Event} event the triggered event
+     */
+    _allSectionToggler(event) {
+        event.preventDefault();
+
+        const target = event.target.closest(this.selectors.TOGGLEALL);
+        const isAllCollapsed = target.classList.contains(this.classes.COLLAPSED);
+
+        const sections = this._getSectionsWithCollapse();
+        let ids = [];
+        for (let i in sections) {
+            ids.push(sections[i].id);
+        }
+        this.reactive.dispatch(
+            'sectionContentCollapsed',
+            ids,
+            !isAllCollapsed
+        );
+    }
+
+    _mainSection(state) {
+        const sectionsList = state.course.sectionlist;
+        let sectionNumber = 0;
+        if (sectionsList.length === 1) {
+            state.section.forEach(s => {
+                if (`${s.id}` === `${sectionsList[0]}`) {
+                    sectionNumber = parseInt(s.number);
+                }
+            });
+        }
+        return sectionNumber;
+    }
+
+    _getSectionsWithCollapse(state) {
+        if (state === undefined) {
+            state = this.reactive.stateManager.state;
+        }
+        const mainSection = this._mainSection(state);
+        let parents = {};
+        parents[`${mainSection}`] = `${mainSection}`;
+        let displayedSections = [];
+        state.section.forEach(
+            section => {
+                const sectionNumber = parseInt(section.number);
+                if (!sectionNumber || sectionNumber === mainSection || !(`${section.parent}` in parents) || section.collapsed) {
+                    return;
+                }
+                parents[`${sectionNumber}`] = `${sectionNumber}`;
+                displayedSections.push(section);
+            }
+        );
+        return displayedSections;
     }
 }

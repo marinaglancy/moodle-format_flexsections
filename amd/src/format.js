@@ -222,7 +222,7 @@ const setupMoveSection = (reactive, modal, modalBody, sectionId, data, element =
     const links = modalBody.querySelectorAll(`${SELECTORS.SECTIONLINK}`);
     for (let i = 0; i < links.length; ++i) {
         const re = new RegExp(`,${sectionId},`,"g");
-        if (links[i].getAttribute('data-id') === `${sectionId}` || links[i].getAttribute('data-after') === `${sectionId}` ||
+        if (links[i].getAttribute('data-before') === `${sectionId}` || links[i].getAttribute('data-after') === `${sectionId}` ||
             `${links[i].getAttribute('data-parents')},`.match(re)) {
             _disableLink(links[i]);
         }
@@ -243,14 +243,16 @@ const setupMoveSection = (reactive, modal, modalBody, sectionId, data, element =
     modalBody.addEventListener('click', (event) => {
 
         const target = event.target;
-        if (!target.matches('a') || target.dataset.for !== 'section' || target.dataset.id === undefined) {
+        if (!target.matches('a') || target.dataset.for !== 'section' || target.dataset.after === undefined) {
             return;
         }
         if (target.getAttribute('aria-disabled')) {
             return;
         }
         event.preventDefault();
-        reactive.dispatch('sectionMove', [sectionId], target.dataset.id);
+        const afterId = parseInt(target.dataset.after);
+        const parentId = parseInt(target.dataset.parent);
+        reactive.dispatch('sectionMove', [sectionId], afterId ? afterId : -parentId);
 
         _destroyModal(modal, element);
     });

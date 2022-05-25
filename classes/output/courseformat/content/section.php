@@ -68,6 +68,13 @@ class section extends \core_courseformat\output\local\content\section {
             $data->numsections->subsections = $this->section->section ? $this->get_subsections($output) : [];
         }
 
+        if (!$this->section->section || $this->section->section == $this->format->get_viewed_section()) {
+            $data->contentcollapsed = false;
+            $data->collapsemenu = true;
+        } else {
+            $data->collapsemenu = false;
+        }
+
         return $data;
     }
 
