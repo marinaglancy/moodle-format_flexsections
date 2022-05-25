@@ -64,6 +64,7 @@ class addsection extends \core_courseformat\output\local\content\addsection {
                         'url' => $url->out(false),
                         'title' => get_string('addsubsectionfor', 'format_flexsections',
                             $this->format->get_section_name($this->section)),
+                        'parentid' => $this->section->id,
                     ];
                 }
             }
@@ -74,6 +75,7 @@ class addsection extends \core_courseformat\output\local\content\addsection {
                 $data->addsections = (object)[
                     'url' => $url->out(false),
                     'title' => get_string('addsections', 'format_flexsections'),
+                    'parentid' => 0,
                 ];
             }
         }

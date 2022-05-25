@@ -651,7 +651,7 @@ class format_flexsections extends core_courseformat\base {
                 && optional_param('confirm', 0, PARAM_INT) == 1) {
                 $section = $this->get_section($deletesection, MUST_EXIST);
                 $parent = $section->parent;
-                $this->delete_section_int($section);
+                $this->delete_section_with_children($section);
                 $url = course_get_url($this->courseid, $parent);
                 redirect($url);
             }
@@ -1022,12 +1022,13 @@ class format_flexsections extends core_courseformat\base {
      * Completely removes a section, all subsections and activities they contain
      *
      * @param section_info $section
+     * @return array list of deleted section ids
      */
-    protected function delete_section_int($section) {
+    public function delete_section_with_children($section): array {
         global $DB;
         if (!$section->section) {
             // Section 0 does not have parent.
-            return;
+            return [];
         }
 
         $sectionid = $section->id;
@@ -1065,6 +1066,7 @@ class format_flexsections extends core_courseformat\base {
         $DB->execute('DELETE FROM {course_sections} WHERE id ' . $sectionsql, $params);
 
         rebuild_course_cache($this->courseid, true);
+        return $sectionstodelete;
     }
 
     /**

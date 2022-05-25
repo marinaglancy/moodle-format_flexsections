@@ -17,6 +17,7 @@
 namespace format_flexsections\courseformat;
 
 use context_course;
+use core_courseformat\stateupdates;
 use stdClass;
 
 /**
@@ -106,7 +107,7 @@ class stateactions extends  \core_courseformat\stateactions {
     }
 
     /**
-     * Moving a section
+     * Merging a section with its parent
      *
      * @param \core_courseformat\stateupdates $updates
      * @param stdClass $course
@@ -134,4 +135,74 @@ class stateactions extends  \core_courseformat\stateactions {
         // The section order is at a course level.
         $updates->add_course_put();
     }
+
+    /**
+     * Adding a subsection
+     *
+     * @param \core_courseformat\stateupdates $updates
+     * @param stdClass $course
+     * @param array $ids parent section id
+     * @param int|null $targetsectionid not used
+     * @param int|null $targetcmid not used
+     * @return void
+     */
+    public function section_add_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
+                            ?int $targetsectionid = null, ?int $targetcmid = null): void {
+        $this->validate_sections($course, $ids, __FUNCTION__);
+        require_capability('moodle/course:update', context_course::instance($course->id));
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $modinfo = $format->get_modinfo();
+        foreach ($this->get_section_info($modinfo, $ids) as $section) {
+            $format->create_new_section($section);
+        }
+
+        // All course sections can be renamed because of the resort.
+        $allsections = $format->get_modinfo()->get_section_info_all();
+        foreach ($allsections as $section) {
+            $updates->add_section_put($section->id);
+        }
+        // The section order is at a course level.
+        $updates->add_course_put();
+    }
+
+    /**
+     * Delete course sections.
+     *
+     * This method follows the same logic as editsection.php.
+     *
+     * @param stateupdates $updates the affected course elements track
+     * @param stdClass $course the course object
+     * @param int[] $ids section ids
+     * @param int $targetsectionid not used
+     * @param int $targetcmid not used
+     */
+    public function section_delete(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids = [],
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
+
+        $coursecontext = context_course::instance($course->id);
+        require_capability('moodle/course:update', $coursecontext);
+        require_capability('moodle/course:movesections', $coursecontext);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $modinfo = $format->get_modinfo();
+
+        foreach ($ids as $sectionid) {
+            $section = $modinfo->get_section_info_by_id($sectionid, MUST_EXIST);
+            $deleted = $format->delete_section_with_children($section);
+            foreach ($deleted as $deletedid) {
+                $updates->add_section_delete($sectionid);
+            }
+        }
+
+        // Removing a section affects the full course structure.
+        $this->course_state($updates, $course);
+    }
+
 }

@@ -269,4 +269,8 @@ export default class extends BaseComponent {
         }
     }
 
+    _requestAddSubSection(target, event) {
+        event.preventDefault();
+        this.reactive.dispatch('addSubSection', target.dataset.parentid ?? 0, );
+    }
 }
