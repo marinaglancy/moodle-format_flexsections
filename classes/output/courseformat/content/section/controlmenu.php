@@ -103,7 +103,8 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             }
         }
 
-        if ($section->section && has_capability('moodle/course:update', $coursecontext)) {
+        if ($section->section && has_capability('moodle/course:update', $coursecontext) &&
+                $section->section != $this->format->get_viewed_section()) {
             $collapseurl = new \moodle_url($url, ['switchcollapsed' => $section->section]);
             $attrs = [
                 'data-action-flexsections' => 'sectionSwitchCollapsed',
@@ -129,7 +130,8 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             }
         }
 
-        if ($section->parent && has_capability('moodle/course:update', $coursecontext)) {
+        if ($section->parent && has_capability('moodle/course:update', $coursecontext) &&
+                $section->section != $this->format->get_viewed_section()) {
             $collapseurl = new \moodle_url($url, ['mergeup' => $section->section]);
             $controls['mergeup'] = [
                 'url' => $collapseurl,
@@ -163,6 +165,11 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
 
         $parentcontrols = parent::section_control_items();
         unset($parentcontrols['movesection'], $parentcontrols['moveup'], $parentcontrols['movedown']);
+        if ($section->section == $this->format->get_viewed_section()) {
+            // Deleting section that is currently viewed does not really work in AJAX (as well as mergeup).
+            // Maybe we re-write it at some moment so it redirects to the parent section.
+            unset($parentcontrols['delete']);
+        }
 
         // If the edit key exists, we are going to insert our controls after it.
         if (array_key_exists("edit", $parentcontrols)) {
