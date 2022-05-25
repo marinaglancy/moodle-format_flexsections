@@ -32,12 +32,13 @@ import Pending from "core/pending";
 //import DefaultMutations from 'core_courseformat/local/courseeditor/mutations';
 //import DefaultStateManager from 'core/local/reactive/stateManager';
 //import {Reactive} from "core/reactive";
-
+import Exporter from "format_flexsections/local/courseeditor/exporter";
 /* eslint-disable no-console */
 
 const SELECTORS = {
     SECTION_MERGEUP: 'li.section a[data-action-flexsections="mergeup"]',
-    SECTION_MOVE: 'li.section a[data-action-flexsections="move"]',
+    SECTION_MOVE: 'li.section a[data-action-flexsections="moveSection"]',
+    CM_MOVE: 'li.section a[data-action-flexsections="moveCm"]',
     SECTIONLINK: `[data-for='section']`,
 };
 
@@ -53,6 +54,10 @@ export const init = () => {
     // };
     // reactive.stateManager.addUpdateTypes({"put": myput});
 
+    // Override exporter.
+    const reactive = getCurrentCourseEditor();
+    reactive.getExporter = () => new Exporter(reactive);
+
     document.addEventListener('click', e => {
         const mergeupElement = e.target.closest(SELECTORS.SECTION_MERGEUP);
         if (mergeupElement) {
@@ -65,6 +70,13 @@ export const init = () => {
         if (moveElement) {
             e.preventDefault();
             showMoveSectionPopup(moveElement);
+            return;
+        }
+
+        const moveCmElement = e.target.closest(SELECTORS.CM_MOVE);
+        if (moveCmElement) {
+            e.preventDefault();
+            showMoveCmPopup(moveCmElement);
             return;
         }
     });
@@ -103,6 +115,7 @@ const showMoveSectionPopup = (target) => {
         // We are on a page of a collapsed section. Do not show "move before" and "move after" controls.
         data.singlesectionmode = 1;
         data.sections[0].contentcollapsed = false;
+        // TODO allow to move from collapsed section up level.
     }
     const buildParents = (sections, parents) => {
         for (var i in sections) {
@@ -131,6 +144,76 @@ const showMoveSectionPopup = (target) => {
             modal.show();
             return modal;
         });
+};
+
+const showMoveCmPopup = (target) => {
+    const cmId = target.dataset.id;
+    if (!cmId) {
+        return;
+    }
+    const reactive = getCurrentCourseEditor();
+    const cmInfo = reactive.get('cm', cmId);
+
+    const exporter = reactive.getExporter();
+    const data = exporter.course(reactive.state);
+
+    // TODO set before and after current as disabled.
+    // TODO allow to move from collapsed section up level.
+
+    data.cmid = cmInfo.id;
+    data.cmname = cmInfo.name;
+
+    ModalFactory.create({
+        type: ModalFactory.types.CANCEL,
+        title: getString('movecoursemodule', 'core'),
+        large: true,
+        buttons: {cancel: getString('closebuttontitle', 'core')},
+        removeOnClose: true,
+    })
+        .then(modal => {
+            Templates.render('format_flexsections/local/content/movecm', data).
+            then((body) => {
+                modal.setBody(body);
+                setupMoveCm(reactive, modal, modal.getBody()[0], cmId, data);
+            });
+            modal.show();
+            return modal;
+        });
+};
+
+const setupMoveCm = (reactive, modal, modalBody, cmId, data, element = null) => {
+
+    // Capture click.
+    modalBody.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!target.matches('a') || target.dataset.for === undefined || target.dataset.id === undefined) {
+            return;
+        }
+        if (target.getAttribute('aria-disabled')) {
+            return;
+        }
+        event.preventDefault();
+
+        const targetSectionId = (target.dataset.for === 'section') ? target.dataset.id : 0;
+        const targetCmId = (target.dataset.for === 'cm') ? target.dataset.id : 0;
+        reactive.dispatch('cmMove', [cmId], targetSectionId, targetCmId);
+        _destroyModal(modal, element);
+    });
+};
+
+const _destroyModal = (modal, element = null) => {
+
+    // Destroy
+    modal.hide();
+    const pendingDestroy = new Pending(`courseformat/actions:destroyModal`);
+    if (element) {
+        element.focus();
+    }
+    setTimeout(() =>{
+        modal.destroy();
+        pendingDestroy.resolve();
+    }, 500);
+
 };
 
 const setupMoveSection = (reactive, modal, modalBody, sectionId, data, element = null) => {
@@ -169,16 +252,7 @@ const setupMoveSection = (reactive, modal, modalBody, sectionId, data, element =
         event.preventDefault();
         reactive.dispatch('sectionMove', [sectionId], target.dataset.id);
 
-        // Destroy
-        modal.hide();
-        const pendingDestroy = new Pending(`courseformat/actions:destroyModal`);
-        if (element) {
-            element.focus();
-        }
-        setTimeout(() =>{
-            modal.destroy();
-            pendingDestroy.resolve();
-        }, 500);
+        _destroyModal(modal, element);
     });
 };
 

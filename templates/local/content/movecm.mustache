@@ -1,0 +1,84 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_flexsections/local/content/movecm
+
+    Displays the course index.
+
+    Example context (json):
+    {
+        "cmname": "Activity name",
+        "cmid": 42,
+        "sections": [
+            {
+                "title": "General",
+                "id": 42,
+                "number": 1,
+                "sectionurl": "#",
+                "hascms": true,
+                "cms": [
+                    {
+                        "name": "Glossary of characters",
+                        "id": "10",
+                        "url": "#"
+                    },
+                    {
+                        "name": "World Cinema forum",
+                        "id": "11",
+                        "url": "#"
+                    },
+                    {
+                        "name": "Announcements",
+                        "id": "12",
+                        "url": "#"
+                    }
+                ]
+            },
+            {
+                "title": "City of God or Cidade de Deus",
+                "id": "43",
+                "number": "2",
+                "sectionurl": "#",
+                "hascms": true,
+                "cms": [
+                    {
+                        "name": "Resources",
+                        "id": "13",
+                        "url": "#"
+                    },
+                    {
+                        "name": "Studying City of God by Stephen Smith Bergman-Messerschmidt",
+                        "id": "14",
+                        "url": "#"
+                    },
+                    {
+                        "name": "Film education study guide",
+                        "id": "15",
+                        "url": "#"
+                    }
+                ]
+            }
+        ]
+    }
+
+}}
+<div class="collapse-list" id="destination-selector" role="tree">
+    {{#sections}}
+        {{> format_flexsections/local/content/movecm_one }}
+
+    {{/sections}}
+</div>

@@ -152,7 +152,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
                 'name' => get_string('move', 'moodle'),
                 'pixattr' => ['class' => ''],
                 'attr' => [
-                    'data-action-flexsections' => 'move',
+                    'data-action-flexsections' => 'moveSection',
                     'data-id' => $section->id,
                     'data-ctxid' => context_course::instance($this->format->get_courseid())->id,
                 ],

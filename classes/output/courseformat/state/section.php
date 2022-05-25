@@ -48,7 +48,8 @@ class section extends \core_courseformat\output\local\state\section {
         } else if ($this->section->section) {
             foreach ($this->format->get_modinfo()->get_section_info_all() as $s) {
                 if ($s->parent == $this->section->section) {
-                    $data->children[] = (new static($this->format, $s))->export_for_template($output);
+                    $data->children[] = (array)((new static($this->format, $s))->export_for_template($output)) +
+                        $this->default_section_properties();
                 }
             }
         }
@@ -56,5 +57,17 @@ class section extends \core_courseformat\output\local\state\section {
         $data->singlesection = (int)($this->section->collapsed && $this->section->section == $this->format->get_viewed_section());
 
         return $data;
+    }
+
+    /**
+     * Since we display sections nested the values from the parent can propagate in templates
+     *
+     * @return array
+     */
+    protected function default_section_properties(): array {
+        return [
+            'isstealth' => false, 'ishidden' => false, 'notavailable' => false, 'hiddenfromstudents' => false,
+            'cmlist' => [], 'hascms' => false, 'cms' => [],
+        ];
     }
 }
