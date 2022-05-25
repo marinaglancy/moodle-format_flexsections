@@ -26,6 +26,7 @@ import Component from 'core_courseformat/local/content'; // course/format/amd/sr
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 import Section from 'format_flexsections/local/content/section';
 import CmItem from 'core_courseformat/local/content/section/cmitem';
+import Mutations from "format_flexsections/local/courseeditor/mutations";
 
 export default class FlexsectionComponent extends Component {
 
@@ -40,6 +41,12 @@ export default class FlexsectionComponent extends Component {
     static init(target, selectors, sectionReturn) {
 
         const courseEditor = getCurrentCourseEditor();
+
+        // Hack to preserve legacy mutations (added in core_course/actions) after we set own plugin mutations.
+        let legacyActivityAction = courseEditor.mutations['legacyActivityAction'] ?? {};
+        let legacySectionAction = courseEditor.mutations['legacySectionAction'] ?? {};
+        courseEditor.setMutations(new Mutations());
+        courseEditor.addMutations({legacyActivityAction, legacySectionAction});
 
         return new FlexsectionComponent({
             element: document.getElementById(target),
