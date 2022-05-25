@@ -139,6 +139,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
                 'attr' => [
                     'class' => 'editing_mergeup',
                     'data-action-flexsections' => 'mergeup',
+                    'data-id' => $section->id,
                 ],
             ];
         }

@@ -1075,9 +1075,9 @@ class format_flexsections extends core_courseformat\base {
      *
      * @param section_info $section
      */
-    protected function mergeup_section($section) {
+    public function mergeup_section($section) {
         global $DB;
-        if (!$section->section) {
+        if (!$section->section || !$section->parent) {
             // Section 0 does not have parent.
             return;
         }

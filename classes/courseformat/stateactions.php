@@ -104,4 +104,34 @@ class stateactions extends  \core_courseformat\stateactions {
         }
         return null;
     }
+
+    /**
+     * Moving a section
+     *
+     * @param \core_courseformat\stateupdates $updates
+     * @param stdClass $course
+     * @param array $ids
+     * @param int|null $targetsectionid not used
+     * @param int|null $targetcmid not used
+     * @return void
+     */
+    public function mergeup(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
+                                 ?int $targetsectionid = null, ?int $targetcmid = null): void {
+        $this->validate_sections($course, $ids, __FUNCTION__);
+        require_capability('moodle/course:update', context_course::instance($course->id));
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $modinfo = $format->get_modinfo();
+        foreach ($this->get_section_info($modinfo, $ids) as $section) {
+            $format->mergeup_section($section);
+        }
+
+        // All course sections can be renamed because of the resort.
+        $allsections = $format->get_modinfo()->get_section_info_all();
+        foreach ($allsections as $section) {
+            $updates->add_section_put($section->id);
+        }
+        // The section order is at a course level.
+        $updates->add_course_put();
+    }
 }

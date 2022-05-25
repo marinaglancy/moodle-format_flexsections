@@ -2,7 +2,6 @@
 import {BaseComponent} from 'core/reactive';
 import {get_string as getString, get_strings as getStrings} from "core/str";
 import Notification from "core/notification";
-import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 import ModalFactory from "core/modal_factory";
 import Templates from "core/templates";
 import Pending from "core/pending";
@@ -80,20 +79,19 @@ export default class extends BaseComponent {
 
     _requestMergeup(target, event) {
         event.preventDefault();
-        const href = target.getAttribute('href');
         getStrings([
             {key: 'confirm', component: 'moodle'},
             {key: 'confirmmerge', component: 'format_flexsections'},
             {key: 'yes', component: 'moodle'},
             {key: 'no', component: 'moodle'}
-        ]).done(function(strings) {
+        ]).done((strings) => {
             Notification.confirm(
                 strings[0], // Confirm.
                 strings[1], // Are you sure you want to merge.
                 strings[2], // Yes.
                 strings[3], // No.
-                function() {
-                    window.location.href = href + '&confirm=1';
+                () => {
+                    this.reactive.dispatch('mergeup', [target.getAttribute('data-id')], 0);
                 }
             );
         }).fail(Notification.exception);
@@ -101,11 +99,10 @@ export default class extends BaseComponent {
 
     _requestMoveSection(target, event) {
         event.preventDefault();
-        const reactive = getCurrentCourseEditor();
         const sectionId = target.getAttribute('data-id');
-        const sectionInfo = reactive.get('section', sectionId);
-        const exporter = reactive.getExporter();
-        const data = exporter.course(reactive.state);
+        const sectionInfo = this.reactive.get('section', sectionId);
+        const exporter = this.reactive.getExporter();
+        const data = exporter.course(this.reactive.state);
         data.sectiontitle = sectionInfo.title;
         //console.log(data);
 
@@ -138,7 +135,7 @@ export default class extends BaseComponent {
                 Templates.render('format_flexsections/local/content/movesection', data).
                 then((body) => {
                     modal.setBody(body);
-                    this.setupMoveSection(reactive, modal, modal.getBody()[0], sectionId, data);
+                    this.setupMoveSection(modal, modal.getBody()[0], sectionId, data);
                 });
                 modal.show();
                 return modal;
@@ -151,11 +148,10 @@ export default class extends BaseComponent {
         if (!cmId) {
             return;
         }
-        const reactive = getCurrentCourseEditor();
-        const cmInfo = reactive.get('cm', cmId);
+        const cmInfo = this.reactive.get('cm', cmId);
 
-        const exporter = reactive.getExporter();
-        const data = exporter.course(reactive.state);
+        const exporter = this.reactive.getExporter();
+        const data = exporter.course(this.reactive.state);
 
         // TODO set before and after current as disabled.
         // TODO allow to move from collapsed section up level.
@@ -174,14 +170,14 @@ export default class extends BaseComponent {
                 Templates.render('format_flexsections/local/content/movecm', data).
                 then((body) => {
                     modal.setBody(body);
-                    this._setupMoveCm(reactive, modal, modal.getBody()[0], cmId, data);
+                    this._setupMoveCm(modal, modal.getBody()[0], cmId, data);
                 });
                 modal.show();
                 return modal;
             });
     }
 
-    _setupMoveCm(reactive, modal, modalBody, cmId, data, element = null) {
+    _setupMoveCm(modal, modalBody, cmId, data, element = null) {
 
         // Capture click.
         modalBody.addEventListener('click', (event) => {
@@ -196,7 +192,7 @@ export default class extends BaseComponent {
 
             const targetSectionId = (target.dataset.for === 'section') ? target.dataset.id : 0;
             const targetCmId = (target.dataset.for === 'cm') ? target.dataset.id : 0;
-            reactive.dispatch('cmMove', [cmId], targetSectionId, targetCmId);
+            this.reactive.dispatch('cmMove', [cmId], targetSectionId, targetCmId);
             this._destroyModal(modal, element);
         });
     }
@@ -216,7 +212,7 @@ export default class extends BaseComponent {
 
     }
 
-    setupMoveSection(reactive, modal, modalBody, sectionId, data, element = null) {
+    setupMoveSection(modal, modalBody, sectionId, data, element = null) {
 
         // Disable moving before or after itself or under one of its own children.
         const links = modalBody.querySelectorAll(`${this.selectors.SECTIONLINK}`);
@@ -252,7 +248,7 @@ export default class extends BaseComponent {
             event.preventDefault();
             const afterId = parseInt(target.dataset.after);
             const parentId = parseInt(target.dataset.parent);
-            reactive.dispatch('sectionMove', [sectionId], afterId ? afterId : -parentId);
+            this.reactive.dispatch('sectionMove', [sectionId], afterId ? afterId : -parentId);
 
             this._destroyModal(modal, element);
         });
