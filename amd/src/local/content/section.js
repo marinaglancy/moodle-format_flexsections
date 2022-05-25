@@ -1,5 +1,6 @@
 import Section from 'core_courseformat/local/content/section';
 import Header from 'core_courseformat/local/content/section/header';
+/* eslint-disable no-console */
 
 export default class extends Section {
     // course/format/amd/src/local/content/section.js

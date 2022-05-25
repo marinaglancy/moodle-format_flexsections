@@ -27,6 +27,8 @@ import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 import Section from 'format_flexsections/local/content/section';
 import CmItem from 'core_courseformat/local/content/section/cmitem';
 import Mutations from "format_flexsections/local/courseeditor/mutations";
+import FlexsectionsActions from 'format_flexsections/local/content/actions';
+import Exporter from "format_flexsections/local/courseeditor/exporter";
 
 export default class FlexsectionComponent extends Component {
 
@@ -41,6 +43,7 @@ export default class FlexsectionComponent extends Component {
     static init(target, selectors, sectionReturn) {
 
         const courseEditor = getCurrentCourseEditor();
+        courseEditor.getExporter = () => new Exporter(courseEditor);
 
         // Hack to preserve legacy mutations (added in core_course/actions) after we set own plugin mutations.
         let legacyActivityAction = courseEditor.mutations['legacyActivityAction'] ?? {};
@@ -64,6 +67,21 @@ export default class FlexsectionComponent extends Component {
     create(descriptor) {
         super.create(descriptor);
         this.selectors.COURSE_SUBSECTIONLIST = `[data-for='course_subsectionlist']`;
+    }
+
+    /**
+     * Initial state ready method.
+     *
+     * @param {Object} state the state data
+     */
+    stateReady(state) {
+        super.stateReady(state);
+        if (this.reactive.supportComponents) {
+            // Actions are only available in edit mode.
+            if (this.reactive.isEditing) {
+                new FlexsectionsActions(this);
+            }
+        }
     }
 
     /**
