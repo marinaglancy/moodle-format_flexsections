@@ -44,7 +44,7 @@ Feature: Using course in flexsections format
 
   Scenario: Hiding section in flexsections format
     When I open section "2" edit menu
-    And I click on "Hide topic" "link" in the "li#section-2" "css_element"
+    And I click on "Hide section" "link" in the "li#section-2" "css_element"
     # TODO check the page
     And I log out
     And I log in as "student1"
@@ -56,7 +56,7 @@ Feature: Using course in flexsections format
 
   Scenario: Hiding section in flexsections format hides the subsections and activities
     When I open section "1" edit menu
-    And I click on "Hide topic" "link" in the "li#section-1" "css_element"
+    And I click on "Hide section" "link" in the "li#section-1" "css_element"
     # TODO check the page
     And I log out
     And I log in as "student1"
