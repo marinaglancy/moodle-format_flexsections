@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Contains the default section controls output class.
- *
- * @package   format_flexsections
- * @copyright 2022 Marina Glancy
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace format_flexsections\output\courseformat\content\section;
 
 use action_menu;
@@ -34,7 +26,7 @@ use section_info;
 use stdClass;
 
 /**
- * Base class to render a course section menu.
+ * Class to render a course section menu.
  *
  * @package   format_flexsections
  * @copyright 2022 Marina Glancy

@@ -57,8 +57,7 @@ class header extends \core_courseformat\output\local\content\section\header {
         }
 
         if (!$this->section->section) {
-            // Do not make "General" section collapsible and also do not display the header.
-            //$data->headerdisplaymultipage = true;
+            // Do not make display header for the "General" section.
             $data->title = '';
         }
 

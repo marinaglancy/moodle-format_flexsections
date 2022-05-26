@@ -85,6 +85,13 @@ class stateactions extends  \core_courseformat\stateactions {
         $updates->add_course_put();
     }
 
+    /**
+     * Find next section
+     *
+     * @param \course_modinfo $modinfo
+     * @param \section_info $thissection
+     * @return \section_info|null
+     */
     protected function find_next_section(\course_modinfo $modinfo, \section_info $thissection): ?\section_info {
         $found = false;
         foreach ($modinfo->get_section_info_all() as $section) {
@@ -97,6 +104,13 @@ class stateactions extends  \core_courseformat\stateactions {
         return null;
     }
 
+    /**
+     * Get first subsection
+     *
+     * @param \course_modinfo $modinfo
+     * @param int $parent
+     * @return \section_info|null
+     */
     protected function get_first_child(\course_modinfo $modinfo, int $parent): ?\section_info {
         foreach ($modinfo->get_section_info_all() as $section) {
             if ($section->parent == $parent && $section->section) {
@@ -204,9 +218,6 @@ class stateactions extends  \core_courseformat\stateactions {
         // Removing a section affects the full course structure.
         $this->course_state($updates, $course);
     }
-
-    //section_switch_collapsed
-
 
     /**
      * Switch collapsed state (display as link/ display on the same page)

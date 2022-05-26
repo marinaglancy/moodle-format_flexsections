@@ -12,7 +12,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/* eslint-disable no-console */
+
+import Exporter from "core_courseformat/local/courseeditor/exporter";
 
 /**
  * Overriding default course format exporter
@@ -21,9 +22,8 @@
  * @copyright  2022 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-import Exporter from "core_courseformat/local/courseeditor/exporter";
-
-export default class extends Exporter { // course/format/amd/src/local/courseeditor/exporter.js
+export default class extends Exporter {
+    // Extends: course/format/amd/src/local/courseeditor/exporter.js
 
     /**
      * Generate a section export data from the state.
@@ -43,5 +43,4 @@ export default class extends Exporter { // course/format/amd/src/local/courseedi
         }
         return section;
     }
-
 }

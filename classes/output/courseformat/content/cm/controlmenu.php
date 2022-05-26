@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Contains the default activity control menu.
- *
- * @package   core_courseformat
- * @copyright 2020 Ferran Recio <ferran@moodle.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace format_flexsections\output\courseformat\content\cm;
 
 use action_menu;
@@ -38,10 +30,10 @@ use section_info;
 use stdClass;
 
 /**
- * Base class to render a course module menu inside a course format.
+ * Class to render a course module menu inside a course format.
  *
- * @package   core_courseformat
- * @copyright 2020 Ferran Recio <ferran@moodle.com>
+ * @package   format_flexsections
+ * @copyright 2022 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class controlmenu extends \core_courseformat\output\local\content\cm\controlmenu {

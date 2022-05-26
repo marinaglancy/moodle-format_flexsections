@@ -12,17 +12,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/* eslint-disable no-console */
 
-/**
- * Course format component
- *
- * @module     format_flexsections/format
- * @copyright  2022 Marina Glancy
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-import Component from 'core_courseformat/local/content'; // course/format/amd/src/local/content.js
+import Component from 'core_courseformat/local/content';
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 import Section from 'format_flexsections/local/content/section';
 import CmItem from 'core_courseformat/local/content/section/cmitem';
@@ -31,7 +22,15 @@ import FlexsectionsActions from 'format_flexsections/local/content/actions';
 import Exporter from "format_flexsections/local/courseeditor/exporter";
 import {get_string as getString} from "core/str";
 
+/**
+ * Course format component
+ *
+ * @module     format_flexsections/local/content
+ * @copyright  2022 Marina Glancy
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 export default class FlexsectionComponent extends Component {
+    // Extends course/format/amd/src/local/content.js
 
     /**
      * Static method to create a component instance form the mustahce template.
@@ -47,8 +46,8 @@ export default class FlexsectionComponent extends Component {
         courseEditor.getExporter = () => new Exporter(courseEditor);
 
         // Hack to preserve legacy mutations (added in core_course/actions) after we set own plugin mutations.
-        let legacyActivityAction = courseEditor.mutations['legacyActivityAction'] ?? {};
-        let legacySectionAction = courseEditor.mutations['legacySectionAction'] ?? {};
+        let legacyActivityAction = courseEditor.mutations.legacyActivityAction ?? {};
+        let legacySectionAction = courseEditor.mutations.legacySectionAction ?? {};
         courseEditor.setMutations(new Mutations());
         courseEditor.addMutations({legacyActivityAction, legacySectionAction});
 
@@ -108,7 +107,7 @@ export default class FlexsectionComponent extends Component {
     _refreshCourseHierarchy({element}) {
         const hierarchy = element.hierarchy ?? [];
         const createSection = this._createSectionItem.bind(this);
-        for (let i = 0; i<hierarchy.length; i++) {
+        for (let i = 0; i < hierarchy.length; i++) {
             const sectionlist = hierarchy[i].children;
             const listparent = this.getElement(this.selectors.COURSE_SUBSECTIONLIST + `[data-parent='${hierarchy[i].id}']`);
             if (listparent) {
@@ -126,7 +125,12 @@ export default class FlexsectionComponent extends Component {
     _refreshSectionTitle({element}) {
         const el = this.getElement(this.selectors.SECTION_ADD_SUBSECTION + `[data-parentid='${element.id}']`);
         if (el) {
-            getString('addsubsectionfor', 'format_flexsections', element.title).then((s) => {el.innerHTML = s;});
+            getString('addsubsectionfor', 'format_flexsections', element.title)
+                .then((s) => {
+                    el.innerHTML = s;
+                    return null;
+                })
+                .catch(() => null);
         }
     }
 
@@ -215,6 +219,12 @@ export default class FlexsectionComponent extends Component {
         );
     }
 
+    /**
+     * Find main section
+     *
+     * @param {Object} state The state data
+     * @returns {Number}
+     */
     _mainSection(state) {
         const sectionsList = state.course.sectionlist;
         let sectionNumber = 0;
@@ -228,6 +238,12 @@ export default class FlexsectionComponent extends Component {
         return sectionNumber;
     }
 
+    /**
+     * Get all sections that can be collapsed or expanded
+     *
+     * @param {Object} state The state data
+     * @returns {Array}
+     */
     _getSectionsWithCollapse(state) {
         if (state === undefined) {
             state = this.reactive.stateManager.state;

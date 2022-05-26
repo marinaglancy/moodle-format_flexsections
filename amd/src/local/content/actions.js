@@ -1,4 +1,18 @@
-/* eslint-disable no-console */
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 import {BaseComponent} from 'core/reactive';
 import {get_string as getString, get_strings as getStrings} from "core/str";
 import Notification from "core/notification";
@@ -6,6 +20,13 @@ import ModalFactory from "core/modal_factory";
 import Templates from "core/templates";
 import Pending from "core/pending";
 
+/**
+ * Actions
+ *
+ * @module     format_flexsections/local/content/actions
+ * @copyright  2022 Marina Glancy
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 export default class extends BaseComponent {
     // Example: course/format/amd/src/local/content/actions.js
 
@@ -13,20 +34,10 @@ export default class extends BaseComponent {
      * Constructor hook.
      */
     create() {
-        // Optional component name for debugging.
-        // this.name = 'content_actions';
         // Default query selectors.
         this.selectors = {
             ACTIONLINK: `[data-action-flexsections]`,
-            // // Move modal selectors.
             SECTIONLINK: `[data-for='section']`,
-            // CMLINK: `[data-for='cm']`,
-            // SECTIONNODE: `[data-for='sectionnode']`,
-            // MODALTOGGLER: `[data-toggle='collapse']`,
-            // ADDSECTION: `[data-action='addSection']`,
-            // CONTENTTREE: `#destination-selector`,
-            // ACTIONMENU: `.action-menu`,
-            // ACTIONMENUTOGGLER: `[data-toggle="dropdown"]`,
         };
         // Component css classes.
         this.classes = {
@@ -73,6 +84,12 @@ export default class extends BaseComponent {
         return `_request${requestName}`;
     }
 
+    /**
+     * Handle a merge section request.
+     *
+     * @param {Element} target the dispatch action element
+     * @param {Event} event the triggered event
+     */
     _requestMergeup(target, event) {
         event.preventDefault();
         getStrings([
@@ -93,6 +110,12 @@ export default class extends BaseComponent {
         }).fail(Notification.exception);
     }
 
+    /**
+     * Handle a move section request.
+     *
+     * @param {Element} target the dispatch action element
+     * @param {Event} event the triggered event
+     */
     _requestMoveSection(target, event) {
         event.preventDefault();
         const sectionId = target.getAttribute('data-id');
@@ -100,7 +123,6 @@ export default class extends BaseComponent {
         const exporter = this.reactive.getExporter();
         const data = exporter.course(this.reactive.state);
         data.sectiontitle = sectionInfo.title;
-        //console.log(data);
 
         if (data.sections.length === 1 && `${data.sections[0].singlesection}` === '1') {
             // We are on a page of a collapsed section. Do not show "move before" and "move after" controls.
@@ -111,7 +133,7 @@ export default class extends BaseComponent {
         const buildParents = (sections, parents) => {
             for (var i in sections) {
                 sections[i].parents = parents;
-                sections[i].aftersectionid = (i>0) ? sections[i-1].id : 0;
+                sections[i].aftersectionid = (i > 0) ? sections[i - 1].id : 0;
                 buildParents(sections[i].children, parents + ',' + sections[i].id);
                 sections[i].lastchildid = sections[i].children.length ?
                     sections[i].children[sections[i].children.length - 1].id : 0;
@@ -131,13 +153,22 @@ export default class extends BaseComponent {
                 Templates.render('format_flexsections/local/content/movesection', data).
                 then((body) => {
                     modal.setBody(body);
-                    this.setupMoveSection(modal, modal.getBody()[0], sectionId, data);
-                });
+                    this._setupMoveSection(modal, modal.getBody()[0], sectionId, data);
+                    return null;
+                })
+                .fail(() => null);
                 modal.show();
                 return modal;
-            });
+            })
+            .fail(() => null);
     }
 
+    /**
+     * Handle a move activity request.
+     *
+     * @param {Element} target the dispatch action element
+     * @param {Event} event the triggered event
+     */
     _requestMoveCm(target, event) {
         event.preventDefault();
         const cmId = target.dataset.id;
@@ -167,12 +198,24 @@ export default class extends BaseComponent {
                 then((body) => {
                     modal.setBody(body);
                     this._setupMoveCm(modal, modal.getBody()[0], cmId, data);
-                });
+                    return null;
+                })
+                .fail(() => null);
                 modal.show();
                 return modal;
-            });
+            })
+            .fail(() => null);
     }
 
+    /**
+     * Set up a popup window for moving activity
+     *
+     * @param {Modal} modal
+     * @param {Element} modalBody
+     * @param {Number} cmId
+     * @param {Object} data
+     * @param {Element} element
+     */
     _setupMoveCm(modal, modalBody, cmId, data, element = null) {
 
         // Capture click.
@@ -193,6 +236,12 @@ export default class extends BaseComponent {
         });
     }
 
+    /**
+     * Destroy modal popup
+     *
+     * @param {Modal} modal
+     * @param {Element} element
+     */
     _destroyModal(modal, element = null) {
 
         // Destroy
@@ -208,18 +257,28 @@ export default class extends BaseComponent {
 
     }
 
-    setupMoveSection(modal, modalBody, sectionId, data, element = null) {
+    /**
+     * Set up a popup window for moving section
+     *
+     * @param {Modal} modal
+     * @param {Element} modalBody
+     * @param {Number} sectionId
+     * @param {Object} data
+     * @param {Element} element
+     */
+    _setupMoveSection(modal, modalBody, sectionId, data, element = null) {
 
         // Disable moving before or after itself or under one of its own children.
         const links = modalBody.querySelectorAll(`${this.selectors.SECTIONLINK}`);
         for (let i = 0; i < links.length; ++i) {
-            const re = new RegExp(`,${sectionId},`,"g");
+            const re = new RegExp(`,${sectionId},`, "g");
             if (links[i].getAttribute('data-before') === `${sectionId}` || links[i].getAttribute('data-after') === `${sectionId}` ||
                 `${links[i].getAttribute('data-parents')},`.match(re)) {
                 this._disableLink(links[i]);
             }
         }
 
+        // TODO.
         // Setup keyboard navigation.
         // new ContentTree(
         //     modalBody.querySelector(this.selectors.CONTENTTREE),
@@ -265,13 +324,25 @@ export default class extends BaseComponent {
         }
     }
 
+    /**
+     * Handle a move request to add a subsection.
+     *
+     * @param {Element} target the dispatch action element
+     * @param {Event} event the triggered event
+     */
     _requestAddSubSection(target, event) {
         event.preventDefault();
-        this.reactive.dispatch('addSubSection', parseInt(target.dataset.parentid ?? 0), );
+        this.reactive.dispatch('addSubSection', parseInt(target.dataset.parentid ?? 0));
     }
 
+    /**
+     * Handle a request to switch the section mode (displayed on the same page vs as a link).
+     *
+     * @param {Element} target the dispatch action element
+     * @param {Event} event the triggered event
+     */
     _requestSectionSwitchCollapsed(target, event) {
         event.preventDefault();
-        this.reactive.dispatch('sectionSwitchCollapsed', target.dataset.id ?? 0, );
+        this.reactive.dispatch('sectionSwitchCollapsed', target.dataset.id ?? 0);
     }
 }

@@ -1,3 +1,50 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_flexsections/local/content/movecm_one
+
+    Displays the course index.
+
+    Example context (json):
+        {
+            "title": "General",
+            "id": 42,
+            "number": 1,
+            "sectionurl": "#",
+            "hascms": true,
+            "cms": [
+                {
+                    "name": "Glossary of characters",
+                    "id": "10",
+                    "url": "#"
+                },
+                {
+                    "name": "World Cinema forum",
+                    "id": "11",
+                    "url": "#"
+                },
+                {
+                    "name": "Announcements",
+                    "id": "12",
+                    "url": "#"
+                }
+            ]
+        }
+}}
 <div data-for="sectionnode"
      role="treeitem"
 >
