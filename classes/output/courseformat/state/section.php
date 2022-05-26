@@ -48,7 +48,7 @@ class section extends \core_courseformat\output\local\state\section {
             $data->cmlist = [];
         } else if ($this->section->section) {
             foreach ($this->format->get_modinfo()->get_section_info_all() as $s) {
-                if ($s->parent == $this->section->section) {
+                if ($s->parent == $this->section->section && $this->format->is_section_visible($s)) {
                     $data->children[] = (array)((new static($this->format, $s))->export_for_template($output)) +
                         $this->default_section_properties();
                 }

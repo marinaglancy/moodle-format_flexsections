@@ -146,7 +146,7 @@ class content extends \core_courseformat\output\local\content {
         $viewedsection = $this->format->get_viewed_section();
         return array_values(array_filter($modinfo->get_section_info_all(), function($s) use ($viewedsection) {
             return (!$s->section) ||
-                (!$viewedsection && !$s->parent) ||
+                (!$viewedsection && !$s->parent && $this->format->is_section_visible($s)) ||
                 ($viewedsection && $s->section == $viewedsection);
         }));
     }

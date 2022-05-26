@@ -29,6 +29,7 @@ import CmItem from 'core_courseformat/local/content/section/cmitem';
 import Mutations from "format_flexsections/local/courseeditor/mutations";
 import FlexsectionsActions from 'format_flexsections/local/content/actions';
 import Exporter from "format_flexsections/local/courseeditor/exporter";
+import {get_string as getString} from "core/str";
 
 export default class FlexsectionComponent extends Component {
 
@@ -67,6 +68,7 @@ export default class FlexsectionComponent extends Component {
     create(descriptor) {
         super.create(descriptor);
         this.selectors.COURSE_SUBSECTIONLIST = `[data-for='course_subsectionlist']`;
+        this.selectors.SECTION_ADD_SUBSECTION = `[data-action-flexsections='addSubSection']`;
     }
 
     /**
@@ -93,6 +95,7 @@ export default class FlexsectionComponent extends Component {
         let res = super.getWatchers();
         res.push({watch: `course.hierarchy:updated`, handler: this._refreshCourseHierarchy});
         res.push({watch: `section.collapsed:updated`, handler: this._reloadSection});
+        res.push({watch: `section.title:updated`, handler: this._refreshSectionTitle});
         return res;
     }
 
@@ -111,6 +114,19 @@ export default class FlexsectionComponent extends Component {
             if (listparent) {
                 this._fixOrder(listparent, sectionlist, this.selectors.SECTION, this.dettachedSections, createSection);
             }
+        }
+    }
+
+    /**
+     * When section title has changed, change the link "Add subscrtion for XYZ"
+     *
+     * @param {Object} param
+     * @param {Object} param.element details the update details.
+     */
+    _refreshSectionTitle({element}) {
+        const el = this.getElement(this.selectors.SECTION_ADD_SUBSECTION + `[data-parentid='${element.id}']`);
+        if (el) {
+            getString('addsubsectionfor', 'format_flexsections', element.title).then((s) => {el.innerHTML = s;});
         }
     }
 

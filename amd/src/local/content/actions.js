@@ -52,9 +52,6 @@ export default class extends BaseComponent {
 
     _dispatchClick(event) {
         const target = event.target.closest(this.selectors.ACTIONLINK);
-        console.log('_dispatchClick');
-        console.log(event);
-        console.log(target);
         if (!target) {
             return;
         }
@@ -65,7 +62,6 @@ export default class extends BaseComponent {
 
         // Invoke proper method.
         const methodName = this._actionMethodName(target.getAttribute('data-action-flexsections'));
-        console.log('Trying to call '+methodName);
 
         if (this[methodName] !== undefined) {
             this[methodName](target, event);
@@ -271,7 +267,7 @@ export default class extends BaseComponent {
 
     _requestAddSubSection(target, event) {
         event.preventDefault();
-        this.reactive.dispatch('addSubSection', target.dataset.parentid ?? 0, );
+        this.reactive.dispatch('addSubSection', parseInt(target.dataset.parentid ?? 0), );
     }
 
     _requestSectionSwitchCollapsed(target, event) {

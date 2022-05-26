@@ -89,9 +89,11 @@ class section extends \core_courseformat\output\local\content\section {
         $data = [];
         foreach ($modinfo->get_section_info_all() as $section) {
             if ($section->parent == $this->section->section) {
-                $d = (array)((new static($this->format, $section))->export_for_template($output)) +
-                    $this->default_section_properties();
-                $data[] = (object)$d;
+                if ($this->format->is_section_visible($section)) {
+                    $d = (array)((new static($this->format, $section))->export_for_template($output)) +
+                        $this->default_section_properties();
+                    $data[] = (object)$d;
+                }
             }
         }
         return $data;

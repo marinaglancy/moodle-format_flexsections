@@ -43,8 +43,6 @@ class format_flexsections_test extends \advanced_testcase {
 
     /**
      * Tests for format_flexsections::get_section_name method with default section names.
-     *
-     * @return void
      */
     public function test_get_section_name() {
         global $DB;
@@ -186,7 +184,8 @@ class format_flexsections_test extends \advanced_testcase {
         $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => 2]);
 
         // Call callback format_flexsections_inplace_editable() directly.
-        $tmpl = component_callback('format_flexsections', 'inplace_editable', ['sectionname', $section->id, 'Rename me again']);
+        $tmpl = component_callback('format_flexsections', 'inplace_editable',
+            ['sectionname', $section->id, 'Rename me again']);
         $this->assertInstanceOf('core\output\inplace_editable', $tmpl);
         $res = $tmpl->export_for_template($PAGE->get_renderer('core'));
         $this->assertEquals('Rename me again', $res['value']);
@@ -249,33 +248,18 @@ class format_flexsections_test extends \advanced_testcase {
         global $CFG;
         $this->resetAfterTest();
 
-        $linkcoursesections = $CFG->linkcoursesections;
-
         // Generate a course with two sections (0 and 1) and two modules.
         $generator = $this->getDataGenerator();
         $course1 = $generator->create_course(['format' => 'flexsections']);
         course_create_sections_if_missing($course1, [0, 1]);
 
         $data = (object)['id' => $course1->id];
+        /** @var \format_flexsections $format */
         $format = course_get_format($course1);
         $format->update_course_format_options($data);
 
-        // In page.
-        $CFG->linkcoursesections = 0;
         $this->assertNotEmpty($format->get_view_url(null));
         $this->assertNotEmpty($format->get_view_url(0));
         $this->assertNotEmpty($format->get_view_url(1));
-        $CFG->linkcoursesections = 1;
-        $this->assertNotEmpty($format->get_view_url(null));
-        $this->assertNotEmpty($format->get_view_url(0));
-        $this->assertNotEmpty($format->get_view_url(1));
-
-        // Navigation.
-        $CFG->linkcoursesections = 0;
-        $this->assertNull($format->get_view_url(1, ['navigation' => 1]));
-        $this->assertNull($format->get_view_url(0, ['navigation' => 1]));
-        $CFG->linkcoursesections = 1;
-        $this->assertNotEmpty($format->get_view_url(1, ['navigation' => 1]));
-        $this->assertNotEmpty($format->get_view_url(0, ['navigation' => 1]));
     }
 }

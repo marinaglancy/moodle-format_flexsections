@@ -201,31 +201,93 @@ class format_flexsections extends core_courseformat\base {
      * @return void
      */
     public function extend_course_navigation($navigation, navigation_node $node) {
-        global $PAGE;
-        // If section is specified in course/view.php, make sure it is expanded in navigation.
-        if ($navigation->includesectionnum === false) {
-            $selectedsection = optional_param('section', null, PARAM_INT);
-            if ($selectedsection !== null && (!defined('AJAX_SCRIPT') || AJAX_SCRIPT == '0') &&
-                    $PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)) {
-                $navigation->includesectionnum = $selectedsection;
-            }
+        // If course format displays section on separate pages and we are on course/view.php page
+        // and the section parameter is specified, make sure this section is expanded in
+        // navigation.
+        if ($navigation->includesectionnum === false && $this->get_viewed_section() &&
+            (!defined('AJAX_SCRIPT') || AJAX_SCRIPT == '0')) {
+            $navigation->includesectionnum = $this->get_viewed_section();
         }
 
-        // Check if there are callbacks to extend course navigation.
-        parent::extend_course_navigation($navigation, $node);
-
-        // We want to remove the general section if it is empty.
-        $modinfo = get_fast_modinfo($this->get_course());
-        $sections = $modinfo->get_sections();
-        if (!isset($sections[0])) {
-            // The general section is empty to find the navigation node for it we need to get its ID.
-            $section = $modinfo->get_section_info(0);
-            $generalsection = $node->get($section->id, navigation_node::TYPE_SECTION);
-            if ($generalsection) {
-                // We found the node - now remove it.
-                $generalsection->remove();
+        $modinfo = get_fast_modinfo($this->courseid);
+        if (!empty($modinfo->sections[0])) {
+            foreach ($modinfo->sections[0] as $cmid) {
+                $this->navigation_add_activity($node, $modinfo->get_cm($cmid));
             }
         }
+        foreach ($modinfo->get_section_info_all() as $section) {
+            if ($section->parent == 0 && $section->section != 0) {
+                $this->navigation_add_section($navigation, $node, $section);
+            }
+        }
+    }
+
+    /**
+     * Adds a course module to the navigation node
+     *
+     * @param navigation_node $node
+     * @param cm_info $cm
+     * @return null|navigation_node
+     */
+    protected function navigation_add_activity(navigation_node $node, cm_info $cm): ?navigation_node {
+        if (!$cm->uservisible || !$cm->has_view()) {
+            return null;
+        }
+        $activityname = $cm->get_formatted_name();
+        $action = $cm->url;
+        if ($cm->icon) {
+            $icon = new pix_icon($cm->icon, $cm->modfullname, $cm->iconcomponent);
+        } else {
+            $icon = new pix_icon('icon', $cm->modfullname, $cm->modname);
+        }
+        $activitynode = $node->add($activityname, $action, navigation_node::TYPE_ACTIVITY, null, $cm->id, $icon);
+        if (global_navigation::module_extends_navigation($cm->modname)) {
+            $activitynode->nodetype = navigation_node::NODETYPE_BRANCH;
+        } else {
+            $activitynode->nodetype = navigation_node::NODETYPE_LEAF;
+        }
+        if (method_exists($cm, 'is_visible_on_course_page')) {
+            $activitynode->display = $cm->is_visible_on_course_page();
+        }
+        return $activitynode;
+    }
+
+    /**
+     * Adds a section to navigation node, loads modules and subsections if necessary
+     *
+     * @param global_navigation $navigation
+     * @param navigation_node $node
+     * @param section_info $section
+     * @return null|navigation_node
+     */
+    protected function navigation_add_section($navigation, navigation_node $node, section_info $section): ?navigation_node {
+        if (!$section->uservisible || !$this->is_section_real_available($section)) {
+            return null;
+        }
+        $sectionname = get_section_name($this->get_course(), $section);
+        $url = course_get_url($this->get_course(), $section->section, array('navigation' => true));
+
+        $sectionnode = $node->add($sectionname, $url, navigation_node::TYPE_SECTION, null, $section->id);
+        $sectionnode->nodetype = navigation_node::NODETYPE_BRANCH;
+        $sectionnode->hidden = !$section->visible || !$section->available;
+        if ($section->section == $this->get_viewed_section()) {
+            $sectionnode->force_open();
+        }
+        if ($this->section_has_parent($navigation->includesectionnum, $section->section)
+            || $navigation->includesectionnum == $section->section) {
+            $modinfo = get_fast_modinfo($this->courseid);
+            if (!empty($modinfo->sections[$section->section])) {
+                foreach ($modinfo->sections[$section->section] as $cmid) {
+                    $this->navigation_add_activity($sectionnode, $modinfo->get_cm($cmid));
+                }
+            }
+            foreach ($modinfo->get_section_info_all() as $subsection) {
+                if ($subsection->parent == $section->section && $subsection->section != 0) {
+                    $this->navigation_add_section($navigation, $sectionnode, $subsection);
+                }
+            }
+        }
+        return $sectionnode;
     }
 
     /**

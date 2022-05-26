@@ -54,7 +54,8 @@ class course extends \core_courseformat\output\local\state\course {
         $res1 = $res2 = [];
         $toinclude = [$viewedsection ?: 0];
         foreach ($allsections as $s) {
-            if ($s->section && (in_array($s->parent, $toinclude) || ($viewedsection && $s->section == $viewedsection))) {
+            if ($s->section && $this->format->is_section_visible($s) &&
+                    (in_array($s->parent, $toinclude) || ($viewedsection && $s->section == $viewedsection))) {
                 $children = [];
                 foreach ($allsections as $ss) {
                     if ($ss->parent == $s->section) {

@@ -76,7 +76,7 @@ class header extends \core_courseformat\output\local\content\section\header {
     protected function title_needs_indenting(): bool {
         $hassections = [FORMAT_FLEXSECTIONS_COLLAPSED => false, FORMAT_FLEXSECTIONS_EXPANDED => 0];
         foreach ($this->format->get_modinfo()->get_section_info_all() as $section) {
-            if ($section->section && $section->parent == $this->section->parent) {
+            if ($section->section && $section->parent == $this->section->parent && $this->format->is_section_visible($section)) {
                 $hassections[$section->collapsed] = true;
             }
         }

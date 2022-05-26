@@ -1,4 +1,4 @@
-@format @format_flexsections
+@format @format_flexsections @javascript
 Feature: Sections can be edited and deleted in flexsections format
   In order to rearrange my course contents
   As a teacher
@@ -23,18 +23,6 @@ Feature: Sections can be edited and deleted in flexsections format
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
 
-  Scenario: View the default name of the general section in flexsections format
-    When I edit the section "0"
-    Then the field "Custom" matches value "0"
-    And the field "New value for Section name" matches value "General"
-
-  Scenario: Edit the default name of the general section in flexsections format
-    Given I should see "General" in the "General" "section"
-    When I edit the section "0" and I fill the form with:
-      | Custom | 1                     |
-      | New value for Section name      | This is the general section |
-    Then I should see "This is the general section" in the "This is the general section" "section"
-
   Scenario: View the default name of the second section in flexsections format
     When I edit the section "2"
     Then the field "Custom" matches value "0"
@@ -52,7 +40,6 @@ Feature: Sections can be edited and deleted in flexsections format
     Then I should see "This is the second topic" in the "This is the second topic" "section"
     And I should not see "Topic 2" in the "region-main" "region"
 
-  @javascript
   Scenario: Inline edit section name in flexsections format
     When I set the field "Edit section name" in the "Topic 1" "section" to "Midterm evaluation"
     Then I should not see "Topic 1" in the "region-main" "region"
@@ -65,27 +52,19 @@ Feature: Sections can be edited and deleted in flexsections format
   Scenario: Deleting the last section in flexsections format
     When I delete section "5"
     Then I should see "Are you absolutely sure you want to completely delete \"Topic 5\" and all the activities it contains?"
-    And I press "Delete"
+    And I click on "Delete" "button" in the "Confirm" "dialogue"
     And I should not see "Topic 5"
     And I should see "Topic 4"
 
   Scenario: Deleting the middle section in flexsections format
     When I delete section "4"
-    And I press "Delete"
+    And I click on "Delete" "button" in the "Confirm" "dialogue"
     Then I should not see "Topic 5"
     And I should not see "Test chat name"
     And I should see "Test choice name" in the "Topic 4" "section"
     And I should see "Topic 4"
 
-  @javascript
   Scenario: Adding sections at the end of a flexsections format
-    When I click on "Add section" "link" in the "Topic 5" "section"
+    When I click on "Add section" "link"
     Then I should see "Topic 6" in the "Topic 6" "section"
     And I should see "Test choice name" in the "Topic 5" "section"
-
-  @javascript
-  Scenario: Adding sections between sections in flexsections format
-    When I click on "Add section" "link" in the "Topic 4" "section"
-    Then I should see "Topic 6" in the "Topic 6" "section"
-    And I should not see "Test choice name" in the "Topic 5" "section"
-    And I should see "Test choice name" in the "Topic 6" "section"
