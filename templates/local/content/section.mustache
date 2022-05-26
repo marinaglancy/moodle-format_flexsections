@@ -38,7 +38,7 @@
                 {
                     "cmitem": {
                         "cmformat": {
-                            "cmname": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Forum example</span></a>",
+                            "cmname": {"displayvalue": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Forum example</span></a>"},
                             "hasname": "true"
                         },
                         "id": 3,
@@ -50,7 +50,7 @@
                 {
                     "cmitem": {
                         "cmformat": {
-                            "cmname": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Assign example</span></a>",
+                            "cmname": {"displayvalue": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Another forum</span></a>"},
                             "hasname": "true"
                         },
                         "id": 4,
@@ -83,9 +83,14 @@
         "insertafter": true,
         "numsections": 42,
         "sitehome": false,
-        "highlightedlabel" : "Highlighted"
+        "highlightedlabel" : "Highlighted",
+        "testingonly-make-mustache-lint-happy": 1
     }
 }}
+{{#testingonly-make-mustache-lint-happy}}
+<ul>
+{{/testingonly-make-mustache-lint-happy}}
+
 {{< core_courseformat/local/content/section }}
 
     {{$ core_courseformat/local/content/section/content }}
@@ -97,3 +102,7 @@
     {{/ core_courseformat/local/content/section/header }}
 
 {{/ core_courseformat/local/content/section }}
+
+{{#testingonly-make-mustache-lint-happy}}
+</ul>
+{{/testingonly-make-mustache-lint-happy}}

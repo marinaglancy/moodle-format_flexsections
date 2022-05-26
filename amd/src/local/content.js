@@ -66,6 +66,8 @@ export default class FlexsectionComponent extends Component {
      */
     create(descriptor) {
         super.create(descriptor);
+        // Optional component name for debugging.
+        this.name = 'course_format_flexsections';
         this.selectors.COURSE_SUBSECTIONLIST = `[data-for='course_subsectionlist']`;
         this.selectors.SECTION_ADD_SUBSECTION = `[data-action-flexsections='addSubSection']`;
     }

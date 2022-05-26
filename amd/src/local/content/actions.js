@@ -34,6 +34,8 @@ export default class extends BaseComponent {
      * Constructor hook.
      */
     create() {
+        // Optional component name for debugging.
+        this.name = 'content_actions_flexsections';
         // Default query selectors.
         this.selectors = {
             ACTIONLINK: `[data-action-flexsections]`,

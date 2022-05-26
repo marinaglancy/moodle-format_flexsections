@@ -25,13 +25,18 @@
         "id": 42,
         "number": 1,
         "sectionurl": "#",
-        "indexcollapsed": 0
+        "indexcollapsed": 0,
+        "testingonly-make-mustache-lint-happy": 1
     }
 
 }}
+{{#testingonly-make-mustache-lint-happy}}
+<ul>
+{{/testingonly-make-mustache-lint-happy}}
+
 {{#number}}
     {{^singlesection}}
-        <div>
+        <li>
             <a href="#{{id}}"
                class="collapse-list-link text-truncate"
                data-for="section"
@@ -43,9 +48,9 @@
             >
                 {{#str}} movebeforesection, format_flexsections, {{{title}}} {{/str}}
             </a>
-        </div>
+        </li>
     {{/singlesection}}
-    <div class="collapse-list-item d-flex p-0" id="movemodalsection{{number}}">
+    <li class="collapse-list-item d-flex p-0" id="movemodalsection{{number}}">
         {{^singlesection}}
         <a data-toggle="collapse"
            href="#movemodalcollapse{{number}}"
@@ -66,11 +71,10 @@
         </a>
         {{/singlesection}}
         {{{title}}}
-    </div>
-    <div id="movemodalcollapse{{number}}"
+    </li>
+    <li id="movemodalcollapse{{number}}"
          class="collapse-list-item-content collapse {{^contentcollapsed}}show{{/contentcollapsed}} pl-3"
          aria-labelledby="movemodalsection{{number}}"
-         role="group"
     >
         <ul class="unlist">
             {{#haschildren}}
@@ -97,6 +101,9 @@
                 </a>
             </li>
         </ul>
-    </div>
+    </li>
 {{/number}}
 
+{{#testingonly-make-mustache-lint-happy}}
+</ul>
+{{/testingonly-make-mustache-lint-happy}}

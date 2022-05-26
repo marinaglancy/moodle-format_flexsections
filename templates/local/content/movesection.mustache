@@ -54,12 +54,12 @@
 
 }}
 <p data-for="sectionname">{{#str}} movefull, moodle, {{sectiontitle}} {{/str}}:</p>
-<div class="collapse-list" id="destination-selector" role="tree">
+<ul class="collapse-list unlist" id="destination-selector" role="tree">
     {{#sections}}
         {{> format_flexsections/local/content/movesection_one }}
     {{/sections}}
     {{^singlesectionmode}}
-        <div>
+        <li>
             <a href="#"
                class="collapse-list-link text-truncate"
                data-for="section"
@@ -70,6 +70,6 @@
             >
                 {{#str}} movesectiontotheend, format_flexsections {{/str}}
             </a>
-        </div>
+        </li>
     {{/singlesectionmode}}
-</div>
+</ul>

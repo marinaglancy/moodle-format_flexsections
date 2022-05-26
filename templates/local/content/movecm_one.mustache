@@ -42,9 +42,14 @@
                     "id": "12",
                     "url": "#"
                 }
-            ]
+            ],
+            "testingonly-make-mustache-lint-happy": 1
         }
 }}
+{{#testingonly-make-mustache-lint-happy}}
+<div class="collapse-list" id="destination-selector" role="tree">
+{{/testingonly-make-mustache-lint-happy}}
+
 <div data-for="sectionnode"
      role="treeitem"
 >
@@ -111,3 +116,7 @@
 
     </div>
 </div>
+
+{{#testingonly-make-mustache-lint-happy}}
+</div>
+{{/testingonly-make-mustache-lint-happy}}

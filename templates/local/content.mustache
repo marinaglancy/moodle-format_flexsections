@@ -21,6 +21,7 @@
 
     Example context (json):
     {
+        "title": "Course",
         "initialsection": {
             "num": 0,
             "id": 34,
@@ -29,10 +30,11 @@
                     {
                         "cmitem": {
                             "cmformat": {
-                                "cmname": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Forum example</span></a>",
+                                "cmname": {"displayvalue": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Forum example</span></a>"},
                                 "hasname": "true"
                             },
                             "id": 3,
+                            "anchor": "module-3",
                             "module": "forum",
                             "extraclasses": "newmessages"
                         }
@@ -50,7 +52,7 @@
                 "num": 1,
                 "id": 35,
                 "header": {
-                    "name": "Section title",
+                    "title": "Section title",
                     "url": "#"
                 },
                 "cmlist": {
@@ -58,10 +60,11 @@
                         {
                             "cmitem": {
                                 "cmformat": {
-                                    "cmname": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Another forum</span></a>",
+                                    "cmname": {"displayvalue": "<a class=\"aalink\" href=\"#\"><span class=\"instancename\">Another forum</span></a>"},
                                     "hasname": "true"
                                 },
-                                "id": 3,
+                                "id": 4,
+                                "anchor": "module-4",
                                 "module": "forum",
                                 "extraclasses": "newmessages"
                             }
@@ -76,29 +79,6 @@
             }
         ],
         "format": "flexsections",
-        "title": "Course title example",
-            "hasnavigation": true,
-            "sectionnavigation": {
-            "hasprevious": true,
-            "previousurl": "#",
-            "larrow": "&#x25C4;",
-            "previousname": "Section 3",
-            "hasnext": true,
-            "rarrow": "&#x25BA;",
-            "nexturl": "#",
-            "nextname": "Section 5"
-        },
-        "sectionselector": {
-            "hasprevious": true,
-            "previousurl": "#",
-            "larrow": "&#x25C4;",
-            "previousname": "Section 3",
-            "hasnext": true,
-            "rarrow": "&#x25BA;",
-            "nexturl": "#",
-            "nextname": "Section 5",
-            "selector": "<select><option>Section 4</option></select>"
-        },
         "sectionreturn": 1
     }
 }}
