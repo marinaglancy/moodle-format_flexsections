@@ -64,6 +64,23 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         $url->param('sesskey', sesskey());
 
         $controls = [];
+
+        if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
+                (!$section->collapsed || $section->section == $this->format->get_viewed_section())) {
+            $addsubsectionurl = new \moodle_url($url, ['addchildsection' => $section->section]);
+            $controls['addsubsection'] = [
+                'url' => $addsubsectionurl,
+                'icon' => 't/add',
+                'name' => get_string('addsubsection', 'format_flexsections'),
+                'pixattr' => ['class' => ''],
+                'attr' => [
+                    'class' => 'editing_addsubsection',
+                    'data-action-flexsections' => 'addSubSection',
+                    'data-parentid' => $section->id,
+                ],
+            ];
+        }
+
         if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
             $markerurl = new \moodle_url($url);
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
@@ -124,9 +141,9 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
 
         if ($section->parent && has_capability('moodle/course:update', $coursecontext) &&
                 $section->section != $this->format->get_viewed_section()) {
-            $collapseurl = new \moodle_url($url, ['mergeup' => $section->section]);
+            $mergeupurl = new \moodle_url($url, ['mergeup' => $section->section]);
             $controls['mergeup'] = [
-                'url' => $collapseurl,
+                'url' => $mergeupurl,
                 'icon' => 'mergeup',
                 'iconcomponent' => 'format_flexsections',
                 'name' => get_string('mergeup', 'format_flexsections'),

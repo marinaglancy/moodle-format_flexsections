@@ -40,19 +40,14 @@ export default class extends Mutations {
     }
 
     /**
-     * Add a new section to a specific course location.
+     * Add a new subsection to a specific section.
      *
      * @param {StateManager} stateManager the current state manager
-     * @param {number} parentSectionId optional the parent section id
+     * @param {number} parentSectionId
      */
     async addSubSection(stateManager, parentSectionId) {
         const course = stateManager.get('course');
-        let updates;
-        if (parentSectionId) {
-            updates = await this._callEditWebservice('section_add_subsection', course.id, [parentSectionId]);
-        } else {
-            updates = await this._callEditWebservice('section_add', course.id, [], 0);
-        }
+        const updates = await this._callEditWebservice('section_add_subsection', course.id, [], parentSectionId);
         stateManager.processUpdates(updates);
     }
 

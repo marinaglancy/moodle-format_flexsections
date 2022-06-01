@@ -32,9 +32,7 @@ class content extends \core_courseformat\output\local\content {
     /** @var \format_flexsections the course format class */
     protected $format;
 
-    /**
-     * @var bool Flexsections format has add section after each topic.
-     */
+    /** @var bool Flexsections format has add section. */
     protected $hasaddsection = true;
 
     /**
@@ -56,13 +54,12 @@ class content extends \core_courseformat\output\local\content {
     public function export_for_template(\renderer_base $output) {
         $data = parent::export_for_template($output);
 
+        // If we are on course view page for particular section.
         if ($this->format->get_viewed_section()) {
             // Do not display the "General" section when on a page of another section.
             $data->initialsection = null;
-        }
 
-        // If we are on course view page for particular section, return 'back to parent' control.
-        if ($this->format->get_viewed_section()) {
+            // Add 'back to parent' control.
             $section = $this->format->get_section($this->format->get_viewed_section());
             if ($section->parent) {
                 $sr = $this->format->find_collapsed_parent($section->parent);
@@ -80,6 +77,9 @@ class content extends \core_courseformat\output\local\content {
                     'coursename' => format_string($this->format->get_course()->fullname, true, ['context' => $context]),
                 ];
             }
+
+            // Hide add section link below page content.
+            $data->numsections = false;
         }
 
         return $data;

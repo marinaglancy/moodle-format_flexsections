@@ -55,6 +55,7 @@ class section extends \core_courseformat\output\local\content\section {
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
             && $this->format->get_viewed_section() != $this->section->section;
 
+        $data->showaslink = $showaslink;
         if ($showaslink) {
             $data->cmlist = [];
             $data->cmcontrols = '';
@@ -62,10 +63,7 @@ class section extends \core_courseformat\output\local\content\section {
 
         // Add subsections.
         if (!$showaslink) {
-            $addsection = new addsection($format, $this->section);
-            $data->numsections = $addsection->export_for_template($output);
-            $data->insertafter = true;
-            $data->numsections->subsections = $this->section->section ? $this->get_subsections($output) : [];
+            $data->subsections = $this->section->section ? $this->get_subsections($output) : [];
         }
 
         if (!$this->section->section || $this->section->section == $this->format->get_viewed_section()) {
