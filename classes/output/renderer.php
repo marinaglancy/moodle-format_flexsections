@@ -86,7 +86,7 @@ class renderer extends section_renderer {
     public function course_index_drawer(course_format $format): ?String {
         if ($format->uses_course_index()) {
             include_course_editor($format);
-            return $this->render_from_template('core_courseformat/local/courseindex/drawer', []);
+            return $this->render_from_template('format_flexsections/local/courseindex/drawer', []);
         }
         return '';
     }
