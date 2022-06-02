@@ -42,38 +42,37 @@ Feature: Deleting sections in flexsections format
 
   Scenario: Deleting the empty section in flexsections format
     When I open section "4" edit menu
-    When I click on "Delete section" "link" in the "li#section-4" "css_element"
-    #And I click on "Yes" "button" in the "Confirm" "dialogue"
-    Then I should not see "Topic 5"
-    And I should see "Topic 4"
-    And I should see "Fourth module"
+    And I click on "Delete section" "link" in the "li#section-4" "css_element"
+    Then I should not see "Topic 5" in the "region-main" "region"
+    And I should see "Topic 4" in the "region-main" "region"
+    And I should see "Fourth module" in the "region-main" "region"
 
   Scenario: Deleting the last section in flexsections format
     When I open section "5" edit menu
-    When I click on "Delete section" "link" in the "li#section-5" "css_element"
-    And I click on "Delete" "button" in the "Confirm" "dialogue"
-    Then I should not see "Topic 5"
-    And I should see "Topic 4"
-    And I should not see "Fourth module"
+    And I click on "Delete section" "link" in the "li#section-5" "css_element"
+    And I click on "Yes" "button" in the "Confirm" "dialogue"
+    Then I should not see "Topic 5" in the "region-main" "region"
+    And I should see "Topic 4" in the "region-main" "region"
+    And I should not see "Fourth module" in the "region-main" "region"
 
   Scenario: Deleting the subsection in flexsections format
     When I open section "2" edit menu
-    When I click on "Delete section" "link" in the "li#section-2" "css_element"
-    And I click on "Delete" "button" in the "Confirm" "dialogue"
-    Then I should not see "Topic 5"
-    And I should see "Topic 4"
-    And I should not see "Second module"
-    And I should see "Fourth module"
+    And I click on "Delete section" "link" in the "li#section-2" "css_element"
+    And I click on "Yes" "button" in the "Confirm" "dialogue"
+    Then I should not see "Topic 5" in the "region-main" "region"
+    And I should see "Topic 4" in the "region-main" "region"
+    And I should not see "Second module" in the "region-main" "region"
+    And I should see "Fourth module" in the "region-main" "region"
 
   Scenario: Deleting the section with subsections in flexsections format
     When I open section "1" edit menu
     When I click on "Delete section" "link" in the "li#section-1" "css_element"
-    And I click on "Delete" "button" in the "Confirm" "dialogue"
-    Then I should not see "Topic 5"
-    And I should not see "Topic 4"
-    And I should not see "Topic 3"
-    And I should see "Topic 2"
-    And I should not see "First module"
-    And I should not see "Second module"
-    And I should not see "Third module"
-    And I should see "Fourth module"
+    And I click on "Yes" "button" in the "Confirm" "dialogue"
+    Then I should not see "Topic 5" in the "region-main" "region"
+    And I should not see "Topic 4" in the "region-main" "region"
+    And I should not see "Topic 3" in the "region-main" "region"
+    And I should see "Topic 2" in the "region-main" "region"
+    And I should not see "First module" in the "region-main" "region"
+    And I should not see "Second module" in the "region-main" "region"
+    And I should not see "Third module" in the "region-main" "region"
+    And I should see "Fourth module" in the "region-main" "region"
