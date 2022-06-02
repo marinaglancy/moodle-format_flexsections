@@ -26,17 +26,17 @@ export default class extends Mutations {
     // Extends: course/format/amd/src/local/courseeditor/mutations.js
 
     /**
-     * Move course modules to specific course location.
+     * Merge section with its parent.
      *
      * @param {StateManager} stateManager the current state manager
-     * @param {array} sectionIds the list of section ids to move
+     * @param {number} sectionId
      */
-    async mergeup(stateManager, sectionIds) {
+    async sectionMergeUp(stateManager, sectionId) {
+        this.sectionLock(stateManager, [sectionId], true);
         const course = stateManager.get('course');
-        this.sectionLock(stateManager, sectionIds, true);
-        const updates = await this._callEditWebservice('mergeup', course.id, sectionIds);
+        const updates = await this._callEditWebservice('section_mergeup', course.id, [], sectionId);
         stateManager.processUpdates(updates);
-        this.sectionLock(stateManager, sectionIds, false);
+        this.sectionLock(stateManager, [sectionId], false);
     }
 
     /**

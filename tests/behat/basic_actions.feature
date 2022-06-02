@@ -33,6 +33,9 @@ Feature: Using course in flexsections format
     And I add a "Forum" to section "2" and I fill the form with:
       | Forum name  | Second module |
       | Description | Test          |
+    And I follow "Add section"
+    And I open section "3" edit menu
+    And I click on "Add subsection" "link" in the "li#section-3" "css_element"
 
   Scenario: Add sections and activities to flexsections format
     Given I should see "First module"
@@ -112,18 +115,27 @@ Feature: Using course in flexsections format
     And I expand "Topic 2" node
     And I should see "Second module" in the "Navigation" "block"
 
+  Scenario: No merging action at the top level section
+    When I open section "3" edit menu
+    Then I should not see "Merge with parent" in the "li#section-3" "css_element"
+
+  Scenario: Merging empty subsection in flexsections format
+    When I open section "4" edit menu
+    And I click on "Merge with parent" "link" in the "li#section-4" "css_element"
+    Then I should not see "Topic 4" in the "region-main" "region"
+
   Scenario: Merging subsection in flexsections format
     Given the following config values are set as admin:
       | unaddableblocks | | theme_boost|
     Given I add the "Navigation" block if not present
     When I open section "2" edit menu
     And I click on "Merge with parent" "link" in the "li#section-2" "css_element"
+    Then I should see "Are you sure you want to merge this section content with the parent? All activities and subsections will be moved"
     And I click on "Yes" "button" in the "Confirm" "dialogue"
     Then I should see "Topic 1" in the "region-main" "region"
-    And "li#section-2" "css_element" should not exist
-    And I should not see "Topic 2"
-    And I should see "First module" in the "region-main" "region"
-    And I should see "Second module" in the "region-main" "region"
+    And I should not see "Topic 2" in the "li#section-1" "css_element"
+    And I should see "First module" in the "li#section-1" "css_element"
+    And I should see "Second module" in the "li#section-1" "css_element"
     And I expand "Topic 1" node
     And I should see "First module" in the "Navigation" "block"
     And I should see "Second module" in the "Navigation" "block"
