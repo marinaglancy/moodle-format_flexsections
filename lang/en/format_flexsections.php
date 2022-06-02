@@ -51,3 +51,11 @@ $string['sectionname'] = 'Topic';
 $string['showcollapsed'] = 'Display as a link';
 $string['showexpanded'] = 'Display on the same page';
 $string['showfromothers'] = 'Show section';
+
+// Deprecated but still can be used in 4.0, to be removed when we have a branch for Moodle 4.1 or later.
+$string['addsection'] = 'Add section';
+$string['addsubsectionfor'] = 'Add subsection for \'{$a}\'';
+$string['cancelmoving'] = 'Cancel moving \'{$a}\'';
+$string['confirmdelete'] = 'Are you sure you want to delete this section? All activities and subsections will also be deleted.';
+$string['removemarker'] = 'Do not mark as current';
+$string['setmarker'] = 'Mark as current';
