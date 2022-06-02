@@ -77,15 +77,10 @@ export default class Component extends BaseCourseindex {
         const hierarchy = element.hierarchy ?? [];
         let dettachedSections = [];
         for (let i = 0; i < hierarchy.length; i++) {
-            const sectionlist = hierarchy[i].children;
             const listparent = this.getElement(this.selectors.COURSE_SUBSECTIONLIST + `[data-parent='${hierarchy[i].id}']`);
-            if (listparent) {
-                this._fixOrderFlexsections(listparent, sectionlist, this.selectors.SECTION, dettachedSections);
-            }
+            this._fixOrderFlexsections(listparent, hierarchy[i].children, dettachedSections);
         }
-
-        const sectionlist = element.sectionlist ?? [];
-        this._fixOrderFlexsections(this.element, sectionlist, this.selectors.SECTION, dettachedSections);
+        this._fixOrderFlexsections(this.element, element.sectionlist ?? [], dettachedSections);
     }
 
     /**
@@ -93,11 +88,10 @@ export default class Component extends BaseCourseindex {
      *
      * @param {Element} container the HTML element to reorder.
      * @param {Array} neworder an array with the ids order
-     * @param {string} selector the element selector
      * @param {Object} dettachedelements a list of dettached elements
      */
-    async _fixOrderFlexsections(container, neworder, selector, dettachedelements) {
-        if (container === undefined) {
+    async _fixOrderFlexsections(container, neworder, dettachedelements) {
+        if (container === undefined || !container) {
             return;
         }
 
@@ -106,12 +100,12 @@ export default class Component extends BaseCourseindex {
 
         // Move the elements in order at the beginning of the list.
         neworder.forEach((itemid, index) => {
-            let item = this.getElement(selector, itemid) ?? dettachedelements[itemid];
+            let item = this.getElement(this.selectors.SECTION, itemid) ?? dettachedelements[itemid];
             if (item === undefined) {
                 // Missing elements cannot be sorted.
                 return;
             }
-            // Get the current elemnt at that position.
+            // Get the current element at that position.
             const currentitem = container.children[index];
             if (currentitem === undefined) {
                 container.append(item);
@@ -122,28 +116,16 @@ export default class Component extends BaseCourseindex {
             }
         });
 
-        // Dndupload add a fake element we need to keep.
-        let dndFakeActivity;
-
         // Remove the remaining elements.
         while (container.children.length > neworder.length) {
             const lastchild = container.lastChild;
-            if (lastchild?.classList?.contains('dndupload-preview')) {
-                dndFakeActivity = lastchild;
-            } else {
-                dettachedelements[lastchild?.dataset?.id ?? 0] = lastchild;
-            }
+            dettachedelements[lastchild?.dataset?.id ?? 0] = lastchild;
             container.removeChild(lastchild);
-        }
-        // Restore dndupload fake element.
-        if (dndFakeActivity) {
-            container.append(dndFakeActivity);
         }
 
         // Empty lists should not be visible.
         if (!neworder.length) {
             container.classList.add('hidden');
-            container.innerHTML = '';
         }
     }
 
