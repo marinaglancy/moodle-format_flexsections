@@ -81,6 +81,7 @@
         "numsections": 42,
         "sitehome": false,
         "highlightedlabel" : "Highlighted",
+        "showaslink" : true,
         "testingonly-make-mustache-lint-happy": 1
     }
 }}
@@ -90,15 +91,19 @@
 
 {{< core_courseformat/local/content/section/content }}
 
-    {{$ core_courseformat/local/content/addsection }}
-        {{> format_flexsections/local/content/addsection }}
-    {{/ core_courseformat/local/content/addsection }}
-
     {{$ core_courseformat/local/content/section/header }}
         {{> format_flexsections/local/content/section/header }}
     {{/ core_courseformat/local/content/section/header }}
 
 {{/ core_courseformat/local/content/section/content }}
+
+{{^showaslink}}
+<ul data-for="course_subsectionlist" data-parent="{{id}}">
+    {{#subsections}}
+        {{> format_flexsections/local/content/section }}
+    {{/subsections}}
+</ul>
+{{/showaslink}}
 
 {{#testingonly-make-mustache-lint-happy}}
 </div>

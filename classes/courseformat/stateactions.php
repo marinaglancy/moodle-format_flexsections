@@ -155,29 +155,23 @@ class stateactions extends  \core_courseformat\stateactions {
      *
      * @param \core_courseformat\stateupdates $updates
      * @param stdClass $course
-     * @param array $ids parent section id
-     * @param int|null $targetsectionid not used
+     * @param array $ids not used
+     * @param int|null $targetsectionid parent section id
      * @param int|null $targetcmid not used
      * @return void
      */
     public function section_add_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
                             ?int $targetsectionid = null, ?int $targetcmid = null): void {
-        $this->validate_sections($course, $ids, __FUNCTION__);
+        $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
         require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
-        foreach ($this->get_section_info($modinfo, $ids) as $section) {
-            $format->create_new_section($section);
-        }
+        $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
+        $format->create_new_section($targetsection);
 
-        // All course sections can be renamed because of the resort.
-        $allsections = $format->get_modinfo()->get_section_info_all();
-        foreach ($allsections as $section) {
-            $updates->add_section_put($section->id);
-        }
-        // The section order is at a course level.
-        $updates->add_course_put();
+        // Adding subsection affects the full course structure.
+        $this->course_state($updates, $course);
     }
 
     /**

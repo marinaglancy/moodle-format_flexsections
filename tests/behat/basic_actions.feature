@@ -28,6 +28,7 @@ Feature: Using course in flexsections format
     And I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | First module |
       | Description     | Test         |
+    And I open section "1" edit menu
     And I click on "Add subsection" "link" in the "li#section-1" "css_element"
     And I add a "Forum" to section "2" and I fill the form with:
       | Forum name  | Second module |

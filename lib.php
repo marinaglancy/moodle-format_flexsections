@@ -644,14 +644,11 @@ class format_flexsections extends core_courseformat\base {
      *
      * @param int|section_info $parent parent section
      * @param null|int|section_info $before
-     * @return int
+     * @return int $sectionnum
      */
-    public function create_new_section($parent = 0, $before = null) {
-        $sections = get_fast_modinfo($this->courseid)->get_section_info_all();
-        $sectionnums = array_keys($sections);
-        $sectionnum = array_pop($sectionnums) + 1;
-        course_create_sections_if_missing($this->courseid, $sectionnum);
-        $sectionnum = $this->move_section($sectionnum, $parent, $before);
+    public function create_new_section($parent = 0, $before = null): int {
+        $section = course_create_section($this->courseid, 0);
+        $sectionnum = $this->move_section($section, $parent, $before);
         return $sectionnum;
     }
 
