@@ -16,6 +16,7 @@
 import Templates from 'core/templates';
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 import BasePlaceholder from 'core_courseformat/local/courseindex/placeholder';
+import Exporter from "format_flexsections/local/courseeditor/exporter";
 
 /**
  * Course index placeholder replacer.
@@ -35,9 +36,11 @@ export default class Component extends BasePlaceholder {
      * @return {Component}
      */
     static init(target, selectors) {
+        const courseEditor = getCurrentCourseEditor();
+        courseEditor.getExporter = () => new Exporter(courseEditor);
         return new Component({
             element: document.getElementById(target),
-            reactive: getCurrentCourseEditor(),
+            reactive: courseEditor,
             selectors,
         });
     }

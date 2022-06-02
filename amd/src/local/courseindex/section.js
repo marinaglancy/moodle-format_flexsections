@@ -26,6 +26,7 @@ import BaseSection from "core_courseformat/local/courseindex/section";
  */
 export default class Component extends BaseSection {
     // Extends course/format/amd/src/local/courseindex/section.js
+    // Extends course/format/amd/src/local/courseeditor/dndsection.js
 
     /**
      * Static method to create a component instance form the mustahce template.
@@ -39,5 +40,15 @@ export default class Component extends BaseSection {
             element: document.getElementById(target),
             selectors,
         });
+    }
+
+    /**
+     * Register state values and the drag and drop subcomponent.
+     *
+     * @param {BaseComponent} sectionitem section item component
+     */
+    configDragDrop(sectionitem) {
+        sectionitem.draggable = false; // <---- my modification - disable drag&drop of sections for now.
+        super.configDragDrop(sectionitem);
     }
 }

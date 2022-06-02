@@ -15,6 +15,7 @@
 
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
 import BaseCourseindex from 'core_courseformat/local/courseindex/courseindex';
+import Exporter from "format_flexsections/local/courseeditor/exporter";
 
 /**
  * Course index main component.
@@ -34,11 +35,116 @@ export default class Component extends BaseCourseindex {
      * @return {Component}
      */
     static init(target, selectors) {
+        const courseEditor = getCurrentCourseEditor();
+        courseEditor.getExporter = () => new Exporter(courseEditor);
         return new Component({
             element: document.getElementById(target),
-            reactive: getCurrentCourseEditor(),
+            reactive: courseEditor,
             selectors,
         });
+    }
+
+    /**
+     * Constructor hook.
+     *
+     * @param {Object} descriptor the component descriptor
+     */
+    create(descriptor) {
+        super.create(descriptor);
+        // Optional component name for debugging.
+        this.name = 'course_format_flexsections_courseindex';
+        this.selectors.COURSE_SUBSECTIONLIST = `[data-for='subsectionlist']`;
+    }
+
+    /**
+     * Return the component watchers.
+     *
+     * @returns {Array} of watchers
+     */
+    getWatchers() {
+        let res = super.getWatchers();
+        res.push({watch: `course.hierarchy:updated`, handler: this._refreshCourseSectionlist});
+        return res;
+    }
+
+    /**
+     * Refresh the section list.
+     *
+     * @param {object} param
+     * @param {Object} param.element
+     */
+    _refreshCourseSectionlist({element}) {
+        const hierarchy = element.hierarchy ?? [];
+        let dettachedSections = [];
+        for (let i = 0; i < hierarchy.length; i++) {
+            const sectionlist = hierarchy[i].children;
+            const listparent = this.getElement(this.selectors.COURSE_SUBSECTIONLIST + `[data-parent='${hierarchy[i].id}']`);
+            if (listparent) {
+                this._fixOrderFlexsections(listparent, sectionlist, this.selectors.SECTION, dettachedSections);
+            }
+        }
+
+        const sectionlist = element.sectionlist ?? [];
+        this._fixOrderFlexsections(this.element, sectionlist, this.selectors.SECTION, dettachedSections);
+    }
+
+    /**
+     * Fix/reorder the section or cms order.
+     *
+     * @param {Element} container the HTML element to reorder.
+     * @param {Array} neworder an array with the ids order
+     * @param {string} selector the element selector
+     * @param {Object} dettachedelements a list of dettached elements
+     */
+    async _fixOrderFlexsections(container, neworder, selector, dettachedelements) {
+        if (container === undefined) {
+            return;
+        }
+
+        // Grant the list is visible (in case it was empty).
+        container.classList.remove('hidden');
+
+        // Move the elements in order at the beginning of the list.
+        neworder.forEach((itemid, index) => {
+            let item = this.getElement(selector, itemid) ?? dettachedelements[itemid];
+            if (item === undefined) {
+                // Missing elements cannot be sorted.
+                return;
+            }
+            // Get the current elemnt at that position.
+            const currentitem = container.children[index];
+            if (currentitem === undefined) {
+                container.append(item);
+                return;
+            }
+            if (currentitem !== item) {
+                container.insertBefore(item, currentitem);
+            }
+        });
+
+        // Dndupload add a fake element we need to keep.
+        let dndFakeActivity;
+
+        // Remove the remaining elements.
+        while (container.children.length > neworder.length) {
+            const lastchild = container.lastChild;
+            if (lastchild?.classList?.contains('dndupload-preview')) {
+                dndFakeActivity = lastchild;
+            } else {
+                dettachedelements[lastchild?.dataset?.id ?? 0] = lastchild;
+            }
+            container.removeChild(lastchild);
+        }
+        // Restore dndupload fake element.
+        if (dndFakeActivity) {
+            container.append(dndFakeActivity);
+        }
+
+        // Empty lists should not be visible.
+        if (!neworder.length) {
+            container.classList.add('hidden');
+            container.innerHTML = '';
+        }
     }
 
     /**
@@ -49,24 +155,41 @@ export default class Component extends BaseCourseindex {
      * @param {Object} details.element the element data.
      */
     async _createSection({state, element}) {
-        // Create a fake node while the component is loading.
-        const fakeelement = document.createElement('div');
-        fakeelement.classList.add('bg-pulse-grey', 'w-100');
-        fakeelement.innerHTML = '&nbsp;';
-        this.sections[element.id] = fakeelement;
-        // Place the fake node on the correct position.
-        this._refreshCourseSectionlist({
-            state,
-            element: state.course,
-        });
+        const sectionItem = this.getElement('section', element.id) ?? this._createFakeSection(this.element, element.id);
+        if (0) { // eslint-disable-line no-constant-condition
+            // TODO. Commented out part of parent function code. Is it needed for something?
+            this.sections[element.id] = sectionItem;
+            // Place the fake node on the correct position.
+            this._refreshCourseSectionlist({
+                state,
+                element: state.course,
+            });
+        }
         // Collect render data.
         const exporter = this.reactive.getExporter();
         const data = exporter.section(state, element);
         // Create the new content.
-        const newcomponent = await this.renderComponent(fakeelement, 'format_flexsections/local/courseindex/section', data);
+        const newcomponent = await this.renderComponent(sectionItem, 'format_flexsections/local/courseindex/section', data);
         // Replace the fake node with the real content.
         const newelement = newcomponent.getElement();
         this.sections[element.id] = newelement;
-        fakeelement.parentNode.replaceChild(newelement, fakeelement);
+        sectionItem.parentNode.replaceChild(newelement, sectionItem);
+    }
+
+    /**
+     * Create a placeholder for a section
+     *
+     * @param {Element} container
+     * @param {Number} sectionid
+     * @returns {Element}
+     */
+    _createFakeSection(container, sectionid) {
+        const fakeelement = document.createElement('div');
+        container.appendChild(fakeelement);
+        fakeelement.classList.add('bg-pulse-grey', 'w-100');
+        fakeelement.dataset.for = 'section';
+        fakeelement.dataset.id = sectionid;
+        fakeelement.innerHTML = '&nbsp;';
+        return fakeelement;
     }
 }

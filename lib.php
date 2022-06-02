@@ -54,8 +54,7 @@ class format_flexsections extends core_courseformat\base {
      * @return bool
      */
     public function uses_course_index() {
-        // TODO: course index hardcodes too many things, it needs to be re-written for format_flexsections.
-        return false;
+        return true;
     }
 
     /**
@@ -142,7 +141,7 @@ class format_flexsections extends core_courseformat\base {
      * @return null|moodle_url
      */
     public function get_view_url($section, $options = []) {
-        $url = new moodle_url('/course/view.php', array('id' => $this->courseid));
+        $url = new moodle_url('/course/view.php', ['id' => $this->courseid]);
 
         $sectionno = $this->resolve_section_number($section);
         $section = $this->get_section($sectionno);
@@ -163,7 +162,13 @@ class format_flexsections extends core_courseformat\base {
                 return $url;
             }
             // Find the parent (or grandparent) page that is displayed on separate page.
-            $url->param('section', $this->find_collapsed_parent($section->parent));
+            if ($parent = $this->find_collapsed_parent($section->parent)) {
+                $url->param('section', $parent);
+            }
+            $url->set_anchor('section-'.$sectionno);
+            return $url;
+        } else {
+            // General section.
             $url->set_anchor('section-'.$sectionno);
             return $url;
         }

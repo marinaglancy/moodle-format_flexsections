@@ -14,7 +14,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 import Section from 'core_courseformat/local/content/section';
-import Header from 'core_courseformat/local/content/section/header';
 
 /**
  * Course section format component.
@@ -28,27 +27,12 @@ export default class extends Section {
     // Extends course/format/amd/src/local/courseeditor/dndsection.js
 
     /**
-     * Initial state ready method.
+     * Register state values and the drag and drop subcomponent.
      *
-     * @param {Object} state the initial state
+     * @param {BaseComponent} sectionitem section item component
      */
-    stateReady(state) {
-        this.configState(state);
-        // Drag and drop is only available for components compatible course formats.
-        if (this.reactive.isEditing && this.reactive.supportComponents) {
-            // Section zero and other formats sections may not have a title to drag.
-            const sectionItem = this.getElement(this.selectors.SECTION_ITEM);
-            if (sectionItem) {
-                // Init the inner dragable element.
-                const headerComponent = new Header({
-                    ...this,
-                    element: sectionItem,
-                    fullregion: this.element,
-                });
-                headerComponent.draggable = false; // <---- my modification - disable drag&drop of sections for now.
-                this.configDragDrop(headerComponent);
-            }
-        }
+    configDragDrop(sectionitem) {
+        sectionitem.draggable = false; // <---- my modification - disable drag&drop of sections for now.
+        super.configDragDrop(sectionitem);
     }
-
 }

@@ -52,9 +52,15 @@
                 "visible": 0,
                 "isactive": 1
             }
-        ]
+        ],
+        "testingonly-make-mustache-lint-happy": true
     }
 }}
+
+{{#testingonly-make-mustache-lint-happy}}
+<div role="tree">
+{{/testingonly-make-mustache-lint-happy}}
+
 <div
     class="courseindex-section {{#current}}current{{/current}}"
     id="{{uniqid}}-course-index-section-{{id}}"
@@ -107,7 +113,7 @@
         <span class="dragicon ml-auto">{{#pix}}i/dragdrop{{/pix}}</span>
     </div>
     <div id="courseindexcollapse{{number}}"
-        class="courseindex-item-content collapse {{^indexcollapsed}}show{{/indexcollapsed}}"
+        class="courseindex-item-content collapse {{^indexcollapsed}}show{{/indexcollapsed}} pb-0"
         aria-labelledby="courseindexsection{{number}}" role="group"
     >
         <ul class="courseindex-sectioncontent unlist" data-for="cmlist" data-id="{{id}}" role="group">
@@ -115,8 +121,18 @@
             {{> core_courseformat/local/courseindex/cm }}
             {{/cms}}
         </ul>
+        <div class="courseindex-sectioncontent-children ml-2" data-for="subsectionlist" data-parent="{{id}}" role="tree">
+            {{#children}}
+                {{> format_flexsections/local/courseindex/section }}
+            {{/children}}
+        </div>
     </div>
 </div>
+
+{{#testingonly-make-mustache-lint-happy}}
+</div>
+{{/testingonly-make-mustache-lint-happy}}
+
 {{#js}}
 require(['format_flexsections/local/courseindex/section'], function(component) {
     component.init('{{uniqid}}-course-index-section-{{id}}');

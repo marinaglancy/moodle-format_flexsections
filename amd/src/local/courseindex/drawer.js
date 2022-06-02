@@ -15,6 +15,7 @@
 
 import BaseDrawer from 'core_courseformat/local/courseindex/drawer';
 import {getCurrentCourseEditor} from 'core_courseformat/courseeditor';
+import Exporter from "format_flexsections/local/courseeditor/exporter";
 
 /**
  * Course format component
@@ -42,9 +43,11 @@ export default class Drawer extends BaseDrawer {
      * @return {Component}
      */
     static init(target, selectors) {
+        const courseEditor = getCurrentCourseEditor();
+        courseEditor.getExporter = () => new Exporter(courseEditor);
         return new Drawer({
             element: document.getElementById(target),
-            reactive: getCurrentCourseEditor(),
+            reactive: courseEditor,
             selectors,
         });
     }
