@@ -30,6 +30,9 @@ class section extends \core_courseformat\output\local\content\section {
     /** @var \format_flexsections the course format */
     protected $format;
 
+    /** @var int subsection level */
+    protected $level = 1;
+
     /**
      * Template name
      *
@@ -64,6 +67,7 @@ class section extends \core_courseformat\output\local\content\section {
         // Add subsections.
         if (!$showaslink) {
             $data->subsections = $this->section->section ? $this->get_subsections($output) : [];
+            $data->level = $this->level;
         }
 
         if (!$this->section->section || $this->section->section == $this->format->get_viewed_section()) {
@@ -88,7 +92,9 @@ class section extends \core_courseformat\output\local\content\section {
         foreach ($modinfo->get_section_info_all() as $section) {
             if ($section->parent == $this->section->section) {
                 if ($this->format->is_section_visible($section)) {
-                    $d = (array)((new static($this->format, $section))->export_for_template($output)) +
+                    $instance = new static($this->format, $section);
+                    $instance->level++;
+                    $d = (array)($instance->export_for_template($output)) +
                         $this->default_section_properties();
                     $data[] = (object)$d;
                 }
