@@ -87,6 +87,34 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Returns the depth of the section in hierarchy
+     *
+     * For example, top section has depth 0, subsection of top section has depth 1,
+     * its subsection has depth 2.
+     *
+     * @param section_info $section
+     * @return int Depth of the section in hierarchy.
+     */
+    public function get_section_depth(section_info $section): int {
+        static $sectionmap = [];
+
+        if (empty($sectionmap)) {
+            // Populate section-parent map and keep it in static variable.
+            foreach ($this->get_sections() as $s) {
+                $sectionmap[$s->section] = $s->parent;
+            }
+        }
+
+        $section = $this->resolve_section_number($section);
+        $depth = 0;
+        while ($sectionmap[$section] !== 0) {
+            $section = $sectionmap[$section];
+            $depth++;
+        }
+        return $depth;
+    }
+
+    /**
      * Returns the default section name for the flexsections course format.
      *
      * If the section number is 0, it will use the string with key = section0name from the course format's lang file.
@@ -356,7 +384,7 @@ class format_flexsections extends core_courseformat\base {
      * @param bool $foreditform
      * @return array
      */
-    public function section_format_options($foreditform = false) {
+    public function section_format_options($foreditform = false): array {
         return array(
             'parent' => array(
                 'type' => PARAM_INT,
@@ -389,6 +417,43 @@ class format_flexsections extends core_courseformat\base {
                 'default' => COURSE_DISPLAY_SINGLEPAGE,
             )
         );
+    }
+
+    /**
+     * Definitions of the additional options that this course format uses for course.
+     *
+     * Flexsections format uses the following options:
+     * - maxsubsections
+     *
+     * @param bool $foreditform
+     * @return array of options
+     */
+    public function course_format_options($foreditform = false) {
+        static $courseformatoptions = false;
+        if ($courseformatoptions === false) {
+            $courseconfig = get_config('moodlecourse');
+            $courseformatoptions = [
+                'maxsubsections' => [
+                    'default' => (int) get_config('format_flexsections', 'maxsubsections'),
+                    'type' => PARAM_INT,
+                ],
+            ];
+        }
+        if ($foreditform && !isset($courseformatoptions['maxsubsections']['label'])) {
+            $courseformatoptionsedit = [
+                'maxsubsections' => [
+                    'label' => new lang_string('maxsubsections', 'format_flexsections'),
+                    'help' => 'maxsubsections',
+                    'help_component' => 'format_flexsections',
+                    'element_type' => 'text',
+                    'element_attributes' => [
+                        'size = "7"',
+                    ],
+                ],
+            ];
+            $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
+        }
+        return $courseformatoptions;
     }
 
     /**

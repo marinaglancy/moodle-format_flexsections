@@ -53,6 +53,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         $section = $this->section;
         $course = $format->get_course();
         $sectionreturn = $format->get_section_number();
+        $sectiondepth = $format->get_section_depth($section);
 
         $coursecontext = context_course::instance($course->id);
 
@@ -66,6 +67,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         $controls = [];
 
         if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
+                $sectiondepth < $course->maxsubsections &&
                 (!$section->collapsed || $section->section == $this->format->get_viewed_section())) {
             $addsubsectionurl = new \moodle_url($url, ['addchildsection' => $section->section]);
             $controls['addsubsection'] = [

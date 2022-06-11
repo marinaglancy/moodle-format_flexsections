@@ -33,4 +33,7 @@ if ($ADMIN->fulltree) {
         new lang_string('indentation_help', 'format_topics').'<br />'.$link,
         1
     ));
+    $settings->add(new admin_setting_configtext('format_flexsections/maxsubsections',
+        get_string('maxsubsections', 'format_flexsections'),
+        get_string('maxsubsectionsdesc', 'format_flexsections'), 10, PARAM_INT, 7));
 }
