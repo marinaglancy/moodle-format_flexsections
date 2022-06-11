@@ -19,6 +19,7 @@ namespace format_flexsections\courseformat;
 use context_course;
 use core_courseformat\stateupdates;
 use stdClass;
+use moodle_exception;
 
 /**
  * class stateactions
@@ -178,6 +179,13 @@ class stateactions extends  \core_courseformat\stateactions {
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
         $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
+
+        // Validate if we do not exceed depth.
+        $targetsectiondepth = $format->get_section_depth($targetsection);
+        if ($targetsectiondepth >= $course->maxsubsections) {
+            throw new moodle_exception('Subsection depth has exceeded configured value.');
+        }
+
         $format->create_new_section($targetsection);
 
         // Adding subsection affects the full course structure.

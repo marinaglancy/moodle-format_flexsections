@@ -11,8 +11,8 @@ Feature: Using course in flexsections format
       | student2 | Mary | Student | student2@example.com |
       | teacher1 | Terry | Teacher | teacher1@example.com |
     And the following "courses" exist:
-      | fullname | shortname | format       | numsections |
-      | Course 1 | C1        | flexsections | 0           |
+      | fullname | shortname | format       | numsections | maxsubsections |
+      | Course 1 | C1        | flexsections | 0           | 3              |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | student1 | C1     | student        |
@@ -139,3 +139,18 @@ Feature: Using course in flexsections format
     And I expand "Topic 1" node
     And I should see "First module" in the "Navigation" "block"
     And I should see "Second module" in the "Navigation" "block"
+
+  Scenario: Subsections depth limit prevents adding subsection
+    When I follow "Add section"
+    Then I should see "Topic 3"
+    And I open section "3" edit menu
+    And I click on "Add subsection" "link" in the "li#section-3" "css_element"
+    And I should see "Topic 4"
+    And I open section "4" edit menu
+    And I click on "Add subsection" "link" in the "li#section-4" "css_element"
+    And I should see "Topic 5"
+    And I open section "5" edit menu
+    And I click on "Add subsection" "link" in the "li#section-5" "css_element"
+    And I should see "Topic 6"
+    And I open section "6" edit menu
+    And "Add subsection" "link" should not exist in the "li#section-6" "css_element"
