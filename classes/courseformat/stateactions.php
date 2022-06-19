@@ -137,19 +137,20 @@ class stateactions extends  \core_courseformat\stateactions {
         ?int $targetcmid = null
     ): void {
         if (!$targetsectionid) {
-            throw new moodle_exception("Action section_mergeup requires targetsectionid");
+            throw new \moodle_exception("Action section_mergeup requires targetsectionid");
         }
 
         $coursecontext = context_course::instance($course->id);
         require_capability('moodle/course:update', $coursecontext);
 
         $modinfo = get_fast_modinfo($course);
+        /** @var \format_flexsections $format */
         $format = course_get_format($course->id);
 
         $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
         $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
         if (!$targetsection->parent) {
-            throw new moodle_exception("Action section_mergeup can't merge top level parentless sections");
+            throw new \moodle_exception("Action section_mergeup can't merge top level parentless sections");
         }
 
         $format->mergeup_section($targetsection);
