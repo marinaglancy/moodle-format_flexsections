@@ -14,6 +14,6 @@ Plugin can be downloaded from https://moodle.org/plugins/format_flexsections
 To see the source code and to create pull request please use branches that correspond 
 to the version you are using:
 
+- Branch **MOODLE_400_STABLE** - for Moodle 4.0, has UI inline with Moodle 4.0
 - Branch **MOODLE_311_STABLE** - for Moodle 3.5-3.11
-- Branch **MOODLE_400_QUICK** - for Moodle 4.0, has the same UI as the previous verions 
-- Branch **new400** (not released yet) - for Moodle 4.0, has UI inline with Moodle 4.0 course formats
+- Branch **MOODLE_400_QUICK** - contains version 4.0.0 for Moodle 4.0, has the same UI as the previous verions course formats
