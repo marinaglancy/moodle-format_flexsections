@@ -51,18 +51,18 @@ Feature: Sections can be edited and deleted in flexsections format
 
   Scenario: Deleting the last section in flexsections format
     When I delete section "5"
-    Then I should see "Are you absolutely sure you want to completely delete \"Topic 5\" and all the activities it contains?"
-    And I click on "Delete" "button" in the "Confirm" "dialogue"
-    And I should not see "Topic 5"
-    And I should see "Topic 4"
+    Then I should see "Are you sure you want to delete this section? All activities and subsections will also be deleted"
+    And I click on "Yes" "button" in the "Confirm" "dialogue"
+    And I should not see "Topic 5" in the "region-main" "region"
+    And I should see "Topic 4" in the "region-main" "region"
 
   Scenario: Deleting the middle section in flexsections format
     When I delete section "4"
-    And I click on "Delete" "button" in the "Confirm" "dialogue"
-    Then I should not see "Topic 5"
+    And I click on "Yes" "button" in the "Confirm" "dialogue"
+    Then I should not see "Topic 5" in the "region-main" "region"
     And I should not see "Test chat name"
     And I should see "Test choice name" in the "Topic 4" "section"
-    And I should see "Topic 4"
+    And I should see "Topic 4" in the "region-main" "region"
 
   Scenario: Adding sections at the end of a flexsections format
     When I click on "Add section" "link"
