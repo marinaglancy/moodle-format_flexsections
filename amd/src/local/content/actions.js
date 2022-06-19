@@ -87,6 +87,45 @@ export default class extends BaseComponent {
     }
 
     /**
+     * Handle a section delete request.
+     *
+     * @param {Element} target the dispatch action element
+     * @param {Event} event the triggered event
+     */
+    _requestDelete(target, event) {
+        const sectionId = target.dataset.id;
+        if (!sectionId) {
+            return;
+        }
+        event.preventDefault();
+
+        const sectionInfo = this.reactive.get('section', sectionId);
+
+        const cmList = sectionInfo.cmlist ?? [];
+        if (cmList.length || sectionInfo.hassummary || sectionInfo.rawtitle || sectionInfo.children.length) {
+            getStrings([
+                {key: 'confirm', component: 'moodle'},
+                {key: 'confirmdelete', component: 'format_flexsections'},
+                {key: 'yes', component: 'moodle'},
+                {key: 'no', component: 'moodle'}
+            ]).done((strings) => {
+                Notification.confirm(
+                    strings[0], // Confirm.
+                    strings[1], // Are you sure you want to delete.
+                    strings[2], // Yes.
+                    strings[3], // No.
+                    () => {
+                        this.reactive.dispatch('sectionDelete', [sectionId]);
+                    }
+                );
+            }).fail(Notification.exception);
+        } else {
+            // We don't need confirmation to merge empty sections.
+            this.reactive.dispatch('sectionDelete', [sectionId]);
+        }
+    }
+
+    /**
      * Handle a merge section request.
      *
      * @param {Element} target the dispatch action element

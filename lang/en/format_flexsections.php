@@ -26,6 +26,7 @@ $string['addsections'] = 'Add section';
 $string['addsubsection'] = 'Add subsection';
 $string['backtocourse'] = 'Back to course \'{$a}\'';
 $string['backtosection'] = 'Back to \'{$a}\'';
+$string['confirmdelete'] = 'Are you sure you want to delete this section? All activities and subsections will also be deleted';
 $string['confirmmerge'] = 'Are you sure you want to merge this section content with the parent? All activities and subsections will be moved';
 $string['currentsection'] = 'This section';
 $string['deletesection'] = 'Delete section';
@@ -51,3 +52,10 @@ $string['sectionname'] = 'Topic';
 $string['showcollapsed'] = 'Display as a link';
 $string['showexpanded'] = 'Display on the same page';
 $string['showfromothers'] = 'Show section';
+
+// Deprecated but still can be used in 4.0, to be removed when we have a branch for Moodle 4.1 or later.
+$string['addsection'] = 'Add section';
+$string['addsubsectionfor'] = 'Add subsection for \'{$a}\'';
+$string['cancelmoving'] = 'Cancel moving \'{$a}\'';
+$string['removemarker'] = 'Do not mark as current';
+$string['setmarker'] = 'Mark as current';

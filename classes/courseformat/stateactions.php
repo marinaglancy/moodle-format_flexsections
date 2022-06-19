@@ -186,8 +186,6 @@ class stateactions extends  \core_courseformat\stateactions {
     /**
      * Delete course sections.
      *
-     * This method follows the same logic as editsection.php.
-     *
      * @param stateupdates $updates the affected course elements track
      * @param stdClass $course the course object
      * @param int[] $ids section ids
@@ -202,20 +200,29 @@ class stateactions extends  \core_courseformat\stateactions {
         ?int $targetcmid = null
     ): void {
 
+        if (empty($ids)) {
+            // Nothing to delete.
+            return;
+        }
+
         $coursecontext = context_course::instance($course->id);
         require_capability('moodle/course:update', $coursecontext);
         require_capability('moodle/course:movesections', $coursecontext);
 
+        $modinfo = get_fast_modinfo($course);
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
-        $modinfo = $format->get_modinfo();
+        $sectionid = array_shift($ids);
 
-        foreach ($ids as $sectionid) {
-            $section = $modinfo->get_section_info_by_id($sectionid, MUST_EXIST);
-            $deleted = $format->delete_section_with_children($section);
-            foreach ($deleted as $deletedid) {
-                $updates->add_section_delete($sectionid);
-            }
+        $section = $modinfo->get_section_info_by_id($sectionid, MUST_EXIST);
+        [$sectionstodelete, $modulestodelete] = $format->delete_section_with_children($section);
+
+        foreach ($modulestodelete as $cmid) {
+            $updates->add_cm_delete($cmid);
+        }
+
+        foreach ($sectionstodelete as $sid) {
+            $updates->add_section_delete($sid);
         }
 
         // Removing a section affects the full course structure.

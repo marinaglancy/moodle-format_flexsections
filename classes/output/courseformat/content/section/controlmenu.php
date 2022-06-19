@@ -178,6 +178,10 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             // Deleting section that is currently viewed does not really work in AJAX (as well as mergeup).
             // Maybe we re-write it at some moment so it redirects to the parent section.
             unset($parentcontrols['delete']);
+        } else {
+            // Override delete to use plugin action.
+            unset($parentcontrols['delete']['attr']['data-action']);
+            $parentcontrols['delete']['attr']['data-action-flexsections'] = 'delete';
         }
 
         // If the edit key exists, we are going to insert our controls after it.

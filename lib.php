@@ -1081,37 +1081,42 @@ class format_flexsections extends core_courseformat\base {
      * Completely removes a section, all subsections and activities they contain
      *
      * @param section_info $section
-     * @return array list of deleted section ids
+     * @return array Array containing arrays of section ids and course mod ids that were deleted
      */
-    public function delete_section_with_children($section): array {
+    public function delete_section_with_children(section_info $section): array {
         global $DB;
         if (!$section->section) {
             // Section 0 does not have parent.
-            return [];
+            return [[], []];
         }
 
         $sectionid = $section->id;
+        $course = $this->get_course();
 
         // Move the section to be removed to the end (this will re-number other sections).
         $this->move_section($section->section, 0);
 
         $modinfo = get_fast_modinfo($this->courseid);
         $allsections = $modinfo->get_section_info_all();
-        $section = null;
-        $sectionstodelete = array();
-        $modulestodelete = array();
+        $process = false;
+        $sectionstodelete = [];
+        $modulestodelete = [];
         foreach ($allsections as $sectioninfo) {
             if ($sectioninfo->id == $sectionid) {
                 // This is the section to be deleted. Since we have already
                 // moved it to the end we know that we need to delete this section
                 // and all the following (which can only be its subsections).
-                $section = $sectioninfo;
+                $process = true;
             }
-            if ($section) {
+            if ($process) {
                 $sectionstodelete[] = $sectioninfo->id;
                 if (!empty($modinfo->sections[$sectioninfo->section])) {
                     $modulestodelete = array_merge($modulestodelete,
                         $modinfo->sections[$sectioninfo->section]);
+                }
+                // Remove the marker if it points to this section.
+                if ($sectioninfo->section == $course->marker) {
+                    course_set_marker($course->id, 0);
                 }
             }
         }
@@ -1120,12 +1125,26 @@ class format_flexsections extends core_courseformat\base {
             course_delete_module($cmid);
         }
 
-        list($sectionsql, $params) = $DB->get_in_or_equal($sectionstodelete);
+        foreach ($sectionstodelete as $sid) {
+            // Invalidate the section cache by given section id.
+            course_modinfo::purge_course_section_cache_by_id($course->id, $sid);
+
+            // Delete section summary files.
+            $context = \context_course::instance($course->id);
+            $fs = get_file_storage();
+            $fs->delete_area_files($context->id, 'course', 'section', $sid);
+        }
+
+        [$sectionsql, $params] = $DB->get_in_or_equal($sectionstodelete);
+        $transaction = $DB->start_delegated_transaction();
         $DB->execute('DELETE FROM {course_format_options} WHERE sectionid ' . $sectionsql, $params);
         $DB->execute('DELETE FROM {course_sections} WHERE id ' . $sectionsql, $params);
+        $transaction->allow_commit();
 
-        rebuild_course_cache($this->courseid, true);
-        return $sectionstodelete;
+        // Partial rebuild section cache that has been purged.
+        rebuild_course_cache($this->courseid, true, true);
+
+        return [$sectionstodelete, $modulestodelete];
     }
 
     /**
