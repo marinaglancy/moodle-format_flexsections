@@ -132,23 +132,36 @@ export default class extends BaseComponent {
      * @param {Event} event the triggered event
      */
     _requestMergeup(target, event) {
+        const sectionId = target.dataset.id;
+        if (!sectionId) {
+            return;
+        }
         event.preventDefault();
-        getStrings([
-            {key: 'confirm', component: 'moodle'},
-            {key: 'confirmmerge', component: 'format_flexsections'},
-            {key: 'yes', component: 'moodle'},
-            {key: 'no', component: 'moodle'}
-        ]).done((strings) => {
-            Notification.confirm(
-                strings[0], // Confirm.
-                strings[1], // Are you sure you want to merge.
-                strings[2], // Yes.
-                strings[3], // No.
-                () => {
-                    this.reactive.dispatch('mergeup', [target.getAttribute('data-id')], 0);
-                }
-            );
-        }).fail(Notification.exception);
+
+        const sectionInfo = this.reactive.get('section', sectionId);
+
+        const cmList = sectionInfo.cmlist ?? [];
+        if (cmList.length || sectionInfo.hassummary || sectionInfo.rawtitle || sectionInfo.children.length) {
+            getStrings([
+                {key: 'confirm', component: 'moodle'},
+                {key: 'confirmmerge', component: 'format_flexsections'},
+                {key: 'yes', component: 'moodle'},
+                {key: 'no', component: 'moodle'}
+            ]).done((strings) => {
+                Notification.confirm(
+                    strings[0], // Confirm.
+                    strings[1], // Are you sure you want to merge.
+                    strings[2], // Yes.
+                    strings[3], // No.
+                    () => {
+                        this.reactive.dispatch('sectionMergeUp', sectionId);
+                    }
+                );
+            }).fail(Notification.exception);
+        } else {
+            // We don't need confirmation to merge empty sections.
+            this.reactive.dispatch('sectionMergeUp', sectionId);
+        }
     }
 
     /**
@@ -159,7 +172,7 @@ export default class extends BaseComponent {
      */
     _requestMoveSection(target, event) {
         event.preventDefault();
-        const sectionId = target.getAttribute('data-id');
+        const sectionId = target.dataset.id;
         const sectionInfo = this.reactive.get('section', sectionId);
         const exporter = this.reactive.getExporter();
         const data = exporter.course(this.reactive.state);
