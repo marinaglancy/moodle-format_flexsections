@@ -13,18 +13,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-import Section from 'core_courseformat/local/content/section';
+import BaseSection from "core_courseformat/local/courseindex/section";
 
 /**
- * Course section format component.
+ * Course index section component.
  *
- * @module     format_flexsections/local/content/section
+ * This component is used to control specific course section interactions like drag and drop.
+ *
+ * @module     format_flexsections/local/courseindex/section
  * @copyright  2022 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-export default class extends Section {
-    // Extends course/format/amd/src/local/content/section.js
+export default class Component extends BaseSection {
+    // Extends course/format/amd/src/local/courseindex/section.js
     // Extends course/format/amd/src/local/courseeditor/dndsection.js
+
+    /**
+     * Static method to create a component instance form the mustahce template.
+     *
+     * @param {string} target the DOM main element or its ID
+     * @param {object} selectors optional css selector overrides
+     * @return {Component}
+     */
+    static init(target, selectors) {
+        return new Component({
+            element: document.getElementById(target),
+            selectors,
+        });
+    }
 
     /**
      * Register state values and the drag and drop subcomponent.
