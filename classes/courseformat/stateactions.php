@@ -201,6 +201,7 @@ class stateactions extends  \core_courseformat\stateactions {
         require_capability('moodle/course:movesections', $coursecontext);
 
         $modinfo = get_fast_modinfo($course);
+        /** @var \format_flexsections $format */
         $format = course_get_format($course);
         $sectionid = array_shift($ids);
 

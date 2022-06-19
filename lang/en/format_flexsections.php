@@ -57,6 +57,5 @@ $string['showfromothers'] = 'Show section';
 $string['addsection'] = 'Add section';
 $string['addsubsectionfor'] = 'Add subsection for \'{$a}\'';
 $string['cancelmoving'] = 'Cancel moving \'{$a}\'';
-$string['confirmdelete'] = 'Are you sure you want to delete this section? All activities and subsections will also be deleted.';
 $string['removemarker'] = 'Do not mark as current';
 $string['setmarker'] = 'Mark as current';
