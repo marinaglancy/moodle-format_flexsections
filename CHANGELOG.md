@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.6] - Unreleased
+### Added
+- Add an option to format settings that allows emulating weekly format in a way
+  where top level sections will be named after weeks. This does not apply to subsections.
+
 ## [4.0.5] - 2023-08-08
 ### Fixed
 - When scrolling the page, the course index now correctly highlights subsections.

@@ -83,7 +83,8 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             ];
         }
 
-        if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
+        if ($course->layout !== FORMAT_FLEXSECTIONS_LAYOUT_WEEKLY && $section->section
+                && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
             $markerurl = new \moodle_url($url);
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
                 $markerurl->param('marker', 0);

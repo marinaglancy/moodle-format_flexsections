@@ -100,6 +100,34 @@ class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
+     * Tests for format_flexsections::get_section_name method with default section names in weekly layout.
+     */
+    public function test_get_section_name_weekly_layout() {
+        $this->resetAfterTest(true);
+        self::setAdminUser();
+
+        // Generate a course with 5 sections.
+        $generator = $this->getDataGenerator();
+        $numsections = 5;
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections', 'layout' => FORMAT_FLEXSECTIONS_LAYOUT_WEEKLY],
+            ['createsections' => true]);
+
+        // Test get_section_name with default section names.
+        $courseformat = course_get_format($course);
+        $sections = $courseformat->get_sections();
+        foreach ($sections as $section) {
+            // Assert that with unmodified section names, get_section_name returns the same result as get_default_section_name.
+            $this->assertEquals($courseformat->get_default_section_name($section), $courseformat->get_section_name($section));
+        }
+
+        // Add subsection.
+        $lastsection = array_pop($sections);
+        $subsectionnum = $courseformat->create_new_section($lastsection);
+        $this->assertEquals(get_string('subtopic', 'format_flexsections'), $courseformat->get_section_name($subsectionnum));
+    }
+
+    /**
      * Tests for format_flexsections::get_default_section_name.
      *
      * @return void
@@ -125,6 +153,40 @@ class format_flexsections_test extends \advanced_testcase {
                 $this->assertEquals($sectionname, $courseformat->get_default_section_name($section));
             } else {
                 $sectionname = get_string('sectionname', 'format_flexsections') . ' ' . $section->section;
+                $this->assertEquals($sectionname, $courseformat->get_default_section_name($section));
+            }
+        }
+    }
+
+    /**
+     * Tests for format_flexsections::get_default_section_name in weekly layout.
+     */
+    public function test_get_default_section_name_weekly_layout() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        // Generate a course with 5 sections.
+        $generator = $this->getDataGenerator();
+        $numsections = 5;
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections', 'layout' => FORMAT_FLEXSECTIONS_LAYOUT_WEEKLY],
+            ['createsections' => true]);
+
+        // Test get_default_section_name with default section names.
+        $courseformat = course_get_format($course);
+        $sections = $courseformat->get_sections();
+        foreach ($sections as $section) {
+            if ($section->section == 0) {
+                $sectionname = get_string('section0name', 'format_flexsections');
+                $this->assertEquals($sectionname, $courseformat->get_default_section_name($section));
+            } else {
+                $dates = $courseformat->get_section_dates($section);
+                $dates->end = ($dates->end - 86400);
+                $dateformat = get_string('strftimedateshort');
+                $weekday = userdate($dates->start, $dateformat);
+                $endweekday = userdate($dates->end, $dateformat);
+                $sectionname = $weekday.' - '.$endweekday;
+
                 $this->assertEquals($sectionname, $courseformat->get_default_section_name($section));
             }
         }
@@ -239,6 +301,62 @@ class format_flexsections_test extends \advanced_testcase {
         $format = course_get_format($course->id);
         $this->assertEquals($enddate, $format->get_default_course_enddate($courseform->get_quick_form()));
 
+    }
+
+    /**
+     * Test course automatic enddate is being updated on section modifications.
+     *
+     * @return void
+     */
+    public function test_course_autoenddate() {
+        global $CFG, $DB, $PAGE;
+
+        $this->resetAfterTest(true);
+        $this->setTimezone('UTC');
+
+        $params = [
+            'format' => 'flexsections',
+            'numsections' => 5,
+            'startdate' => 1445644800,
+            'layout' => FORMAT_FLEXSECTIONS_LAYOUT_WEEKLY,
+            'automaticenddate' => true,
+        ];
+        self::setAdminUser();
+        $course = $this->getDataGenerator()->create_course($params);
+
+        // Test enddate on course creation.
+        $enddate = $params['startdate'] + (WEEKSECS * $params['numsections']) + 7200;
+        $courseenddate = $DB->get_field('course', 'enddate', ['id' => $course->id]);
+        $this->assertEquals($enddate, $courseenddate);
+
+        $courseformat = course_get_format($course->id);
+        // Add section to bottom.
+        $lastsection = $courseformat->create_new_section();
+        $newenddate = $params['startdate'] + (WEEKSECS * ($params['numsections'] + 1)) + 7200;
+        $courseenddate = $DB->get_field('course', 'enddate', ['id' => $course->id]);
+        $this->assertEquals($newenddate, $courseenddate);
+
+        // Add subsection to the first section and make sure enddate did not change.
+        $subsection = $courseformat->create_new_section(1);
+        $courseenddate = $DB->get_field('course', 'enddate', ['id' => $course->id]);
+        $this->assertEquals($newenddate, $courseenddate);
+
+        // Add two subsections to the last section and make sure enddate did not change.
+        $courseformat->create_new_section($lastsection);
+        $courseformat->create_new_section($lastsection);
+        $courseenddate = $DB->get_field('course', 'enddate', ['id' => $course->id]);
+        $this->assertEquals($newenddate, $courseenddate);
+
+        // Delete last section and make sure enddate changed to previous one.
+        $courseformat->delete_section_with_children($courseformat->get_section($lastsection));
+        $enddate = $params['startdate'] + (WEEKSECS * $params['numsections']) + 7200;
+        $courseenddate = $DB->get_field('course', 'enddate', ['id' => $course->id]);
+        $this->assertEquals($enddate, $courseenddate);
+
+        // Delete first section subsection and make sure enddate did not change.
+        $courseformat->delete_section_with_children($courseformat->get_section($subsection));
+        $courseenddate = $DB->get_field('course', 'enddate', ['id' => $course->id]);
+        $this->assertEquals($enddate, $courseenddate);
     }
 
     /**

@@ -15,19 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Event handlers definition for flexible sections course format.
  *
  * @package    format_flexsections
- * @copyright  2022 Marina Glancy
+ * @copyright  2022 Ruslan Kabalin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2023080801;             // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022041900.00;          // Requires Moodle 4.0 or above.
-$plugin->release   = "4.0.5";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->component = 'format_flexsections';  // Full name of the plugin (used for diagnostics).
-$plugin->supported = [400, 402];
-
+$observers = [
+    [
+        'eventname'   => '\core\event\course_updated',
+        'callback'    => '\format_flexsections\event\observer::course_updated',
+    ],
+    [
+        'eventname'   => '\core\event\course_section_deleted',
+        'callback'    => '\format_flexsections\event\observer::course_section_deleted',
+    ]
+];
