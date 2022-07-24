@@ -54,6 +54,7 @@ class section extends \core_courseformat\output\local\content\section {
         $course = $format->get_course();
 
         $data = parent::export_for_template($output);
+        $data->secondarytitle = $this->section->secondarytitle;
 
         // For sections that are displayed as a link do not print list of cms or controls.
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED

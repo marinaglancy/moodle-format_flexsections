@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.4] - Unreleased
+### Added
+- Add option to section settings that allows defining secondary title which is displayed above the main title and remain visible when section is collapsed.
+
 ## [4.0.3] - 2023-05-06
 ### Added
 - Allow to indent activities on the course page

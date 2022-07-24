@@ -9,6 +9,15 @@
     padding-bottom: 1rem;
 }
 
+.course-content ul.flexsections li.section .course-section-header {
+    flex-flow: wrap;
+}
+
+.course-content ul.flexsections li.section .course-section-header .secondarytitle {
+    flex-basis: 100%;
+    padding-bottom: 1rem;
+}
+
 .course-content ul.flexsections li.section .content {
     margin: 0;
     padding: 0;
