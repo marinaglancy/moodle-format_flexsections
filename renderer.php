@@ -201,6 +201,37 @@ class format_flexsections_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Function to display News forum on page.
+     *
+     * @param stdClass $course
+     * @return void
+     */
+    public function display_forum($course) {
+        global $USER;
+        $pageno = optional_param('p', 0, PARAM_INT);
+
+        $forum = forum_get_course_forum($course->id, 'news');
+        if (empty($forum)) {
+            return;
+        }
+
+        $coursemodule = get_coursemodule_from_instance('forum', $forum->id);
+        $modcontext = context_module::instance($coursemodule->id);
+
+        $entityfactory = \mod_forum\local\container::get_entity_factory();
+        $forumentity = $entityfactory->get_forum_from_stdclass($forum, $modcontext, $coursemodule, $course);
+        echo "<h2>".format_string($forum->name)."</h2>";
+        echo html_writer::div(forum_get_subscribe_link($forum, $modcontext), 'subscribelink');
+
+        $numdiscussions = $course->newsitems;
+
+        $rendererfactory = \mod_forum\local\container::get_renderer_factory();
+        $discussionsrenderer = $rendererfactory->get_social_discussion_list_renderer($forumentity);
+        $cm = \cm_info::create($coursemodule);
+        echo $discussionsrenderer->render($USER, $cm, null, null, $pageno, $numdiscussions);
+    }
+
+    /**
      * Displays the target div for moving section (in 'moving' mode only)
      *
      * @param int|stdClass $courseorid current course

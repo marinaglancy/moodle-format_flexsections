@@ -43,6 +43,9 @@ if (($deletesection = optional_param('deletesection', 0, PARAM_INT)) && confirm_
 } else {
     $renderer->display_section($course, $displaysection, $displaysection);
 }
+if (empty($displaysection)) {
+    $renderer->display_forum($course);
+}
 
 // Include course format js module.
 $PAGE->requires->js('/course/format/flexsections/format.js');
