@@ -37,25 +37,17 @@ class course extends \core_courseformat\output\local\state\course {
     public function export_for_template(\renderer_base $output): \stdClass {
         $data = parent::export_for_template($output);
 
-        $viewedsection = $this->format->get_viewed_section();
-        if ($viewedsection) {
-            $s = $this->format->get_section($viewedsection);
-            $data->sectionlist = [$s->id];
-        } else {
-            $data->sectionlist = array_values(array_filter($data->sectionlist,
-                function($sectionid) {
-                    $section = $this->format->get_modinfo()->get_section_info_by_id($sectionid);
-                    return $section && !$section->parent;
-                }));
-        }
+        $data->sectionlist = array_values(array_filter($data->sectionlist,
+            function($sectionid) {
+                $section = $this->format->get_modinfo()->get_section_info_by_id($sectionid);
+                return $section && !$section->parent;
+            }));
 
         // Build sections hierarchy.
         $allsections = $this->format->get_modinfo()->get_section_info_all();
         $res1 = $res2 = [];
-        $toinclude = [$viewedsection ?: 0];
         foreach ($allsections as $s) {
-            if ($s->section && $this->format->is_section_visible($s) &&
-                    (in_array($s->parent, $toinclude) || ($viewedsection && $s->section == $viewedsection))) {
+            if ($s->section && $this->format->is_section_visible($s)) {
                 $children = [];
                 foreach ($allsections as $ss) {
                     if ($ss->parent == $s->section) {
@@ -67,7 +59,6 @@ class course extends \core_courseformat\output\local\state\course {
                 } else {
                     $res2[] = ['id' => $s->id, 'section' => $s->section, 'children' => $children];
                 }
-                $toinclude[] = $s->section;
             }
         }
         // Function _fixOrder in lib/amd/src/local/reactive/basecomponent.js removes all existing children of empty lists

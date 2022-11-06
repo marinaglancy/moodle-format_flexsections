@@ -44,9 +44,7 @@ class section extends \core_courseformat\output\local\state\section {
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
             && $this->format->get_viewed_section() != $this->section->section;
         $data->children = [];
-        if ($showaslink) {
-            $data->cmlist = [];
-        } else if ($this->section->section) {
+        if ($this->section->section) {
             foreach ($this->format->get_modinfo()->get_section_info_all() as $s) {
                 if ($s->parent == $this->section->section && $this->format->is_section_visible($s)) {
                     $data->children[] = (array)((new static($this->format, $s))->export_for_template($output)) +
