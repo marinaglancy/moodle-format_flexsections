@@ -102,9 +102,9 @@ Feature: Using course in flexsections format
     And I am on "Course 1" course homepage
     Then I should see "Topic 1" in the "region-main" "region"
     And I should see "Topic 1" in the "Navigation" "block"
-    And I should not see "First module"
-    And I should not see "Topic 2"
-    And I should not see "Second module"
+    And I should not see "First module" in the "region-main" "region"
+    And I should not see "Topic 2" in the "region-main" "region"
+    And I should not see "Second module" in the "region-main" "region"
     And I click on "Topic 1" "link" in the "region-main" "region"
     And I should see "Topic 1" in the "region-main" "region"
     And I should see "First module" in the "region-main" "region"
