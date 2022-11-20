@@ -51,6 +51,7 @@ class section extends \core_courseformat\output\local\content\section {
      */
     public function export_for_template(\renderer_base $output): stdClass {
         $format = $this->format;
+        $course = $format->get_course();
 
         $data = parent::export_for_template($output);
 
@@ -70,8 +71,15 @@ class section extends \core_courseformat\output\local\content\section {
             $data->level = $this->level;
         }
 
-        if (!$this->section->section || $this->section->section == $this->format->get_viewed_section()) {
+        if ((!$course->showsection0title && $this->section->section === 0) ||
+                ($this->section->section !== 0 && $this->section->section === $this->format->get_viewed_section())) {
+            // Never collapse content of top section in single section view or
+            // when showing title of the top section is not shown.
             $data->contentcollapsed = false;
+        }
+
+        if ($this->section->section === 0 || $this->section->section === $this->format->get_viewed_section()) {
+            // Show collapse/expand all menu at top section header.
             $data->collapsemenu = true;
         } else {
             $data->collapsemenu = false;

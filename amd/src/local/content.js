@@ -236,7 +236,7 @@ export default class FlexsectionComponent extends Component {
         state.section.forEach(
             section => {
                 const sectionNumber = parseInt(section.number);
-                if (!sectionNumber || sectionNumber === mainSection || !(`${section.parent}` in parents) || section.collapsed) {
+                if (!(`${section.parent}` in parents) || section.collapsed) {
                     return;
                 }
                 parents[`${sectionNumber}`] = `${sectionNumber}`;
