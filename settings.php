@@ -15,18 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Flexible sections course format settings.
  *
- * @package    format_flexsections
- * @copyright  2022 Marina Glancy
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   format_flexsections
+ * @copyright 2022 Ruslan Kabalin
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2022112200;             // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022041900.00;          // Requires Moodle 4.0 or above.
-$plugin->release   = "4.0.1";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->component = 'format_flexsections';  // Full name of the plugin (used for diagnostics).
-$plugin->supported = [400, 400];
+if ($ADMIN->fulltree) {
+    $settings->add(new admin_setting_configcheckbox('format_flexsections/showsection0titledefault',
+        get_string('showsection0titledefault', 'format_flexsections'),
+        get_string('showsection0titledefaultdesc', 'format_flexsections'), 0));
+}

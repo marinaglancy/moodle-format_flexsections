@@ -45,20 +45,22 @@ class header extends \core_courseformat\output\local\content\section\header {
 
         $data = parent::export_for_template($output);
         $data->indenttitle = false;
+        $course = $this->format->get_course();
 
         if ($this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
             // Do not display the collapse/expand caret for sections that are meant to be shown on a separate page.
             $data->headerdisplaymultipage = true;
             if ($this->format->get_viewed_section() != $this->section->section) {
                 // If the section is displayed as a link and we are not on this section's page, display it as a link.
-                $data->title = $output->section_title($this->section, $this->format->get_course());
+                $data->title = $output->section_title($this->section, $course);
                 $data->indenttitle = $this->title_needs_indenting();
             }
         }
 
-        if (!$this->section->section) {
-            // Do not make display header for the "General" section.
-            $data->title = '';
+        $data->hidetitle = false;
+        if (!$course->showsection0title && $this->section->section === 0) {
+            // Do not display header title for the "General" section.
+            $data->hidetitle = true;
         }
 
         $data->headerdisplaymultipage = !empty($data->headerdisplaymultipage);

@@ -390,6 +390,39 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Definitions of the additional options that this course format uses for course.
+     *
+     * Flexsections format uses the following options:
+     * - showsection0title
+     *
+     * @param bool $foreditform
+     * @return array of options
+     */
+    public function course_format_options($foreditform = false) {
+        static $courseformatoptions = false;
+        if ($courseformatoptions === false) {
+            $courseformatoptions = [
+                'showsection0title' => [
+                    'default' => get_config('format_flexsections', 'showsection0titledefault') ?? 0,
+                    'type' => PARAM_BOOL,
+                ],
+            ];
+        }
+        if ($foreditform && !isset($courseformatoptions['showsection0title']['label'])) {
+            $courseformatoptionsedit = [
+                'showsection0title' => [
+                    'label' => new lang_string('showsection0title', 'format_flexsections'),
+                    'help' => 'showsection0title',
+                    'help_component' => 'format_flexsections',
+                    'element_type' => 'advcheckbox',
+                ],
+            ];
+            $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
+        }
+        return $courseformatoptions;
+    }
+
+    /**
      * Adds format options elements to the course/section edit form.
      *
      * This function is called from {@see course_edit_form::definition_after_data()}.
@@ -610,7 +643,7 @@ class format_flexsections extends core_courseformat\base {
      *
      * @return int
      */
-    public function get_viewed_section() {
+    public function get_viewed_section(): int {
         if ($this->on_course_view_page()) {
             if ($s = $this->get_caller_page_url()->get_param('section')) {
                 return $s;
