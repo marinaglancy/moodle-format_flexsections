@@ -262,4 +262,43 @@ class format_flexsections_test extends \advanced_testcase {
         $this->assertNotEmpty($format->get_view_url(0));
         $this->assertNotEmpty($format->get_view_url(1));
     }
+
+    /**
+     * Tests for format_flexsections::delete_section_with_children.
+     */
+    public function test_delete_section_with_children() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        // Generate a course with 5 sections.
+        $generator = $this->getDataGenerator();
+        $numsections = 5;
+        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]);
+
+        // Get last section.
+        $courseformat = course_get_format($course);
+        $sections = $courseformat->get_sections();
+        $lastsection = array_pop($sections);
+
+        // Create 2 subsections.
+        $this->assertEquals(6, $courseformat->create_new_section($lastsection->section));
+        $this->assertEquals(7, $courseformat->create_new_section($lastsection->section));
+        // Sanity check, expect 8 sections in total (section 0-7).
+        $this->assertCount(8, $courseformat->get_sections());
+
+        // Delete last top section, this should delete 3 sections in total.
+        $sink = $this->redirectEvents();
+        $courseformat->delete_section_with_children($lastsection);
+
+        // Check events.
+        $events = $sink->get_events();
+        $this->assertCount(3, $events);
+        foreach ($events as $event) {
+            $this->assertInstanceOf('\core\event\course_section_deleted', $event);
+            $this->assertContains((int) $event->get_data()['other']['sectionnum'], [5, 6, 7]);
+        }
+        // Sanity check, expect 5 sections in total (section 0-4).
+        $this->assertCount(5, $courseformat->get_sections());
+    }
 }
