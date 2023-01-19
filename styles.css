@@ -34,3 +34,12 @@
         display: none;
     }
 }
+
+.course-content ul.flexsections li.section .section-controls {
+    display: flex;
+    gap: 1em 1em;
+}
+
+.course-content ul.flexsections li.section .section-controls button.section-addsubsection {
+    margin-top: 0.25rem;
+}

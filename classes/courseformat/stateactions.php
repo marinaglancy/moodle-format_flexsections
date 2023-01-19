@@ -171,13 +171,21 @@ class stateactions extends  \core_courseformat\stateactions {
      */
     public function section_add_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
                             ?int $targetsectionid = null, ?int $targetcmid = null): void {
-        $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
-        require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
-        $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
-        $format->create_new_section($targetsection);
+        $aftersectionid = array_shift($ids);
+        $validatesections = [$targetsectionid];
+        $beforesection = null;
+        if (!empty($aftersectionid)) {
+            $validatesections[] = $aftersectionid;
+            $aftersection = $modinfo->get_section_info_by_id($aftersectionid, MUST_EXIST);
+            $beforesection = $this->find_next_section($modinfo, $aftersection);
+        }
+        $this->validate_sections($course, $validatesections, __FUNCTION__);
+        require_capability('moodle/course:update', context_course::instance($course->id));
+        $parentsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
+        $format->create_new_section($parentsection, $beforesection);
 
         // Adding subsection affects the full course structure.
         $this->course_state($updates, $course);

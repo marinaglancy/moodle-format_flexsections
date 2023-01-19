@@ -50,6 +50,7 @@ class section extends \core_courseformat\output\local\content\section {
      * @return stdClass
      */
     public function export_for_template(\renderer_base $output): stdClass {
+        global $PAGE;
         $format = $this->format;
 
         $data = parent::export_for_template($output);
@@ -58,10 +59,20 @@ class section extends \core_courseformat\output\local\content\section {
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
             && $this->format->get_viewed_section() != $this->section->section;
 
+        $cap = has_capability('moodle/course:update', \context_course::instance($format->get_course()->id));
         $data->showaslink = $showaslink;
         if ($showaslink) {
             $data->cmlist = [];
             $data->cmcontrols = '';
+        } else if ($PAGE->user_is_editing() && $cap && !empty($this->section->parent)
+                && $this->section->section != $this->format->get_viewed_section()) {
+            $addsubsectiondata = [
+                'parentid' => $format->get_section($this->section->parent)->id,
+                'afterid' => $this->section->id,
+                'cmcontrols' => $data->cmcontrols,
+            ];
+            $data->cmcontrols = $output->render_from_template('format_flexsections/local/content/section/addsubsectionbutton',
+                $addsubsectiondata);
         }
 
         // Add subsections.

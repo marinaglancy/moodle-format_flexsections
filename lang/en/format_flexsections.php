@@ -24,6 +24,7 @@
 
 $string['addsections'] = 'Add section';
 $string['addsubsection'] = 'Add subsection';
+$string['addsectionbelow'] = 'Add section below';
 $string['backtocourse'] = 'Back to course \'{$a}\'';
 $string['backtosection'] = 'Back to \'{$a}\'';
 $string['confirmdelete'] = 'Are you sure you want to delete this section? All activities and subsections will also be deleted';

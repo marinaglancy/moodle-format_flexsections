@@ -44,10 +44,11 @@ export default class extends Mutations {
      *
      * @param {StateManager} stateManager the current state manager
      * @param {number} parentSectionId
+     * @param {number|null} afterSectionId
      */
-    async addSubSection(stateManager, parentSectionId) {
+    async addSubSection(stateManager, parentSectionId, afterSectionId) {
         const course = stateManager.get('course');
-        const updates = await this._callEditWebservice('section_add_subsection', course.id, [], parentSectionId);
+        const updates = await this._callEditWebservice('section_add_subsection', course.id, [afterSectionId], parentSectionId);
         stateManager.processUpdates(updates);
     }
 
