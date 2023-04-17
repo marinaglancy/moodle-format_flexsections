@@ -19,6 +19,7 @@ namespace format_flexsections\courseformat;
 use context_course;
 use core_courseformat\stateupdates;
 use stdClass;
+use core_component;
 
 /**
  * class stateactions
