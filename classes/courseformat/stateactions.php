@@ -122,7 +122,7 @@ class stateactions extends  \core_courseformat\stateactions {
     /**
      * Merging a section with its parent
      *
-     * @param stateupdates $updates the affected course elements track
+     * @param \format_flexsections\courseformat\stateupdates $updates the affected course elements track
      * @param stdClass $course the course object
      * @param int[] $ids not used
      * @param int $targetsectionid section id to merge up
@@ -153,7 +153,7 @@ class stateactions extends  \core_courseformat\stateactions {
         }
 
         $format->mergeup_section($targetsection);
-        $updates->add_section_delete($targetsectionid);
+        $updates->add_section_remove($targetsectionid);
 
         // Merging a section affects the full course structure.
         $this->course_state($updates, $course);
@@ -218,11 +218,11 @@ class stateactions extends  \core_courseformat\stateactions {
         [$sectionstodelete, $modulestodelete] = $format->delete_section_with_children($section);
 
         foreach ($modulestodelete as $cmid) {
-            $updates->add_cm_delete($cmid);
+            $updates->add_cm_remove($cmid);
         }
 
         foreach ($sectionstodelete as $sid) {
-            $updates->add_section_delete($sid);
+            $updates->add_section_remove($sid);
         }
 
         // Removing a section affects the full course structure.
