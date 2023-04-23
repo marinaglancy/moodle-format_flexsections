@@ -118,7 +118,7 @@ class format_flexsections extends core_courseformat\base {
      * Returns the section relative number regardless whether argument is an object or an int
      *
      * @param int|section_info $section
-     * @return int
+     * @return ?int
      */
     protected function resolve_section_number($section) {
         if ($section === null || $section === '') {
@@ -613,7 +613,7 @@ class format_flexsections extends core_courseformat\base {
     public function get_viewed_section() {
         if ($this->on_course_view_page()) {
             if ($s = $this->get_caller_page_url()->get_param('section')) {
-                return $s;
+                return (int)$s;
             }
             $sid = $this->get_caller_page_url()->get_param('sectionid');
             if ($sid && ($section = $this->get_modinfo()->get_section_info_by_id($sid))) {
