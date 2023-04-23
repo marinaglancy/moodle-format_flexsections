@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+### Fixed
+- Fixed a bug causing section not to be moved to the correct location in some cases.
+  See https://github.com/marinaglancy/moodle-format_flexsections/issues/37
+
 ## [4.0.2] - 2023-04-17
 ### Changed
 - Course index always shows all sections and activities regardless of the current page. More details
