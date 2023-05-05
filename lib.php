@@ -1214,7 +1214,7 @@ class format_flexsections extends core_courseformat\base {
  * @param string $itemtype
  * @param int $itemid
  * @param mixed $newvalue
- * @return inplace_editable
+ * @return ?inplace_editable
  */
 function format_flexsections_inplace_editable($itemtype, $itemid, $newvalue) {
     global $DB, $CFG;
