@@ -1043,7 +1043,7 @@ class format_flexsections extends core_courseformat\base {
         if ($section->section == $parent->section || $this->section_has_parent($parent, $section->section)) {
             return false;
         }
-        if ($section->parent != $parent) {
+        if ($section->parent != $parent->section) {
             // When moving to another parent, check the depth.
             if ($this->get_section_depth($parent) + 1 > $this->get_max_section_depth()) {
                 return false;
