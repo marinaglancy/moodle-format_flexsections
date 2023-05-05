@@ -63,7 +63,7 @@ class format_flexsections extends core_courseformat\base {
      * @return bool
      */
     public function uses_indentation(): bool {
-        return false;
+        return (get_config('format_flexsections', 'indentation')) ? true : false;
     }
 
     /**
@@ -1218,6 +1218,7 @@ class format_flexsections extends core_courseformat\base {
  */
 function format_flexsections_inplace_editable($itemtype, $itemid, $newvalue) {
     global $DB, $CFG;
+    require_once($CFG->libdir . '/externallib.php');
     require_once($CFG->dirroot . '/course/lib.php');
     if ($itemtype === 'sectionname' || $itemtype === 'sectionnamenl') {
         $section = $DB->get_record_sql(
