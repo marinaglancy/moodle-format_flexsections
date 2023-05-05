@@ -43,4 +43,16 @@ export default class extends Exporter {
         }
         return section;
     }
+
+    /**
+     * Generate the course export data from the state.
+     *
+     * @param {Object} state the current state.
+     * @returns {Object}
+     */
+    course(state) {
+        const course = super.course(state);
+        course.maxsectiondepth = state.course.maxsectiondepth;
+        return course;
+    }
 }

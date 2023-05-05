@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Allow to indent activities on the course page
 - Added automated tests on Moodle 4.2
+- Subsection depth limiting course format setting. Setting maximum number of
+  subsection levels will restrict ability of user to create sections at levels
+  deeper than configured. The setting does not affect existing course subsections
+  layout.
 ### Fixed
 - Fixed a bug causing section not to be moved to the correct location in some cases.
   See https://github.com/marinaglancy/moodle-format_flexsections/issues/37

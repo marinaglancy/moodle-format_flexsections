@@ -65,6 +65,7 @@ class course extends \core_courseformat\output\local\state\course {
         // too early, before saving them in the 'dettachedelements'. To avoid accidentally losing sections during
         // reordering we pass the empty lists in the end.
         $data->hierarchy = array_merge($res1, $res2);
+        $data->maxsectiondepth = $this->format->get_max_section_depth();
 
         return $data;
     }

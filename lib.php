@@ -67,6 +67,16 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Maximum number of subsections
+     *
+     * @return int
+     */
+    public function get_max_section_depth(): int {
+        $limit = (int)get_config('format_flexsections', 'maxsectiondepth');
+        return max(1, min($limit, 100));
+    }
+
+    /**
      * Returns the display name of the given section that the course prefers.
      *
      * Use section name is specified by user. Otherwise use default ("Topic #").
@@ -84,6 +94,20 @@ class format_flexsections extends core_courseformat\base {
         } else {
             return $this->get_default_section_name($section);
         }
+    }
+
+    /**
+     * Returns the depth of the section in hierarchy
+     *
+     * For example, top section has depth 1, subsection of top section has depth 2,
+     * its subsection has depth 3.
+     *
+     * @param section_info $section
+     * @return int Depth of the section in hierarchy.
+     */
+    public function get_section_depth(section_info $section): int {
+        $parent = $this->get_section($section->parent);
+        return $parent && $parent->section ? $this->get_section_depth($parent) + 1 : 1;
     }
 
     /**
@@ -356,7 +380,7 @@ class format_flexsections extends core_courseformat\base {
      * @param bool $foreditform
      * @return array
      */
-    public function section_format_options($foreditform = false) {
+    public function section_format_options($foreditform = false): array {
         return array(
             'parent' => array(
                 'type' => PARAM_INT,
@@ -1019,6 +1043,12 @@ class format_flexsections extends core_courseformat\base {
         if ($section->section == $parent->section || $this->section_has_parent($parent, $section->section)) {
             return false;
         }
+        if ($section->parent != $parent->section) {
+            // When moving to another parent, check the depth.
+            if ($this->get_section_depth($parent) + 1 > $this->get_max_section_depth()) {
+                return false;
+            }
+        }
 
         if ($before) {
             if (is_string($before)) {
@@ -1158,7 +1188,7 @@ class format_flexsections extends core_courseformat\base {
                     'context' => $context,
                     'other' => [
                         'sectionnum' => $section->section,
-                        'sectionname' => self::get_section_name($section),
+                        'sectionname' => $this->get_section_name($section),
                     ]
                 )
             );
