@@ -1188,7 +1188,7 @@ class format_flexsections extends core_courseformat\base {
                     'context' => $context,
                     'other' => [
                         'sectionnum' => $section->section,
-                        'sectionname' => self::get_section_name($section),
+                        'sectionname' => $this->get_section_name($section),
                     ]
                 )
             );
