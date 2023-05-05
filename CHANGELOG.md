@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [4.0.3] - 2023-05-06
 ### Added
 - Allow to indent activities on the course page
 - Added automated tests on Moodle 4.2
@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed a bug causing section not to be moved to the correct location in some cases.
   See https://github.com/marinaglancy/moodle-format_flexsections/issues/37
+- Trigger event when section is deleted
 
 ## [4.0.2] - 2023-04-17
 ### Changed
