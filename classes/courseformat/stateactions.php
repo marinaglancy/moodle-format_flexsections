@@ -181,8 +181,8 @@ class stateactions extends  \core_courseformat\stateactions {
 
         // Validate if we do not exceed depth.
         $targetsectiondepth = $format->get_section_depth($targetsection);
-        if ($targetsectiondepth >= $course->maxsubsections) {
-            throw new moodle_exception('Subsection depth has exceeded configured value.');
+        if ($targetsectiondepth >= $format->get_max_section_depth()) {
+            throw new moodle_exception('errorsectiondepthexceeded', 'format_flexsections');
         }
 
         $format->create_new_section($targetsection);

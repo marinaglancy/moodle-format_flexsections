@@ -330,6 +330,11 @@ export default class extends BaseComponent {
                 `${links[i].getAttribute('data-parents')},`.match(re)) {
                 this._disableLink(links[i]);
             }
+            // Disable moving to the depth that exceeds the maxsectiondepth setting.
+            const depth = (`${links[i].getAttribute('data-parents')}`.match(/,/g) || []).length;
+            if (data.maxsectiondepth && depth >= data.maxsectiondepth) {
+                this._disableLink(links[i]);
+            }
         }
 
         // TODO.

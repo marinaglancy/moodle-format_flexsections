@@ -10,9 +10,11 @@ Feature: Using course in flexsections format
       | student1 | Sam | Student | student1@example.com |
       | student2 | Mary | Student | student2@example.com |
       | teacher1 | Terry | Teacher | teacher1@example.com |
+    And the following config values are set as admin:
+      | maxsectiondepth | 4 | format_flexsections |
     And the following "courses" exist:
-      | fullname | shortname | format       | numsections | maxsubsections |
-      | Course 1 | C1        | flexsections | 0           | 3              |
+      | fullname | shortname | format       | numsections |
+      | Course 1 | C1        | flexsections | 0           |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | student1 | C1     | student        |

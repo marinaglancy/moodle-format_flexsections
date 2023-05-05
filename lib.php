@@ -67,6 +67,16 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Maximum number of subsections
+     *
+     * @return int
+     */
+    public function get_max_section_depth(): int {
+        $limit = (int)get_config('format_flexsections', 'maxsectiondepth');
+        return max(1, min($limit, 100));
+    }
+
+    /**
      * Returns the display name of the given section that the course prefers.
      *
      * Use section name is specified by user. Otherwise use default ("Topic #").
@@ -89,29 +99,15 @@ class format_flexsections extends core_courseformat\base {
     /**
      * Returns the depth of the section in hierarchy
      *
-     * For example, top section has depth 0, subsection of top section has depth 1,
-     * its subsection has depth 2.
+     * For example, top section has depth 1, subsection of top section has depth 2,
+     * its subsection has depth 3.
      *
      * @param section_info $section
      * @return int Depth of the section in hierarchy.
      */
     public function get_section_depth(section_info $section): int {
-        static $sectionmap = [];
-
-        if (empty($sectionmap)) {
-            // Populate section-parent map and keep it in static variable.
-            foreach ($this->get_sections() as $s) {
-                $sectionmap[$s->section] = $s->parent;
-            }
-        }
-
-        $section = $this->resolve_section_number($section);
-        $depth = 0;
-        while ($sectionmap[$section] !== 0) {
-            $section = $sectionmap[$section];
-            $depth++;
-        }
-        return $depth;
+        $parent = $this->get_section($section->parent);
+        return $parent && $parent->section ? $this->get_section_depth($parent) + 1 : 1;
     }
 
     /**
@@ -417,43 +413,6 @@ class format_flexsections extends core_courseformat\base {
                 'default' => COURSE_DISPLAY_SINGLEPAGE,
             )
         );
-    }
-
-    /**
-     * Definitions of the additional options that this course format uses for course.
-     *
-     * Flexsections format uses the following options:
-     * - maxsubsections
-     *
-     * @param bool $foreditform
-     * @return array of options
-     */
-    public function course_format_options($foreditform = false) {
-        static $courseformatoptions = false;
-        if ($courseformatoptions === false) {
-            $courseconfig = get_config('moodlecourse');
-            $courseformatoptions = [
-                'maxsubsections' => [
-                    'default' => (int) get_config('format_flexsections', 'maxsubsections'),
-                    'type' => PARAM_INT,
-                ],
-            ];
-        }
-        if ($foreditform && !isset($courseformatoptions['maxsubsections']['label'])) {
-            $courseformatoptionsedit = [
-                'maxsubsections' => [
-                    'label' => new lang_string('maxsubsections', 'format_flexsections'),
-                    'help' => 'maxsubsections',
-                    'help_component' => 'format_flexsections',
-                    'element_type' => 'text',
-                    'element_attributes' => [
-                        'size = "7"',
-                    ],
-                ],
-            ];
-            $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
-        }
-        return $courseformatoptions;
     }
 
     /**
@@ -1083,6 +1042,12 @@ class format_flexsections extends core_courseformat\base {
         // Check that $parent is not subsection of $section.
         if ($section->section == $parent->section || $this->section_has_parent($parent, $section->section)) {
             return false;
+        }
+        if ($section->parent != $parent) {
+            // When moving to another parent, check the depth.
+            if ($this->get_section_depth($parent) + 1 > $this->get_max_section_depth()) {
+                return false;
+            }
         }
 
         if ($before) {
