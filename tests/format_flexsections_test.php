@@ -133,6 +133,7 @@ class format_flexsections_test extends \advanced_testcase {
     /**
      * Test web service updating section name.
      *
+     * @runInSeparateProcess
      * @return void
      */
     public function test_update_inplace_editable() {
@@ -168,6 +169,7 @@ class format_flexsections_test extends \advanced_testcase {
     /**
      * Test callback updating section name.
      *
+     * @runInSeparateProcess
      * @return void
      */
     public function test_inplace_editable() {

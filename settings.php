@@ -15,19 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Settings for format_flexsections
  *
  * @package    format_flexsections
- * @copyright  2022 Marina Glancy
+ * @copyright  2023 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2023041700;             // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022041900.00;          // Requires Moodle 4.0 or above.
-$plugin->release   = "4.0.2";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->component = 'format_flexsections';  // Full name of the plugin (used for diagnostics).
-$plugin->supported = [400, 402];
-
+if ($ADMIN->fulltree) {
+    $url = new moodle_url('/admin/course/resetindentation.php', ['format' => 'flexsections']);
+    $link = html_writer::link($url, get_string('resetindentation', 'admin'));
+    $settings->add(new admin_setting_configcheckbox(
+        'format_flexsections/indentation',
+        new lang_string('indentation', 'format_topics'),
+        new lang_string('indentation_help', 'format_topics').'<br />'.$link,
+        1
+    ));
+}
