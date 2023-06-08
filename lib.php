@@ -381,38 +381,47 @@ class format_flexsections extends core_courseformat\base {
      * @return array
      */
     public function section_format_options($foreditform = false): array {
-        return array(
-            'parent' => array(
+        return [
+            'secondarytitle' => [
+                'type' => PARAM_TEXT,
+                'label' => get_string('secondarytitle', 'format_flexsections'),
+                'element_type' => 'text',
+                'help' => 'secondarytitle',
+                'default' => '',
+                'cache' => true,
+                'cachedefault' => '',
+            ],
+            'parent' => [
                 'type' => PARAM_INT,
                 'label' => '',
                 'element_type' => 'hidden',
                 'default' => 0,
                 'cache' => true,
                 'cachedefault' => 0,
-            ),
-            'visibleold' => array(
+            ],
+            'visibleold' => [
                 'type' => PARAM_INT,
                 'label' => '',
                 'element_type' => 'hidden',
                 'default' => 1,
                 'cache' => true,
                 'cachedefault' => 0,
-            ),
-            'collapsed' => array(
+            ],
+            'collapsed' => [
                 'type' => PARAM_INT,
                 'label' => get_string('displaycontent', 'format_flexsections'),
                 'element_type' => 'select',
-                'element_attributes' => array(
-                    array(
+                'element_attributes' => [
+                    [
                         FORMAT_FLEXSECTIONS_EXPANDED => new lang_string('showexpanded', 'format_flexsections'),
                         FORMAT_FLEXSECTIONS_COLLAPSED => new lang_string('showcollapsed', 'format_flexsections'),
-                    )
-                ),
+                    ]
+                ],
                 'cache' => true,
                 'cachedefault' => FORMAT_FLEXSECTIONS_EXPANDED,
                 'default' => COURSE_DISPLAY_SINGLEPAGE,
-            )
-        );
+            ]
+        ];
     }
 
     /**
