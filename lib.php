@@ -669,7 +669,7 @@ class format_flexsections extends core_courseformat\base {
      *
      * @return int
      */
-    public function get_viewed_section(): int {
+    public function get_viewed_section() {
         if ($this->on_course_view_page()) {
             if ($s = $this->get_caller_page_url()->get_param('section')) {
                 return (int)$s;
