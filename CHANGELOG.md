@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## UNRELEASED
+### Added
+- Setting to show header for the General section
+### Fixed
+- Fixed a bug when drag&drop of activities was not possible if the target
+  section is empty
+
 ## [4.0.3] - 2023-05-06
 ### Added
 - Allow to indent activities on the course page

@@ -27,13 +27,17 @@ export default class extends Section {
     // Extends course/format/amd/src/local/courseeditor/dndsection.js
 
     /**
-     * Initial state ready method.
+     * Register state values and the drag and drop subcomponent.
      *
-     * @param {Object} state the initial state
+     * @param {BaseComponent} headerComponent section header component
      */
-    stateReady(state) {
-        this.configState(state);
-        // Overrides the parent method and removes drag&drop initialisation.
-        // Drag & drop of sections is not currently supported in format_flexsections.
+    configDragDrop(headerComponent) {
+        super.configDragDrop(headerComponent);
+        // Disable drag and drop for the sections, it does not really work yet.
+        setTimeout(() => {
+            if (typeof headerComponent.dragdrop.parent.getDraggableData === 'function') {
+                headerComponent.dragdrop.setDraggable(false);
+            }
+        }, 1500);
     }
 }

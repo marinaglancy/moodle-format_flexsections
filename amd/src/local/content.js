@@ -45,10 +45,12 @@ export default class FlexsectionComponent extends Component {
         courseEditor.getExporter = () => new Exporter(courseEditor);
 
         // Hack to preserve legacy mutations (added in core_course/actions) after we set own plugin mutations.
-        let legacyActivityAction = courseEditor.mutations.legacyActivityAction ?? {};
-        let legacySectionAction = courseEditor.mutations.legacySectionAction ?? {};
+        let legacyActivityAction = courseEditor.mutations.legacyActivityAction ?? null;
+        let legacySectionAction = courseEditor.mutations.legacySectionAction ?? null;
         courseEditor.setMutations(new Mutations());
-        courseEditor.addMutations({legacyActivityAction, legacySectionAction});
+        courseEditor.addMutations({
+            ...(legacyActivityAction ? {legacyActivityAction} : {}),
+            ...(legacySectionAction ? {legacySectionAction} : {})});
 
         return new FlexsectionComponent({
             element: document.getElementById(target),
