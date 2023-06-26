@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace format_flexsections\output\courseformat\state;
+use format_flexsections\constants;
 
 /**
  * Contains the ajax update section structure.
@@ -59,6 +60,8 @@ class section extends \core_courseformat\output\local\state\section {
         }
         $data->haschildren = !empty($data->children);
         $data->singlesection = (int)($this->section->collapsed && $this->section->section == $this->format->get_viewed_section());
+        $courseindex = $this->format->get_course_index_display();
+        $data->hidecmsinindex = ($courseindex == constants::COURSEINDEX_SECTIONS);
 
         return $data;
     }

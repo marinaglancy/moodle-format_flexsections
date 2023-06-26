@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot. '/course/format/lib.php');
 
+use format_flexsections\constants;
 use core\output\inplace_editable;
 
 define('FORMAT_FLEXSECTIONS_COLLAPSED', 1);
@@ -54,7 +55,17 @@ class format_flexsections extends core_courseformat\base {
      * @return bool
      */
     public function uses_course_index() {
-        return true;
+        return $this->get_course_index_display() != constants::COURSEINDEX_NONE;
+    }
+
+    /**
+     * Type of course index display
+     *
+     * @return int
+     */
+    public function get_course_index_display(): int {
+        $type = (int)get_config('format_flexsections', 'courseindexdisplay');
+        return $type;
     }
 
     /**

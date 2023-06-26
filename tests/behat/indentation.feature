@@ -37,7 +37,6 @@ Feature: Course module indentation in Flexsections course format
     And I wait "5" seconds
     And "Reset indentation" "link" should exist
     When I click on "Reset indentation" "link"
-    And I should see "Reset indentation on course page"
     And "Reset indentation" "button" should exist
     And I click on "Reset indentation" "button"
     Then I should see "Indentation reset"
@@ -58,7 +57,6 @@ Feature: Course module indentation in Flexsections course format
     Given I navigate to "Plugins > Course formats > Flexible sections format" in site administration
     And "Reset indentation" "link" should exist
     When I click on "Reset indentation" "link"
-    And I should see "Reset indentation on course page"
     And "Reset indentation" "button" should exist
     And "Cancel" "button" should exist
     And I click on "Cancel" "button"

@@ -116,11 +116,13 @@
         class="courseindex-item-content collapse {{^indexcollapsed}}show{{/indexcollapsed}} pb-0"
         aria-labelledby="courseindexsection{{number}}" role="group"
     >
+        {{^hidecmsinindex}}
         <ul class="courseindex-sectioncontent unlist" data-for="cmlist" data-id="{{id}}" role="group">
             {{#cms}}
             {{> core_courseformat/local/courseindex/cm }}
             {{/cms}}
         </ul>
+        {{/hidecmsinindex}}
         <div class="courseindex-sectioncontent-children ml-2" data-for="subsectionlist" data-parent="{{id}}" role="tree">
             {{#children}}
                 {{> format_flexsections/local/courseindex/section }}

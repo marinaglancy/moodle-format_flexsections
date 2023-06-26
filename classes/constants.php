@@ -14,20 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace format_flexsections;
+
 /**
- * Version details.
+ * Constants
  *
  * @package    format_flexsections
- * @copyright  2022 Marina Glancy
+ * @copyright  2023 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version   = 2023050602;             // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022041900.00;          // Requires Moodle 4.0 or above.
-$plugin->release   = "4.0.3";
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->component = 'format_flexsections';  // Full name of the plugin (used for diagnostics).
-$plugin->supported = [400, 402];
-
+class constants {
+    /** @var int */
+    const COURSEINDEX_FULL = 0;
+    /** @var int */
+    const COURSEINDEX_SECTIONS = 1;
+    /** @var int */
+    const COURSEINDEX_NONE = 2;
+}
