@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 - Setting to show header for the General section
 - Setting how to show the course index (sections and activities, only sections,
   do not display)
+- Setting to enable 'accordion' effect - when one section is expanded, all others
+  are collapsed
 ### Fixed
 - Fixed a bug when drag&drop of activities was not possible if the target
   section is empty

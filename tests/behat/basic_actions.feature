@@ -72,7 +72,7 @@ Feature: Using course in flexsections format
     And I should not see "Topic 2"
     And I should not see "Second module"
 
-  Scenario: Collapsing section in flexsections format
+  Scenario: Display section as a link in flexsections format
     Given the following config values are set as admin:
       | unaddableblocks | | theme_boost|
     Given I add the "Navigation" block if not present
@@ -92,7 +92,7 @@ Feature: Using course in flexsections format
     And I should see "Topic 2" in the "Navigation" "block"
     And I should see "Second module" in the "Navigation" "block"
 
-  Scenario: Collapsing section with subsections in flexsections format
+  Scenario: Display section with subsections as a link in flexsections format
     And I change window size to "large"
     Given the following config values are set as admin:
       | unaddableblocks | | theme_boost|

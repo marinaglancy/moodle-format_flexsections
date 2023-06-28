@@ -88,6 +88,15 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Accordion effect
+     *
+     * @return bool
+     */
+    public function get_accordion_setting(): bool {
+        return (bool)get_config('format_flexsections', 'accordion');
+    }
+
+    /**
      * Returns the display name of the given section that the course prefers.
      *
      * Use section name is specified by user. Otherwise use default ("Topic #").
@@ -203,11 +212,6 @@ class format_flexsections extends core_courseformat\base {
                 $url->param('section', $parent);
             }
             $url->set_anchor('section-'.$sectionno);
-            return $url;
-        } else {
-            // General section.
-            $url->set_anchor('section-'.$sectionno);
-            return $url;
         }
         return $url;
     }

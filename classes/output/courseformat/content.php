@@ -81,6 +81,8 @@ class content extends \core_courseformat\output\local\content {
             // Hide add section link below page content.
             $data->numsections = false;
         }
+        $data->accordion = $this->format->get_accordion_setting() ? 1 : '';
+        $data->mainsection = $this->format->get_viewed_section();
 
         return $data;
     }

@@ -34,3 +34,7 @@
         display: none;
     }
 }
+
+[data-flexsections-accordion="1"] .section-collapsemenu.collapsed .expandall {
+    display: none;
+}

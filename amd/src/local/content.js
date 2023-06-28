@@ -85,6 +85,27 @@ export default class FlexsectionComponent extends Component {
                 new FlexsectionsActions(this);
             }
         }
+        if (state.course.accordion) {
+            this._ensureOnlyOneSectionIsExpanded(state);
+        }
+    }
+
+    _ensureOnlyOneSectionIsExpanded(state) {
+        const isExpanded = (sectionInfo) => !sectionInfo.showaslink && !sectionInfo.contentcollapsed;
+        const hasExpandedChildren = (sectionInfo) =>
+            (sectionInfo.children ?? []).some(s => isExpanded(s));
+
+        let firstExpandedSection = null;
+        for (let sectionInfo of this._getSectionsWithCollapse(state)) {
+            if (!firstExpandedSection && isExpanded(sectionInfo) && !hasExpandedChildren(sectionInfo)) {
+                firstExpandedSection = sectionInfo;
+            }
+        }
+
+        if (firstExpandedSection) {
+            const sectionitem = this.getElement(this.selectors.SECTION, firstExpandedSection.id);
+            this._collapseAllSectionsExceptFor(sectionitem);
+        }
     }
 
     /**
@@ -145,6 +166,65 @@ export default class FlexsectionComponent extends Component {
     }
 
     /**
+     * Setup sections toggler.
+     *
+     * Toggler click is delegated to the main course content element because new sections can
+     * appear at any moment and this way we prevent accidental double bindings.
+     *
+     * @param {Event} event the triggered event
+     */
+    _sectionTogglers(event) {
+        // Overrides parent method to add more functionality.
+        const sectionlink = event.target.closest(this.selectors.TOGGLER);
+        const closestCollapse = event.target.closest(this.selectors.COLLAPSE);
+        const isChevron = closestCollapse?.closest(this.selectors.SECTION_ITEM);
+
+        if (sectionlink || isChevron) {
+            const section = event.target.closest(this.selectors.SECTION);
+            const toggler = section.querySelector(this.selectors.COLLAPSE);
+            const isCollapsed = toggler?.classList.contains(this.classes.COLLAPSED) ?? false;
+
+
+            if (isChevron || isCollapsed) {
+                const sectionId = parseInt(section.getAttribute('data-id'));
+                // Update the state.
+                this.reactive.dispatch(
+                    'sectionContentCollapsed',
+                    [sectionId],
+                    !isCollapsed
+                );
+            }
+            // If we expanded a section, collapse all other expanded sections
+            // except for this section parents.
+            if (isCollapsed && this.reactive.stateManager.state.course.accordion) {
+                this._collapseAllSectionsExceptFor(section);
+            }
+        }
+    }
+
+    /**
+     * Collapse all sections except for the given one and its parents.
+     *
+     * @param {HTMLElement} section
+     */
+    _collapseAllSectionsExceptFor(section) {
+        const sectionNumber = parseInt(section.getAttribute('data-sectionid'));
+        const leaveOpen = [...this._findAllParents(sectionNumber), sectionNumber];
+        if (sectionNumber > 0 && leaveOpen.includes(0)) {
+            leaveOpen.splice(leaveOpen.indexOf(0), 1);
+        }
+        const sectionIds =
+            this._getSectionsWithCollapse(this.reactive.stateManager.state)
+                .filter(s => !leaveOpen.includes(parseInt(s.section)))
+                .map(s => s.id);
+        this.reactive.dispatch(
+            'sectionContentCollapsed',
+            sectionIds,
+            true
+        );
+    }
+
+    /**
      * Refresh the collapse/expand all sections element.
      *
      * @param {Object} state The state data
@@ -156,21 +236,18 @@ export default class FlexsectionComponent extends Component {
         }
         // Check if we have all sections collapsed/expanded.
         let allcollapsed = true;
-        let allexpanded = true;
-        const mainSection = this._mainSection(state);
+        const mainSection = this._mainSection();
         const sections = this._getSectionsWithCollapse(state);
         for (let i in sections) {
             if (parseInt(sections[i].parent) === mainSection) {
                 allcollapsed = allcollapsed && sections[i].contentcollapsed;
             }
-            allexpanded = allexpanded && !sections[i].contentcollapsed;
         }
         // Update control.
         if (allcollapsed) {
             target.classList.add(this.classes.COLLAPSED);
             target.setAttribute('aria-expanded', false);
-        }
-        if (allexpanded) {
+        } else {
             target.classList.remove(this.classes.COLLAPSED);
             target.setAttribute('aria-expanded', true);
         }
@@ -205,20 +282,10 @@ export default class FlexsectionComponent extends Component {
     /**
      * Find main section
      *
-     * @param {Object} state The state data
      * @returns {Number}
      */
-    _mainSection(state) {
-        const sectionsList = state.course.sectionlist;
-        let sectionNumber = 0;
-        if (sectionsList.length === 1) {
-            state.section.forEach(s => {
-                if (`${s.id}` === `${sectionsList[0]}`) {
-                    sectionNumber = parseInt(s.number);
-                }
-            });
-        }
-        return sectionNumber;
+    _mainSection() {
+        return parseInt(this.element.getAttribute('data-flexsections-mainsection'));
     }
 
     /**
@@ -231,14 +298,16 @@ export default class FlexsectionComponent extends Component {
         if (state === undefined) {
             state = this.reactive.stateManager.state;
         }
-        const mainSection = this._mainSection(state);
+        const mainSection = this._mainSection();
         let parents = {};
         parents[`${mainSection}`] = `${mainSection}`;
         let displayedSections = [];
         state.section.forEach(
             section => {
                 const sectionNumber = parseInt(section.number);
-                if (!(`${section.parent}` in parents) || section.collapsed) {
+                const toggler = this.getElement(this.selectors.SECTION, section.id)?.querySelector(this.selectors.COLLAPSE);
+
+                if (!toggler || !(`${section.parent}` in parents) || section.showaslink) {
                     return;
                 }
                 parents[`${sectionNumber}`] = `${sectionNumber}`;
@@ -246,5 +315,25 @@ export default class FlexsectionComponent extends Component {
             }
         );
         return displayedSections;
+    }
+
+    /**
+     * Find all parents of the current section (section numbers, not ids)
+     *
+     * @param {Number} thisSectionNumber
+     * @returns {Array} Array of section numbers that are parents of this one
+     */
+    _findAllParents(thisSectionNumber) {
+        // Section object has properties: number, id, parent, parentid.
+        if (thisSectionNumber === this._mainSection()) {
+            return [];
+        }
+        let section = this.reactive.stateManager.state.section
+            .find(section => parseInt(section.number) === thisSectionNumber);
+        if (section && section.parent !== undefined) {
+            const parent = parseInt(section.parent);
+            return [...this._findAllParents(parent), parent];
+        }
+        return [];
     }
 }

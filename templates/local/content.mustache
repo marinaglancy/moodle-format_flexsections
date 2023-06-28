@@ -98,23 +98,9 @@
         </a>
     </div>
 {{/backtosection}}
-{{#collapsemenu}}
-    <div class="flex-fill d-flex justify-content-end mr-2 align-self-start mt-2">
-        <a
-                id="collapsesections"
-                class="section-collapsemenu"
-                href="#"
-                aria-expanded="true"
-                role="button"
-                data-toggle="toggleall"
-        >
-            <span class="collapseall text-nowrap">{{#str}}collapseall{{/str}}</span>
-            <span class="expandall text-nowrap">{{#str}}expandall{{/str}}</span>
-        </a>
-    </div>
-{{/collapsemenu}}
 
-<div id="{{uniqid}}-course-format">
+<div id="{{uniqid}}-course-format" data-flexsections-accordion="{{{accordion}}}"
+        data-flexsections-mainsection="{{mainsection}}">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
     <ul class="{{format}} flexsections-level-0" data-for="course_sectionlist">
