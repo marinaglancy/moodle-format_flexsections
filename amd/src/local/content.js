@@ -116,7 +116,7 @@ export default class FlexsectionComponent extends Component {
     getWatchers() {
         let res = super.getWatchers();
         res.push({watch: `course.hierarchy:updated`, handler: this._refreshCourseHierarchy});
-        res.push({watch: `section.collapsed:updated`, handler: this._reloadSection});
+        res.push({watch: `section.showaslink:updated`, handler: this._reloadSection});
         return res;
     }
 
