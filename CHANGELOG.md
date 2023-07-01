@@ -3,11 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## UNRELEASED
 ### Added
-- Setting to show header for the General section
+- Setting to show header for the General section and make it collapsible
 - Setting how to show the course index (sections and activities, only sections,
   do not display)
 - Setting to enable 'accordion' effect - when one section is expanded, all others
   are collapsed
+- Setting to display 'Back to...' link inside the activities allowing to return
+  back to the course section
 ### Fixed
 - Fixed a bug when drag&drop of activities was not possible if the target
   section is empty

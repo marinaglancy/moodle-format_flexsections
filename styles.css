@@ -38,3 +38,10 @@
 [data-flexsections-accordion="1"] .section-collapsemenu.collapsed .expandall {
     display: none;
 }
+
+@media (min-width: 768px) {
+    #page.drawers .flexsections-activity-page-navigate-back {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}

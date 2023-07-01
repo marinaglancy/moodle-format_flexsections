@@ -82,22 +82,8 @@
         "sectionreturn": 1
     }
 }}
-{{#backtocourse}}
-    <div class="header backto">
-        <a href="{{url}}">
-            <i class="icon fa fa-arrow-up fa-fw " aria-hidden="true"></i>
-            {{#str}}backtocourse, format_flexsections, {{coursename}} {{/str}}
-        </a>
-    </div>
-{{/backtocourse}}
-{{#backtosection}}
-    <div class="header backto">
-        <a href="{{url}}">
-            <i class="icon fa fa-arrow-up fa-fw " aria-hidden="true"></i>
-            {{#str}}backtosection, format_flexsections, {{sectionname}} {{/str}}
-        </a>
-    </div>
-{{/backtosection}}
+
+{{> format_flexsections/local/navigate_back_to }}
 
 <div id="{{uniqid}}-course-format" data-flexsections-accordion="{{{accordion}}}"
         data-flexsections-mainsection="{{mainsection}}">

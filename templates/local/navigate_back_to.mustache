@@ -1,0 +1,49 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_flexsections/local/navigate_back_to
+
+    Links to navigate back to course/section
+
+    Example context (json):
+    {
+        "backtocourse": {
+            "url": "/course/view.php?id=2",
+            "coursename": "Course 1"
+        },
+        "backtosection": {
+            "url": "/course/view.php?id=2&section=1",
+            "sectionname": "Section 1"
+        }
+    }
+}}
+{{#backtocourse}}
+    <div class="header backto">
+        <a href="{{url}}">
+            <i class="icon fa fa-arrow-up fa-fw " aria-hidden="true"></i>
+            {{#str}}backtocourse, format_flexsections, {{coursename}} {{/str}}
+        </a>
+    </div>
+{{/backtocourse}}
+{{#backtosection}}
+    <div class="header backto">
+        <a href="{{url}}">
+            <i class="icon fa fa-arrow-up fa-fw " aria-hidden="true"></i>
+            {{#str}}backtosection, format_flexsections, {{sectionname}} {{/str}}
+        </a>
+    </div>
+{{/backtosection}}

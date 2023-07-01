@@ -52,4 +52,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('format_flexsections/accordion',
         get_string('accordion', 'format_flexsections'),
         get_string('accordiondesc', 'format_flexsections'), 0));
+    $settings->add(new admin_setting_configcheckbox('format_flexsections/cmbacklink',
+        get_string('cmbacklink', 'format_flexsections'),
+        get_string('cmbacklinkdesc', 'format_flexsections'), 0));
 }

@@ -1334,3 +1334,42 @@ function format_flexsections_get_fontawesome_icon_map() {
         'format_flexsections:mergeup' => 'fa-level-up',
     ];
 }
+
+/**
+ * If we are on an activity page inside the course in the 'flexsections' format - return the activity
+ *
+ * @return cm_info|null
+ */
+function format_flexsections_add_back_link_to_cm(): ?cm_info {
+    global $PAGE, $CFG;
+    if ($PAGE->course
+            && $PAGE->cm
+            && $PAGE->course->format === 'flexsections' // Only modules in 'flexsections' courses.
+            && get_config('format_flexsections', 'cmbacklink')
+            && $PAGE->pagelayout === 'incourse' // Only view pages with the incourse layout (not popup, embedded, etc).
+            && $PAGE->cm->sectionnum // Do not display in activities in General section.
+            && $PAGE->url->out_omit_querystring() === $CFG->wwwroot . "/mod/{$PAGE->cm->modname}/view.php") {
+        return $PAGE->cm;
+    }
+    return null;
+}
+
+/**
+ * Callback allowing to add contetnt inside the region-main, in the very end
+ *
+ * If we are on activity page, add the "Back to section" link
+ *
+ * @return string
+ */
+function format_flexsections_before_footer() {
+    global $OUTPUT;
+    if ($cm = format_flexsections_add_back_link_to_cm()) {
+        return $OUTPUT->render_from_template('format_flexsections/back_link_in_cms', [
+            'backtosection' => [
+                'url' => course_get_url($cm->course, $cm->sectionnum)->out(false),
+                'sectionname' => get_section_name($cm->course, $cm->sectionnum),
+            ]
+        ]);
+    }
+    return '';
+}
