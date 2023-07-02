@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## UNRELEASED
+## [4.0.4] - 2023-07-02
 ### Added
 - Setting to show header for the General section and make it collapsible
 - Link 'Add section' between sections (only for the top-level sections on the
