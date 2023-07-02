@@ -161,7 +161,101 @@ class stateactions extends  \core_courseformat\stateactions {
     }
 
     /**
-     * Adding a subsection
+     * Check maxsectionslimit
+     *
+     * @param stdClass $course
+     * @throws moodle_exception
+     */
+    protected function check_maxsections(stdClass $course) {
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course->id);
+        $lastsectionnumber = $format->get_last_section_number();
+        $maxsections = $format->get_max_sections();
+
+        if ($lastsectionnumber >= $maxsections) {
+            // See also https://github.com/marinaglancy/moodle-format_flexsections/issues/20 .
+            throw new moodle_exception('maxsectionslimit', 'moodle', $maxsections);
+        }
+    }
+
+    /**
+     * Check maxsectiondepth
+     *
+     * @param stdClass $course
+     * @param \section_info $targetsection
+     * @throws moodle_exception
+     */
+    protected function check_maxdepth(stdClass $course, \section_info $targetsection) {
+        // Validate if we do not exceed depth.
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course->id);
+        $targetsectiondepth = $format->get_section_depth($targetsection);
+        if ($targetsectiondepth >= $format->get_max_section_depth()) {
+            throw new moodle_exception('errorsectiondepthexceeded', 'format_flexsections');
+        }
+    }
+
+    /**
+     * Find section number of the next sibling
+     *
+     * @param stdClass $course
+     * @param int $parent section number of the parent section (0 for top level)
+     * @param int $sectionnum section number of the section, 0 for finding the first child
+     * @return int|null section number of the next sibling or null if it is the last child
+     */
+    protected function find_next_sibling(stdClass $course, int $parent, int $sectionnum): ?int {
+        foreach (get_fast_modinfo($course)->get_section_info_all() as $section) {
+            if ($section->parent == $parent && $section->section > $sectionnum) {
+                return $section->section;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create a course section.
+     *
+     * This method follows the same logic as changenumsections.php.
+     *
+     * @param stateupdates $updates the affected course elements track
+     * @param stdClass $course the course object
+     * @param int[] $ids not used
+     * @param int $targetsectionid optional target section id (if not passed section will be appended),
+     *     the section will be inserted to the same parent AFTER the target section
+     * @param int $targetcmid not used
+     */
+    public function section_add(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids = [],
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
+
+        $coursecontext = context_course::instance($course->id);
+        require_capability('moodle/course:update', $coursecontext);
+        $this->check_maxsections($course);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course->id);
+
+        // Calculate position to insert new section (parent and number of the next section).
+        $parentsection = 0;
+        $insertposition = null;
+        if ($targetsectionid) {
+            $targetsection = get_fast_modinfo($course)->get_section_info_by_id($targetsectionid, MUST_EXIST);
+            $parentsection = $targetsection->parent ? $format->get_section($targetsection->parent) : 0;
+            $insertposition = $this->find_next_sibling($course, $targetsection->parent, $targetsection->section);
+        }
+
+        $format->create_new_section($parentsection, $insertposition);
+
+        // Adding a section affects the full course structure.
+        $this->course_state($updates, $course);
+    }
+
+    /**
+     * Adding a subsection as the last child of the parent
      *
      * @param \core_courseformat\stateupdates $updates
      * @param stdClass $course
@@ -172,20 +266,42 @@ class stateactions extends  \core_courseformat\stateactions {
      */
     public function section_add_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
                             ?int $targetsectionid = null, ?int $targetcmid = null): void {
-        $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
         require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
         $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
-
-        // Validate if we do not exceed depth.
-        $targetsectiondepth = $format->get_section_depth($targetsection);
-        if ($targetsectiondepth >= $format->get_max_section_depth()) {
-            throw new moodle_exception('errorsectiondepthexceeded', 'format_flexsections');
-        }
+        $this->check_maxsections($course);
+        $this->check_maxdepth($course, $targetsection);
 
         $format->create_new_section($targetsection);
+
+        // Adding subsection affects the full course structure.
+        $this->course_state($updates, $course);
+    }
+
+    /**
+     * Adding a subsection as the first child of the parent
+     *
+     * @param \core_courseformat\stateupdates $updates
+     * @param stdClass $course
+     * @param array $ids not used
+     * @param int|null $targetsectionid parent section id
+     * @param int|null $targetcmid not used
+     * @return void
+     */
+    public function section_insert_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
+                            ?int $targetsectionid = null, ?int $targetcmid = null): void {
+        require_capability('moodle/course:update', context_course::instance($course->id));
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $modinfo = $format->get_modinfo();
+        $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
+        $this->check_maxsections($course);
+        $this->check_maxdepth($course, $targetsection);
+
+        $insertposition = $this->find_next_sibling($course, $targetsection->section, 0);
+        $format->create_new_section($targetsection, $insertposition);
 
         // Adding subsection affects the full course structure.
         $this->course_state($updates, $course);

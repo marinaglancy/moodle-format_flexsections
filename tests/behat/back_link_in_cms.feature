@@ -10,9 +10,9 @@ Feature: Return to section from activity in format flexsections
       | student  | Sam       | Student  | student@example.com |
       | teacher  | Tom       | Teacher  | teacher@example.com |
     And the following "course enrolments" exist:
-      | user     | course | role     |
-      | student  | C1     | student  |
-      | teacher  | C1     | teacher  |
+      | user    | course | role           |
+      | student | C1     | student        |
+      | teacher | C1     | editingteacher |
     And the following "format_flexsections > sections" exist:
       | name | course | parent | collapsed |
       | t100 | C1     |        | 0         |

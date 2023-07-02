@@ -1304,6 +1304,21 @@ class format_flexsections extends core_courseformat\base {
         // Partial rebuild section cache that has been purged.
         rebuild_course_cache($this->courseid, true, true);
     }
+
+    /**
+     * Display 'Add section' as a link on the page and not as a "Add subsection" menu item
+     *
+     * @param int $sectionnum
+     * @return bool
+     */
+    public function should_display_add_sub_section_link(int $sectionnum): bool {
+        // Display for the top-level sections and for the sections that are displayed as a link.
+        if (!$sectionnum) {
+            return true;
+        }
+        $section = $this->get_section($sectionnum);
+        return (bool)$section->collapsed;
+    }
 }
 
 /**

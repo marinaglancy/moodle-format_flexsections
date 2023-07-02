@@ -91,17 +91,31 @@
 <ul>
 {{/testingonly-make-mustache-lint-happy}}
 
-{{< core_courseformat/local/content/section }}
+<li id="section-{{num}}"
+    class="section course-section main {{#onlysummary}} section-summary {{/onlysummary}} clearfix
+            {{#ishidden}} hidden {{/ishidden}} {{#iscurrent}} current {{/iscurrent}}
+            {{#isstealth}} orphaned {{/isstealth}}"
+    data-sectionid="{{num}}"
+    data-sectionreturnid="{{sectionreturnid}}"
+    data-for="section"
+    data-id="{{id}}"
+    data-number="{{num}}"
+>
+    <div class="course-section-header d-flex"
+        data-for="section_title"
+        data-id="{{id}}"
+        data-number="{{num}}"
+    >
+        {{$ core_courseformat/local/content/section/content }}
+            {{> format_flexsections/local/content/section/content }}
+       {{/ core_courseformat/local/content/section/content }}
 
-    {{$ core_courseformat/local/content/section/content }}
-        {{> format_flexsections/local/content/section/content }}
-    {{/ core_courseformat/local/content/section/content }}
+    </div>
 
-    {{$ core_courseformat/local/content/section/header }}
-        {{> format_flexsections/local/content/section/header }}
-    {{/ core_courseformat/local/content/section/header }}
-
-{{/ core_courseformat/local/content/section }}
+    {{#addsectionafter}}
+        {{> format_flexsections/local/content/addsection}}
+    {{/addsectionafter}}
+</li>
 
 {{#testingonly-make-mustache-lint-happy}}
 </ul>

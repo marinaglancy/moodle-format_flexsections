@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## UNRELEASED
 ### Added
 - Setting to show header for the General section and make it collapsible
+- Link 'Add section' between sections (only for the top-level sections on the
+  current page)
 - Setting how to show the course index (sections and activities, only sections,
   do not display)
 - Setting to enable 'accordion' effect - when one section is expanded, all others
@@ -13,6 +15,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed a bug when drag&drop of activities was not possible if the target
   section is empty
+
+Release contributor: **Hogeschool Inholland, the Netherlands**.
 
 ## [4.0.3] - 2023-05-06
 ### Added

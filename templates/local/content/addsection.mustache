@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_flexsections/local/content/addsection
+
+    Link to inesert a section
+
+    Example context (json):
+    {
+    }
+}}
+{{#showaddsection}}
+<div class="mdl-left py-2 changenumsections bulk-hidden">
+    {{#addsections}}
+    <a
+        href="{{{url}}}"
+        class="add-sections"
+        data-add-sections="{{title}}"
+        data-new-sections="{{newsection}}"
+        {{#insertparentid}}
+            data-parentid="{{insertparentid}}"
+            data-action-flexsections="insertSubSection"
+        {{/insertparentid}}
+        {{^insertparentid}}
+            data-id="{{id}}"
+            data-action="addSection"
+        {{/insertparentid}}
+    >
+        {{title}}
+    </a>
+    {{/addsections}}
+</div>
+{{/showaddsection}}

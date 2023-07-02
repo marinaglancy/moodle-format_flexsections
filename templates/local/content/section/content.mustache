@@ -99,6 +99,9 @@
 
 {{^showaslink}}
 <ul class="flexsections-level-{{level}}" data-for="course_subsectionlist" data-parent="{{id}}">
+    {{#insertsubsection}}
+        {{> format_flexsections/local/content/addsection}}
+    {{/insertsubsection}}
     {{#subsections}}
         {{> format_flexsections/local/content/section }}
     {{/subsections}}

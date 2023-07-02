@@ -85,6 +85,34 @@ class section extends \core_courseformat\output\local\content\section {
             $data->collapsemenu = false;
         }
 
+        $data->addsectionafter = false;
+        $data->insertsubsection = false;
+        if ($this->format->should_display_add_sub_section_link($this->section->parent)
+                && ($this->section->section != $this->format->get_viewed_section() || $this->section->section === 0)) {
+            // Display 'Add section' button after to insert after this section.
+            $data->addsectionafter = $this->export_add_section($output);
+        }
+        if ($this->section->section && $this->format->should_display_add_sub_section_link($this->section->section)) {
+            // Display 'Add section' button to insert a section as a first direct child of this section.
+            $data->insertsubsection = $this->export_add_section($output, $this->section->id);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Exporter for the 'Add section' link
+     *
+     * @param \renderer_base $output
+     * @param int $parentid
+     * @return stdClass
+     */
+    protected function export_add_section(\renderer_base $output, int $parentid = 0): stdClass {
+        $addsectionclass = $this->format->get_output_classname('content\\addsection');
+        /** @var \core_courseformat\output\local\content\addsection $addsection */
+        $addsection = new $addsectionclass($this->format);
+        $data = $addsection->export_for_template($output);
+        $data->insertparentid = $parentid;
         return $data;
     }
 

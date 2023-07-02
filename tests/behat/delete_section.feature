@@ -33,8 +33,8 @@ Feature: Deleting sections in flexsections format
     And I add a "Forum" to section "3" and I fill the form with:
       | Forum name | Third module |
       | Description | Test |
-    And I follow "Add section"
-    And I follow "Add section"
+    And I click on "Add section" "link" in the "li#section-1" "css_element"
+    And I click on "Add section" "link" in the "li#section-4" "css_element"
     And I add a "Forum" to section "5" and I fill the form with:
       | Forum name | Fourth module |
       | Description | Test |

@@ -65,6 +65,6 @@ Feature: Sections can be edited and deleted in flexsections format
     And I should see "Topic 4" in the "region-main" "region"
 
   Scenario: Adding sections at the end of a flexsections format
-    When I click on "Add section" "link"
+    When I click on "Add section" "link" in the "Topic 5" "section"
     Then I should see "Topic 6" in the "Topic 6" "section"
     And I should see "Test choice name" in the "Topic 5" "section"
