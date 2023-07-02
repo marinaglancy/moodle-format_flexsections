@@ -87,3 +87,27 @@ Feature: Adding sections in flexsections format
     And I click on "Add section" "link" in the "li#section-14" "css_element"
     And "Topic 15" "text" should appear after "Topic 14" "text"
     And "t320" "text" should appear after "Topic 15" "text"
+
+  Scenario: Respecting maxsections when adding sections
+    Given the following config values are set as admin:
+      | maxsections | 4 | moodlecourse |
+    When I log in as "teacher"
+    And I am on the "C1" course page
+    And I turn editing mode on
+    And I click on "Add section" "link" in the "li#section-10" "css_element"
+    And "Topic 16" "text" should appear after "t300" "text" in the "region-main" "region"
+    # Adding another section would show a warning but we can't test it in behat yet
+    # We can add subsections though
+    And I open section "1" edit menu
+    And I click on "Add subsection" "link" in the "li#section-1" "css_element"
+    And "Topic 6" "text" should appear after "t121" "text" in the "region-main" "region"
+    And "Topic 6" "text" should appear before "t200" "text" in the "region-main" "region"
+    And I am on the "C1" course page
+    And I click on "t300" "link" in the "region-main" "region"
+    # Any amount of subsections can be added here
+    And I follow "Add section"
+    And "Topic 12" "text" should appear after "Page in t300 section" "text" in the "region-main" "region"
+    And "t310" "text" should appear after "Topic 12" "text" in the "region-main" "region"
+    And I click on "Add section" "link" in the "li#section-13" "css_element"
+    And "Topic 16" "text" should appear after "t312" "text" in the "region-main" "region"
+    And "t320" "text" should appear after "Topic 16" "text" in the "region-main" "region"

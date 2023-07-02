@@ -1319,6 +1319,29 @@ class format_flexsections extends core_courseformat\base {
         $section = $this->get_section($sectionnum);
         return (bool)$section->collapsed;
     }
+
+    /**
+     * Method used to get the maximum number of sections for this course format.
+     *
+     * Flexsections does not have a limit for the total number of the sections.
+     *
+     * @return int
+     */
+    public function get_max_sections() {
+        return 9999999;
+    }
+
+    /**
+     * Method used to get the maximum number of sections on the top level.
+     * @return int
+     */
+    public function get_max_toplevel_sections() {
+        $maxsections = get_config('moodlecourse', 'maxsections');
+        if (!isset($maxsections) || !is_numeric($maxsections)) {
+            $maxsections = 52;
+        }
+        return $maxsections;
+    }
 }
 
 /**

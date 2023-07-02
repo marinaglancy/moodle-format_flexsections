@@ -163,18 +163,24 @@ class stateactions extends  \core_courseformat\stateactions {
     /**
      * Check maxsectionslimit
      *
+     * Only compare the number of sections on the top level.
+     *
      * @param stdClass $course
      * @throws moodle_exception
      */
     protected function check_maxsections(stdClass $course) {
         /** @var \format_flexsections $format */
         $format = course_get_format($course->id);
-        $lastsectionnumber = $format->get_last_section_number();
-        $maxsections = $format->get_max_sections();
+        $cnt = 0;
+        foreach ($format->get_sections() as $section) {
+            if ($section->section && !$section->parent) {
+                $cnt++;
+            }
+        }
+        $maxsections = $format->get_max_toplevel_sections();
 
-        if ($lastsectionnumber >= $maxsections) {
-            // See also https://github.com/marinaglancy/moodle-format_flexsections/issues/20 .
-            throw new moodle_exception('maxsectionslimit', 'moodle', $maxsections);
+        if ($cnt >= $maxsections) {
+            throw new moodle_exception('maxsectionslimit', 'moodle', '', $maxsections);
         }
     }
 
@@ -234,7 +240,6 @@ class stateactions extends  \core_courseformat\stateactions {
 
         $coursecontext = context_course::instance($course->id);
         require_capability('moodle/course:update', $coursecontext);
-        $this->check_maxsections($course);
 
         /** @var \format_flexsections $format */
         $format = course_get_format($course->id);
@@ -246,6 +251,10 @@ class stateactions extends  \core_courseformat\stateactions {
             $targetsection = get_fast_modinfo($course)->get_section_info_by_id($targetsectionid, MUST_EXIST);
             $parentsection = $targetsection->parent ? $format->get_section($targetsection->parent) : 0;
             $insertposition = $this->find_next_sibling($course, $targetsection->parent, $targetsection->section);
+        }
+
+        if (!($parentsection && $parentsection->section)) {
+            $this->check_maxsections($course);
         }
 
         $format->create_new_section($parentsection, $insertposition);
@@ -271,7 +280,6 @@ class stateactions extends  \core_courseformat\stateactions {
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
         $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
-        $this->check_maxsections($course);
         $this->check_maxdepth($course, $targetsection);
 
         $format->create_new_section($targetsection);
@@ -297,7 +305,6 @@ class stateactions extends  \core_courseformat\stateactions {
         $format = course_get_format($course);
         $modinfo = $format->get_modinfo();
         $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
-        $this->check_maxsections($course);
         $this->check_maxdepth($course, $targetsection);
 
         $insertposition = $this->find_next_sibling($course, $targetsection->section, 0);

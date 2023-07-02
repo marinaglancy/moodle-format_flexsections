@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
   are collapsed
 - Setting to display 'Back to...' link inside the activities allowing to return
   back to the course section
+- Setting 'maxsections' now only affects the number of top-level sections. Number
+  of subsections is unlimited (there is also a setting about the maximum depth).
 ### Fixed
 - Fixed a bug when drag&drop of activities was not possible if the target
   section is empty
