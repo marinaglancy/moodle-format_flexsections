@@ -55,4 +55,40 @@ export default class extends Exporter {
         course.maxsectiondepth = state.course.maxsectiondepth;
         return course;
     }
+
+    /**
+     * Return a sorted list of all sections and cms items in the state.
+     *
+     * @param {Object} state the current state.
+     * @returns {Array} all sections and cms items in the state.
+     */
+    allItemsArray(state) {
+        const items = [];
+        const sectionlist = state.course.sectionlist ?? [];
+
+        const addCms = (sectioninfo) => {
+            const cmlist = sectioninfo.cmlist ?? [];
+            cmlist.forEach(cmid => {
+                const cminfo = state.cm.get(cmid);
+                items.push({type: 'cm', id: cminfo.id, url: cminfo.url});
+            });
+        };
+        const addChildItems = (children) => {
+            if (children && children.length) {
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    items.push({type: 'section', id: child.id, url: child.sectionurl});
+                    addCms(child);
+                    addChildItems(child.children);
+                }
+            }
+        };
+        sectionlist.forEach(sectionid => {
+            const sectioninfo = state.section.get(sectionid);
+            items.push({type: 'section', id: sectioninfo.id, url: sectioninfo.sectionurl});
+            addCms(sectioninfo);
+            addChildItems(sectioninfo.children);
+        });
+        return items;
+    }
 }

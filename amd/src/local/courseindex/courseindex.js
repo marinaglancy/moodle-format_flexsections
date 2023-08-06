@@ -84,6 +84,22 @@ export default class Component extends BaseCourseindex {
     }
 
     /**
+     * Refresh a section cm list.
+     *
+     * @param {object} param
+     * @param {Object} param.element
+     */
+    _refreshSectionCmlist({element}) {
+        const cmlist = element.cmlist ?? [];
+        const listparent = this.getElement(this.selectors.SECTION_CMLIST, element.id);
+        if (listparent) {
+            // Function overridden because the cm list can be empty if the course index
+            // is set to display sections only.
+            this._fixOrder(listparent, cmlist, this.cms);
+        }
+    }
+
+    /**
      * Fix/reorder the section or cms order.
      *
      * @param {Element} container the HTML element to reorder.

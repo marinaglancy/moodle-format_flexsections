@@ -64,8 +64,7 @@ class format_flexsections extends core_courseformat\base {
      * @return int
      */
     public function get_course_index_display(): int {
-        $type = (int)get_config('format_flexsections', 'courseindexdisplay');
-        return $type;
+        return (int)$this->get_course()->courseindexdisplay;
     }
 
     /**
@@ -93,7 +92,7 @@ class format_flexsections extends core_courseformat\base {
      * @return bool
      */
     public function get_accordion_setting(): bool {
-        return (bool)get_config('format_flexsections', 'accordion');
+        return (bool)$this->get_course()->accordion;
     }
 
     /**
@@ -447,14 +446,44 @@ class format_flexsections extends core_courseformat\base {
                     'default' => get_config('format_flexsections', 'showsection0titledefault') ?? 0,
                     'type' => PARAM_BOOL,
                 ],
+                'courseindexdisplay' => [
+                    'default' => get_config('format_flexsections', 'courseindexdisplay') ?? 0,
+                    'type' => PARAM_INT,
+                ],
+                'accordion' => [
+                    'default' => (bool)get_config('format_flexsections', 'accordion'),
+                    'type' => PARAM_BOOL,
+                ],
+                'cmbacklink' => [
+                    'default' => (bool)get_config('format_flexsections', 'cmbacklink'),
+                    'type' => PARAM_BOOL,
+                ],
             ];
         }
         if ($foreditform && !isset($courseformatoptions['showsection0title']['label'])) {
+            $options = [
+                constants::COURSEINDEX_FULL => get_string('courseindexfull', 'format_flexsections'),
+                constants::COURSEINDEX_SECTIONS => get_string('courseindexsections', 'format_flexsections'),
+                constants::COURSEINDEX_NONE => get_string('courseindexnone', 'format_flexsections'),
+            ];
             $courseformatoptionsedit = [
                 'showsection0title' => [
                     'label' => new lang_string('showsection0title', 'format_flexsections'),
                     'help' => 'showsection0title',
                     'help_component' => 'format_flexsections',
+                    'element_type' => 'advcheckbox',
+                ],
+                'courseindexdisplay' => [
+                    'label' => new lang_string('courseindexdisplay', 'format_flexsections'),
+                    'element_type' => 'select',
+                    'element_attributes' => [$options],
+                ],
+                'accordion' => [
+                    'label' => new lang_string('accordion', 'format_flexsections'),
+                    'element_type' => 'advcheckbox',
+                ],
+                'cmbacklink' => [
+                    'label' => new lang_string('cmbacklink', 'format_flexsections'),
                     'element_type' => 'advcheckbox',
                 ],
             ];
@@ -514,7 +543,7 @@ class format_flexsections extends core_courseformat\base {
      * @param bool $editable
      * @param null|lang_string|string $edithint
      * @param null|lang_string|string $editlabel
-     * @return inplace_editable
+     * @return inplace_editable|void
      */
     public function inplace_editable_render_section_name($section, $linkifneeded = true,
             $editable = null, $edithint = null, $editlabel = null) {
@@ -1383,7 +1412,7 @@ function format_flexsections_add_back_link_to_cm(): ?cm_info {
     if ($PAGE->course
             && $PAGE->cm
             && $PAGE->course->format === 'flexsections' // Only modules in 'flexsections' courses.
-            && get_config('format_flexsections', 'cmbacklink')
+            && course_get_format($PAGE->course)->get_course()->cmbacklink
             && $PAGE->pagelayout === 'incourse' // Only view pages with the incourse layout (not popup, embedded, etc).
             && $PAGE->cm->sectionnum // Do not display in activities in General section.
             && $PAGE->url->out_omit_querystring() === $CFG->wwwroot . "/mod/{$PAGE->cm->modname}/view.php") {

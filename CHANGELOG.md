@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+### Fixed
+- When scrolling the course index the subsections are now scrolled correctly.
+  Thanks to [luttje](https://github.com/luttje) for the patch.
+### Added
+- Course level settings for 'accordion' effect, 'Back to...' link and how to
+  show the course index.
+- In accordion mode clicking on the section in the course index will expand
+  it in the course contents
+
 ## [4.0.4] - 2023-07-02
 ### Added
 - Setting to show header for the General section and make it collapsible

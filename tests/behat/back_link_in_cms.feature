@@ -44,8 +44,13 @@ Feature: Return to section from activity in format flexsections
     Then I should not see "Back to '"
 
   Scenario: Return to section from activity in format flexsections (with a link)
-    Given the following config values are set as admin:
-      | cmbacklink | 1 | format_flexsections |
+    When I log in as "teacher"
+    When I am on "Course 1" course homepage
+    And I follow "Settings"
+    And I set the following fields to these values:
+      | cmbacklink | 1 |
+    And I press "Save and display"
+    And I log out
     When I log in as "student"
     And I am on "Course 1" course homepage
     And I follow "Page in General section"

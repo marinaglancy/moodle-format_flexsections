@@ -68,8 +68,13 @@ Feature: Collapsing and expanding sections in flexsections format
     And I should see "t311" in the "region-main" "region"
 
   Scenario: Expanding and collapsing sections with accordion in flexsections format
-    Given the following config values are set as admin:
-      | accordion | 1 | format_flexsections |
+    When I log in as "teacher"
+    When I am on "Course 1" course homepage
+    And I follow "Settings"
+    And I set the following fields to these values:
+      | accordion | 1 |
+    And I press "Save and display"
+    And I log out
     When I log in as "student"
     And I am on "Course 1" course homepage
     # First section and first subsection are expanded, general section is always expanded
@@ -99,13 +104,13 @@ Feature: Collapsing and expanding sections in flexsections format
     And I should not see "t210" in the "region-main" "region"
 
   Scenario: Expanding and collapsing sections with accordion and expandable General section in flexsections format
-    Given the following config values are set as admin:
-      | accordion | 1 | format_flexsections |
     When I log in as "admin"
     And I am on "Course 1" course homepage
     And I navigate to "Settings" in current page administration
     And I expand all fieldsets
-    And I set the field "Show top section title" to "1"
+    And I set the following fields to these values:
+      | accordion              | 1 |
+      | Show top section title | 1 |
     And I press "Save and display"
     And I log out
     When I log in as "student"
@@ -160,8 +165,13 @@ Feature: Collapsing and expanding sections in flexsections format
     And I should see "Page in t310 section" in the "region-main" "region"
 
   Scenario: Expanding and collapsing sections on the subsection page in accordion mode in flexible sections format
-    Given the following config values are set as admin:
-      | accordion | 1 | format_flexsections |
+    When I log in as "teacher"
+    When I am on "Course 1" course homepage
+    And I follow "Settings"
+    And I set the following fields to these values:
+      | accordion | 1 |
+    And I press "Save and display"
+    And I log out
     When I log in as "student"
     And I am on "Course 1" course homepage
     And I click on "t300" "link" in the "region-main" "region"

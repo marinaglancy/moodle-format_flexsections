@@ -87,6 +87,11 @@ export default class FlexsectionComponent extends Component {
         }
         if (state.course.accordion) {
             this._ensureOnlyOneSectionIsExpanded(state);
+            // Monitor hash change so that we can expand the section from the hash.
+            window.addEventListener(
+                "hashchange",
+                this._hashHandler.bind(this),
+            );
         }
     }
 
@@ -104,7 +109,7 @@ export default class FlexsectionComponent extends Component {
 
         if (firstExpandedSection) {
             const sectionitem = this.getElement(this.selectors.SECTION, firstExpandedSection.id);
-            this._collapseAllSectionsExceptFor(sectionitem);
+            this._collapseAllSectionsExceptFor(sectionitem, false);
         }
     }
 
@@ -206,8 +211,9 @@ export default class FlexsectionComponent extends Component {
      * Collapse all sections except for the given one and its parents.
      *
      * @param {HTMLElement} section
+     * @param {Boolean} scrollToSection
      */
-    _collapseAllSectionsExceptFor(section) {
+    _collapseAllSectionsExceptFor(section, scrollToSection = true) {
         const sectionNumber = parseInt(section.getAttribute('data-sectionid'));
         const leaveOpen = [...this._findAllParents(sectionNumber), sectionNumber];
         if (sectionNumber > 0 && leaveOpen.includes(0)) {
@@ -222,6 +228,12 @@ export default class FlexsectionComponent extends Component {
             sectionIds,
             true
         );
+        if (scrollToSection) {
+            const toggler = section.querySelector(this.selectors.COLLAPSE);
+            setTimeout(() => {
+                toggler.scrollIntoView({behavior: "smooth", block: "nearest"});
+            }, 500);
+        }
     }
 
     /**
@@ -335,5 +347,33 @@ export default class FlexsectionComponent extends Component {
             return [...this._findAllParents(parent), parent];
         }
         return [];
+    }
+
+    /**
+     * Handler for when the page hash was changed - if in accordion mode, expand the target section
+     */
+    _hashHandler() {
+        if ((window.location.hash ?? '').length <= 1) {
+            return;
+        }
+        const target = document.querySelector(`${window.location.hash}${this.selectors.SECTION}`);
+        if (!target) {
+            return;
+        }
+        const toggler = target.querySelector(this.selectors.COLLAPSE);
+        if (toggler) {
+            const sectionNumber = parseInt(target.getAttribute('data-sectionid'));
+            const toExpand = [...this._findAllParents(sectionNumber), sectionNumber].filter(s => s > 0);
+            const sectionIds =
+                this._getSectionsWithCollapse(this.reactive.stateManager.state)
+                    .filter(s => toExpand.includes(parseInt(s.section)))
+                    .map(s => s.id);
+            this.reactive.dispatch(
+                'sectionContentCollapsed',
+                sectionIds,
+                false
+            );
+            this._collapseAllSectionsExceptFor(target);
+        }
     }
 }
