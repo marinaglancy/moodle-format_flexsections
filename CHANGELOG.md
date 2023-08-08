@@ -1,15 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [4.0.5] - 2023-08-08
 ### Fixed
-- When scrolling the course index the subsections are now scrolled correctly.
-  Thanks to [luttje](https://github.com/luttje) for the patch.
+- When scrolling the page, the course index now correctly highlights subsections.
+  Thanks to [luttje](https://github.com/luttje) for the patch submitted in
+  https://github.com/marinaglancy/moodle-format_flexsections/issues/47 .
+- Fixed unexpected scrolling when expanding a section in accordion mode.
 ### Added
 - Course level settings for 'accordion' effect, 'Back to...' link and how to
-  show the course index.
+  show the course index. (In addition to site-level settings added in v4.0.4)
 - In accordion mode clicking on the section in the course index will expand
-  it in the course contents
+  it in the course contents.
 
 ## [4.0.4] - 2023-07-02
 ### Added
