@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [4.0.6] - 2023-12-23
 ### Added
 - Adjusted automatic tests for Moodle 4.3
+### Fixed
+- #71 - 'Back to' link does not display ampersand (&) correcty
 
 ## [4.0.5] - 2023-08-08
 ### Fixed
