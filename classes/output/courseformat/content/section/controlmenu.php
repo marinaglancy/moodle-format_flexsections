@@ -69,7 +69,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
                 $sectiondepth < $format->get_max_section_depth() &&
                 (!$section->collapsed || $section->section == $this->format->get_viewed_section())) {
-            $addsubsectionurl = new \moodle_url($url, ['addchildsection' => $section->section]);
+            $addsubsectionurl = new moodle_url($url, ['addchildsection' => $section->section]);
             $controls['addsubsection'] = [
                 'url' => $addsubsectionurl,
                 'icon' => 't/add',
@@ -84,7 +84,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         }
 
         if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
-            $markerurl = new \moodle_url($url);
+            $markerurl = new moodle_url($url);
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
                 $markerurl->param('marker', 0);
                 $highlightoff = get_string('highlightoff');
@@ -116,7 +116,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
 
         if ($section->section && has_capability('moodle/course:update', $coursecontext) &&
                 $section->section != $this->format->get_viewed_section()) {
-            $collapseurl = new \moodle_url($url, ['switchcollapsed' => $section->section]);
+            $collapseurl = new moodle_url($url, ['switchcollapsed' => $section->section]);
             $attrs = [
                 'data-action-flexsections' => 'sectionSwitchCollapsed',
                 'class' => 'editing_collapsed',
@@ -143,7 +143,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
 
         if ($section->parent && has_capability('moodle/course:update', $coursecontext) &&
                 $section->section != $this->format->get_viewed_section()) {
-            $mergeupurl = new \moodle_url($url, ['mergeup' => $section->section]);
+            $mergeupurl = new moodle_url($url, ['mergeup' => $section->section]);
             $controls['mergeup'] = [
                 'url' => $mergeupurl,
                 'icon' => 'mergeup',
@@ -213,7 +213,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
      * @param renderer_base $output typically, the renderer that's calling this function
      * @return array data context for a mustache template
      */
-    public function export_for_template(\renderer_base $output): stdClass {
+    public function export_for_template(renderer_base $output): stdClass {
 
         $section = $this->section;
 

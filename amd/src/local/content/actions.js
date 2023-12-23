@@ -204,6 +204,7 @@ export default class extends BaseComponent {
             removeOnClose: true,
         })
             .then(modal => {
+                // eslint-disable-next-line promise/no-nesting
                 Templates.render('format_flexsections/local/content/movesection', data).
                 then((body) => {
                     modal.setBody(body);
@@ -248,6 +249,7 @@ export default class extends BaseComponent {
             removeOnClose: true,
         })
             .then(modal => {
+                // eslint-disable-next-line promise/no-nesting
                 Templates.render('format_flexsections/local/content/movecm', data).
                 then((body) => {
                     modal.setBody(body);
