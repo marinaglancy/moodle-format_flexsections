@@ -33,7 +33,7 @@ class stateactions extends  \core_courseformat\stateactions {
     /**
      * Moving a section
      *
-     * @param \core_courseformat\stateupdates $updates
+     * @param stateupdates $updates
      * @param stdClass $course
      * @param array $ids
      * @param int|null $targetsectionid if positive number, move AFTER this section under the same parent
@@ -43,7 +43,7 @@ class stateactions extends  \core_courseformat\stateactions {
      * @param int|null $targetcmid
      * @return void
      */
-    public function section_move(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
+    public function section_move(stateupdates $updates, stdClass $course, array $ids,
                                  ?int $targetsectionid = null, ?int $targetcmid = null): void {
         $this->validate_sections($course, $ids, __FUNCTION__);
 
@@ -137,7 +137,7 @@ class stateactions extends  \core_courseformat\stateactions {
         ?int $targetcmid = null
     ): void {
         if (!$targetsectionid) {
-            throw new \moodle_exception("Action section_mergeup requires targetsectionid");
+            throw new moodle_exception("Action section_mergeup requires targetsectionid");
         }
 
         $coursecontext = context_course::instance($course->id);
@@ -150,7 +150,7 @@ class stateactions extends  \core_courseformat\stateactions {
         $this->validate_sections($course, [$targetsectionid], __FUNCTION__);
         $targetsection = $modinfo->get_section_info_by_id($targetsectionid, MUST_EXIST);
         if (!$targetsection->parent) {
-            throw new \moodle_exception("Action section_mergeup can't merge top level parentless sections");
+            throw new moodle_exception("Action section_mergeup can't merge top level parentless sections");
         }
 
         $format->mergeup_section($targetsection);
@@ -291,14 +291,14 @@ class stateactions extends  \core_courseformat\stateactions {
     /**
      * Adding a subsection as the first child of the parent
      *
-     * @param \core_courseformat\stateupdates $updates
+     * @param stateupdates $updates
      * @param stdClass $course
      * @param array $ids not used
      * @param int|null $targetsectionid parent section id
      * @param int|null $targetcmid not used
      * @return void
      */
-    public function section_insert_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
+    public function section_insert_subsection(stateupdates $updates, stdClass $course, array $ids,
                             ?int $targetsectionid = null, ?int $targetcmid = null): void {
         require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */

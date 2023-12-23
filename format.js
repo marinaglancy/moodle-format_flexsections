@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 // Javascript functions for Flexible sections course format.
 
 // This is no longer used but there are errors in console if this file is missing.
