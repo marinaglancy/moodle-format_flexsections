@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.6] - 2023-12-23
+### Added
+- Adjusted automatic tests for Moodle 4.3
+
 ## [4.0.5] - 2023-08-08
 ### Fixed
 - When scrolling the page, the course index now correctly highlights subsections.
