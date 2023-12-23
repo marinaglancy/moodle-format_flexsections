@@ -52,7 +52,7 @@ class content extends \core_courseformat\output\local\content {
      * @return \stdClass data context for a mustache template
      */
     public function export_for_template(\renderer_base $output) {
-        /** @var \stdClass */
+        /** @var \stdClass $data */
         $data = parent::export_for_template($output);
 
         // If we are on course view page for particular section.
