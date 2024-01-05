@@ -112,6 +112,11 @@
             {{/sectionselector}}
         </div>
     {{/hasnavigation}}
+    {{#bulkedittools}}
+        {{$ core_courseformat/local/content/bulkedittools}}
+            {{> core_courseformat/local/content/bulkedittools}}
+        {{/ core_courseformat/local/content/bulkedittools}}
+    {{/bulkedittools}}
 </div>
 {{#js}}
     require(['format_flexsections/local/content'], function(component) {
