@@ -1,0 +1,22 @@
+{
+    "name": "marinaglancy/moodle-format_flexsections",
+    "description": "Flexible sections course format",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Marina Glancy",
+            "email": "marina.glancy@gmail.com"
+        }
+    ],
+    "type": "moodle-format",
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "extra": {
+        "installer-name": "flexsections"
+    },
+    "support": {
+        "issues": "https://github.com/marinaglancy/moodle-format_flexsections/issues",
+        "source": "https://github.com/marinaglancy/moodle-format_flexsections"
+    }
+}
