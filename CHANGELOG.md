@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.1] - 2024-09-16
+### Fixed
+- Fixed exception thrown and no drawer items displayed when using restricted access 
+  "Not available unless: The previous activity with completion is marked complete".
+  It returned null instead of an url which is not allowed in the get_view_url() method 
+  even though it says so in the documentation - see moodle/course/format/classes/base.php#L871.
+
 ## [4.1.0] - 2024-05-22
 ### Added
 - Support for Moodle 4.4, #83

@@ -197,7 +197,8 @@ class format_flexsections extends core_courseformat\base {
         $sectionno = $this->resolve_section_number($section);
         $section = $this->get_section($sectionno);
         if ($sectionno && (!$section->uservisible || !$this->is_section_real_available($section))) {
-            return empty($options['navigation']) ? $url : null;
+            $url->param('section', $sectionno);
+            return $url;
         }
 
         if (array_key_exists('sr', $options)) {
