@@ -27,6 +27,7 @@ require_once($CFG->dirroot. '/course/format/lib.php');
 
 use format_flexsections\constants;
 use core\output\inplace_editable;
+use format_flexsections\local\helpers\preferences;
 
 define('FORMAT_FLEXSECTIONS_COLLAPSED', 1);
 define('FORMAT_FLEXSECTIONS_EXPANDED', 0);
@@ -39,6 +40,7 @@ define('FORMAT_FLEXSECTIONS_EXPANDED', 0);
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class format_flexsections extends core_courseformat\base {
+    use preferences;
 
     /**
      * Returns true if this course format uses sections.
@@ -431,6 +433,13 @@ class format_flexsections extends core_courseformat\base {
                 'cache' => true,
                 'cachedefault' => FORMAT_FLEXSECTIONS_EXPANDED,
                 'default' => COURSE_DISPLAY_SINGLEPAGE,
+            ],
+            'cssflex' => [
+                'type' => PARAM_TEXT,
+                'label' => get_string('cssflex', 'format_flexsections'),
+                'element_type' => 'text',
+                'cache' => true,
+
             ],
         ];
     }
@@ -1549,6 +1558,27 @@ class format_flexsections extends core_courseformat\base {
                 $availableinfo = null;
             }
         }
+    }
+
+    /**
+     * Return the format section preferences.
+     *
+     * @return array of preferences indexed by sectionid
+     */
+    public function get_sections_preferences(): array {
+        $result = parent::get_sections_preferences();
+
+        // For sections that are displayed as links ignore the 'contentcollapsed' preference.
+        $displayedaslink = [];
+        foreach ($this->get_sections() as $s) {
+            $displayedaslink[$s->id] = $s->collapsed;
+        }
+        foreach ($result as $sectionid => &$obj) {
+            if (!empty($obj->contentcollapsed) && !empty($displayedaslink[$sectionid])) {
+                $obj->contentcollapsed = 0;
+            }
+        }
+        return $result;
     }
 }
 
