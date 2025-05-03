@@ -114,7 +114,7 @@ Feature: Duplicate a section in format_flexsections
     And I open section "4" edit menu
     And I choose "Duplicate" in the open action menu
     And "Section B1 (copy)" "text" should appear after "Section B1" "text" in the "region-main" "region"
-    And I click on "#action-menu-toggle-5" "css_element"
+    And I click on "#action-menu-toggle-4" "css_element"
     And I choose "Display as a link" in the open action menu
     And I click on "Section B1 (copy)" "link" in the "region-main" "region"
     And I should see "Section B1 (copy)"
@@ -123,7 +123,7 @@ Feature: Duplicate a section in format_flexsections
 
   @javascript
   Scenario: Duplicate a subsection on a page of the parent section on Moodle 4.2-4.3
-    Given the site is running Moodle version 4.3 or lower
+    Given the site is running Moodle version 4.3.99 or lower
     And I click on "Section B0" "link" in the "region-main" "region"
     And I open section "4" edit menu
     And I choose "Duplicate" in the open action menu

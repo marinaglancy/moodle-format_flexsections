@@ -14,27 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace format_flexsections\output\courseformat\content\cm;
+
 /**
- * Hook callbacks for Flexible sections format
+ * Class delegatedcontrolmenu
  *
  * @package    format_flexsections
- * @copyright  2024 Marina Glancy
+ * @copyright  Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class delegatedcontrolmenu extends \core_courseformat\output\local\content\cm\delegatedcontrolmenu {
 
-defined('MOODLE_INTERNAL') || die();
-
-$callbacks = [
-
-    [
-        'hook' => core\hook\output\before_footer_html_generation::class,
-        'callback' => 'format_flexsections\local\hooks\output\before_footer_html_generation::callback',
-        'priority' => 0,
-    ],
-
-    [
-        'hook' => core_course\hook\before_activitychooserbutton_exported::class,
-        'callback' => 'format_flexsections\local\hooks\before_activitychooserbutton_exported::callback',
-        'priority' => -100,
-    ],
-];
+    /**
+     * Generate the edit control items of a section.
+     *
+     * @return array of edit control items
+     */
+    public function delegated_control_items() {
+        $controls = parent::delegated_control_items();
+        unset($controls['view'], $controls['permalink']);
+        return $controls;
+    }
+}

@@ -24,7 +24,7 @@ Feature: Sections can be edited and deleted in flexsections format
     And I am on "Course 1" course homepage with editing mode on
 
   Scenario: View the default name of the second section in flexsections format for Moodle 4.1-4.3
-    Given the site is running Moodle version 4.3 or lower
+    Given the site is running Moodle version 4.3.99 or lower
     When I edit the section "2"
     Then the field "Custom" matches value "0"
     And the field "New value for Section name" matches value "Topic 2"
@@ -35,7 +35,7 @@ Feature: Sections can be edited and deleted in flexsections format
     And the field "Section name" matches expression "/^$/"
 
   Scenario: Edit section summary in flexsections format for Moodle 4.1-4.3
-    Given the site is running Moodle version 4.3 or lower
+    Given the site is running Moodle version 4.3.99 or lower
     When I edit the section "2" and I fill the form with:
       | Summary | Welcome to section 2 |
     Then I should see "Welcome to section 2" in the "Topic 2" "section"
@@ -47,7 +47,7 @@ Feature: Sections can be edited and deleted in flexsections format
     Then I should see "Welcome to section 2" in the "Topic 2" "section"
 
   Scenario: Edit section default name in flexsections format for Moodle 4.1-4.3
-    Given the site is running Moodle version 4.3 or lower
+    Given the site is running Moodle version 4.3.99 or lower
     When I edit the section "2" and I fill the form with:
       | Custom                     | 1                        |
       | New value for Section name | This is the second topic |
@@ -89,3 +89,10 @@ Feature: Sections can be edited and deleted in flexsections format
     When I click on "Add section" "link" in the "Topic 5" "section"
     Then I should see "Topic 6" in the "Topic 6" "section"
     And I should see "Test choice name" in the "Topic 5" "section"
+
+  Scenario: Copy section page permalink URL to clipboard
+    Given the site is running Moodle version 4.2 or higher
+    When I open section "4" edit menu
+    And I click on "Permalink" "link" in the "Topic 4" "section"
+    And I click on "Copy to clipboard" "link" in the "Permalink" "dialogue"
+    Then I should see "Text copied to clipboard"

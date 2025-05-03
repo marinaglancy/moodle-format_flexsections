@@ -33,6 +33,7 @@
 
 <div class="d-flex align-items-start position-relative">
     {{#headerdisplaymultipage}}
+        {{^hidetitle}}
         {{#indenttitle}}
             <span class="icon-no-margin p-2 dimmed_text mr-1" style="color: #dee2e6">
                 <span class="dir-rtl-hide">{{#pix}} t/collapsedchevron, core {{/pix}}</span>
@@ -43,6 +44,7 @@
             id="coursecontentsection{{num}}" data-for="section_title" data-id="{{id}}" data-number="{{num}}">
             {{{title}}}
         </h3>
+        {{/hidetitle}}
     {{/headerdisplaymultipage}}
     {{^headerdisplaymultipage}}
         {{^hidetitle}}
