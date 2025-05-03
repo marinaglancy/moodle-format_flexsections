@@ -89,3 +89,10 @@ Feature: Sections can be edited and deleted in flexsections format
     When I click on "Add section" "link" in the "Topic 5" "section"
     Then I should see "Topic 6" in the "Topic 6" "section"
     And I should see "Test choice name" in the "Topic 5" "section"
+
+  Scenario: Copy section page permalink URL to clipboard
+    Given the site is running Moodle version 4.4 or higher
+    When I open section "4" edit menu
+    And I click on "Permalink" "link" in the "Topic 4" "section"
+    And I click on "Copy to clipboard" "link" in the "Permalink" "dialogue"
+    Then I should see "Text copied to clipboard"

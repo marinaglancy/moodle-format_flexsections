@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+### Fixed
+- Item 'Permalink' in the course section edit menu displays the copy-to-clipboard popup
+  and allows to copy the link to the section #95
+- Removed the 'View' item from the course section edit menu added by core, it conflicts the
+  functionality of the format_flexsections plugin "Display as a link".
+
 ## [4.1.3] - 2024-12-08
 ### Fixed
 - Fixed exception: Call to undefined function format_flexsections_add_back_link_to_cm #99, #101

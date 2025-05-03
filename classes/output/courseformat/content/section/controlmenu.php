@@ -175,7 +175,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         }
 
         $parentcontrols = parent::section_control_items();
-        unset($parentcontrols['movesection'], $parentcontrols['moveup'], $parentcontrols['movedown']);
+        unset($parentcontrols['movesection'], $parentcontrols['moveup'], $parentcontrols['movedown'], $parentcontrols['view']);
         if ($section->section == $this->format->get_viewed_section()) {
             // Deleting section that is currently viewed does not really work in AJAX (as well as mergeup).
             // Maybe we re-write it at some moment so it redirects to the parent section.
@@ -184,6 +184,10 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             // Override delete to use plugin action.
             unset($parentcontrols['delete']['attr']['data-action']);
             $parentcontrols['delete']['attr']['data-action-flexsections'] = 'delete';
+        }
+
+        if (array_key_exists('permalink', $parentcontrols)) {
+            $parentcontrols['permalink']['url'] = $this->format->get_view_url($section, ['permalink' => true]);
         }
 
         // If the edit key exists, we are going to insert our controls after it.
@@ -228,6 +232,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         $icon = $output->pix_icon('i/menu', get_string('edit'));
         $menu->set_menu_trigger($icon, 'btn btn-icon d-flex align-items-center justify-content-center');
         $menu->attributes['class'] .= ' section-actions';
+        $menu->attributes['data-sectionid'] = $this->section->id;
         foreach ($controls as $value) {
             $url = empty($value['url']) ? '' : $value['url'];
             $icon = empty($value['icon']) ? '' : $value['icon'];
