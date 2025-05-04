@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 ### Fixed
 - (4.4+) Item 'Permalink' in the course section edit menu displays the copy-to-clipboard popup
-  and allows to copy the link to the section, these links will contain section ids rather
-  than section numbers (persistent after moving sections around) #95
+  and allows to copy the link to the section #95
+- Section 'Permalink' contain section ids rather than section numbers (persistent after
+  moving sections around)
 - (4.4+) Removed the 'View' item from the course section edit menu added by core, it conflicts the
   functionality of the format_flexsections plugin "Display as a link".
 - (4.5+) Do not display a link to add subsection (mod_subsection) as it is confusing with the
