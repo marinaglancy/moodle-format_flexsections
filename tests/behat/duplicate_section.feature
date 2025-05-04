@@ -123,7 +123,7 @@ Feature: Duplicate a section in format_flexsections
 
   @javascript
   Scenario: Duplicate a subsection on a page of the parent section on Moodle 4.2-4.3
-    Given the site is running Moodle version 4.3 or lower
+    Given the site is running Moodle version 4.3.99 or lower
     And I click on "Section B0" "link" in the "region-main" "region"
     And I open section "4" edit menu
     And I choose "Duplicate" in the open action menu
