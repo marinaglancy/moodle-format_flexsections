@@ -48,9 +48,6 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
      * @return array of edit control items
      */
     public function section_control_items() {
-        global $CFG;
-
-        $parentcontrols = parent::section_control_items();
 
         $format = $this->format;
         $section = $this->section;
@@ -177,6 +174,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             ];
         }
 
+        $parentcontrols = parent::section_control_items();
         unset($parentcontrols['movesection'], $parentcontrols['moveup'], $parentcontrols['movedown'], $parentcontrols['view']);
         if ($section->section == $this->format->get_viewed_section()) {
             // Deleting section that is currently viewed does not really work in AJAX (as well as mergeup).
