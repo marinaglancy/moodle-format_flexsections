@@ -184,6 +184,25 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Get if the current format instance will show multiple sections or an individual one.
+     *
+     * Only available in Moodle 4.4 or later
+     *
+     * Some formats has the hability to swith from one section to multiple sections per page,
+     * output components will use this method to know if the current display is a single or
+     * multiple sections.
+     *
+     * @return int|null null for all sections or the sectionid.
+     */
+    public function get_sectionid(): ?int {
+        global $CFG;
+        if ((int)$CFG->branch >= 404) {
+            return parent::get_sectionid();
+        }
+        return 0;
+    }
+
+    /**
      * The URL to use for the specified course (with section).
      *
      * @param int|stdClass $section Section object from database or just field course_sections.section
@@ -200,6 +219,12 @@ class format_flexsections extends core_courseformat\base {
         $section = $this->get_section($sectionno);
         if ($sectionno && !$this->is_section_visible($section)) {
             return empty($options['navigation']) ? $url : null;
+        }
+
+        if ($this->get_sectionid() && $this->get_sectionid() == $section->id &&
+                (strpos(qualified_me(), '/course/section.php') !== false) && !empty($options['navigation'])) {
+            // When we are already on /course/section.php page, return URL for this page so that the breadcrumb sets correctly.
+            return new moodle_url('/course/section.php', ['id' => $section->id]);
         }
 
         if (array_key_exists('sr', $options)) {
@@ -723,6 +748,10 @@ class format_flexsections extends core_courseformat\base {
      * @return int
      */
     public function get_viewed_section() {
+        $sid = $this->get_sectionid();
+        if ($sid && ($section = $this->get_modinfo()->get_section_info_by_id($sid))) {
+            return $section->section;
+        }
         if ($this->on_course_view_page()) {
             if ($s = $this->get_caller_page_url()->get_param('section')) {
                 return (int)$s;

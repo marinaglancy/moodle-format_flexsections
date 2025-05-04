@@ -45,6 +45,7 @@ class header extends \core_courseformat\output\local\content\section\header {
 
         $data = parent::export_for_template($output);
         $data->indenttitle = false;
+        $data->hidetitle = false;
         $course = $this->format->get_course();
 
         if ($this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
@@ -54,10 +55,13 @@ class header extends \core_courseformat\output\local\content\section\header {
                 // If the section is displayed as a link and we are not on this section's page, display it as a link.
                 $data->title = $output->section_title($this->section, $course);
                 $data->indenttitle = $this->title_needs_indenting();
+            } else {
+                if (strpos(qualified_me(), '/course/section.php') !== false) {
+                    $data->hidetitle = true;
+                }
             }
         }
 
-        $data->hidetitle = false;
         if (!$course->showsection0title && $this->section->section === 0) {
             // Do not display header title for the "General" section.
             $data->hidetitle = true;
