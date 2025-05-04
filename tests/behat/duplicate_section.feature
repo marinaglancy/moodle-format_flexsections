@@ -114,7 +114,7 @@ Feature: Duplicate a section in format_flexsections
     And I open section "4" edit menu
     And I choose "Duplicate" in the open action menu
     And "Section B1 (copy)" "text" should appear after "Section B1" "text" in the "region-main" "region"
-    And I click on "#action-menu-toggle-5" "css_element"
+    And I click on "#action-menu-toggle-4" "css_element"
     And I choose "Display as a link" in the open action menu
     And I click on "Section B1 (copy)" "link" in the "region-main" "region"
     And I should see "Section B1 (copy)"
