@@ -42,6 +42,7 @@ class content extends \core_courseformat\output\local\content {
      * @return string
      */
     public function get_template_name(\renderer_base $renderer): string {
+        // Mdlcode uses: template 'format_flexsections/local/content'.
         return 'format_flexsections/local/content';
     }
 

@@ -16,11 +16,6 @@
 
 namespace format_flexsections\local\hooks;
 
-use action_link;
-use context_course;
-use moodle_url;
-use pix_icon;
-
 /**
  * Hook callbacks for format_flexsections
  *
