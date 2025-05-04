@@ -50,10 +50,16 @@ class section extends \core_courseformat\output\local\content\section {
      * @return stdClass
      */
     public function export_for_template(\renderer_base $output): stdClass {
+        global $CFG;
         $format = $this->format;
         $course = $format->get_course();
 
         $data = parent::export_for_template($output);
+
+        if ((int)$CFG->branch == 404) {
+            // Fixed in MDL-81766 in 4.5 but not in 4.4.
+            $data->displayonesection = $this->format->get_sectionid() == $this->section->id;
+        }
 
         // For sections that are displayed as a link do not print list of cms or controls.
         $showaslink = $this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED
