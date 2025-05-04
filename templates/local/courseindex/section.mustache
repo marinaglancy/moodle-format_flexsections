@@ -77,20 +77,20 @@
         id="courseindexsection{{number}}"
         data-for="section_item"
     >
-        <a data-toggle="collapse"
+        <a data-bs-toggle="collapse"
             href="#courseindexcollapse{{number}}"
             class="courseindex-chevron icons-collapse-expand {{#indexcollapsed}}collapsed{{/indexcollapsed}}"
             aria-expanded="{{^indexcollapsed}}true{{/indexcollapsed}}{{#indexcollapsed}}false{{/indexcollapsed}}"
             aria-controls="courseindexcollapse{{number}}"
             tabindex="-1"
         >
-            <span class="collapsed-icon icon-no-margin mr-1"
+            <span class="collapsed-icon icon-no-margin me-1"
                 title="{{#str}} expand, core {{/str}}">
                 <span class="dir-rtl-hide">{{#pix}} t/collapsedchevron, core {{/pix}}</span>
                 <span class="dir-ltr-hide">{{#pix}} t/collapsedchevron_rtl, core {{/pix}}</span>
                 <span class="sr-only">{{#str}} expand, core {{/str}}</span>
             </span>
-            <span class="expanded-icon icon-no-margin mr-1"
+            <span class="expanded-icon icon-no-margin me-1"
                 title="{{#str}} collapse, core {{/str}}">
                 {{#pix}} t/expandedchevron, core {{/pix}}
                 <span class="sr-only">{{#str}} collapse, core {{/str}}</span>
@@ -104,13 +104,13 @@
         >
             {{{title}}}
         </a>
-        <span class="current-badge badge badge-primary ml-2 px-2 rounded-pill">
+        <span class="current-badge badge badge-primary ms-2  px-2 rounded-pill">
             {{highlighted}}
         </span>
-        <span class="courseindex-locked ml-1" data-for="cm_name">
+        <span class="courseindex-locked ms-1" data-for="cm_name">
             {{#pix}} t/locked, core {{/pix}}
         </span>
-        <span class="dragicon ml-auto">{{#pix}}i/dragdrop{{/pix}}</span>
+        <span class="dragicon ms-auto">{{#pix}}i/dragdrop{{/pix}}</span>
     </div>
     <div id="courseindexcollapse{{number}}"
         class="courseindex-item-content collapse {{^indexcollapsed}}show{{/indexcollapsed}} pb-0"
@@ -123,7 +123,7 @@
             {{/cms}}
         </ul>
         {{/hidecmsinindex}}
-        <div class="courseindex-sectioncontent-children ml-2" data-for="subsectionlist" data-parent="{{id}}" role="tree">
+        <div class="courseindex-sectioncontent-children ms-2" data-for="subsectionlist" data-parent="{{id}}" role="tree">
             {{#children}}
                 {{> format_flexsections/local/courseindex/section }}
             {{/children}}

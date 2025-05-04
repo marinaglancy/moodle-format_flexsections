@@ -52,19 +52,19 @@
     {{/singlesection}}
     <li class="collapse-list-item d-flex p-0" id="movemodalsection{{number}}">
         {{^singlesection}}
-        <a data-toggle="collapse"
+        <a data-bs-toggle="collapse"
            href="#movemodalcollapse{{number}}"
            aria-expanded="{{#contentcollapsed}}false{{/contentcollapsed}}{{^contentcollapsed}}true{{/contentcollapsed}}"
            aria-controls="movemodalcollapse{{number}}"
            class="collapse-list-link icons-collapse-expand {{#contentcollapsed}}collapsed{{/contentcollapsed}}"
         >
-                <span class="collapsed-icon icon-no-margin mr-1"
-                      data-toggle="tooltip" title="{{#str}} expand, core {{/str}}">
+                <span class="collapsed-icon icon-no-margin me-1"
+                      data-bs-toggle="tooltip" title="{{#str}} expand, core {{/str}}">
                     {{#pix}} t/collapsed, core {{/pix}}
                     <span class="sr-only">{{#str}} expand, core {{/str}}</span>
                 </span>
-            <span class="expanded-icon icon-no-margin mr-1"
-                  data-toggle="tooltip" title="{{#str}} collapse, core {{/str}}">
+            <span class="expanded-icon icon-no-margin me-1"
+                  data-bs-toggle="tooltip" title="{{#str}} collapse, core {{/str}}">
                     {{#pix}} t/expanded, core {{/pix}}
                 <span class="sr-only">{{#str}} collapse, core {{/str}}</span>
                 </span>

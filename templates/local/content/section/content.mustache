@@ -96,7 +96,7 @@
 {{> format_flexsections/local/content/section/header }}
 {{/header}}
 {{#restrictionlock}}
-    <div class="align-self-center ml-2">
+    <div class="align-self-center ms-2">
         {{#pix}}t/unlock, core{{/pix}}
     </div>
 {{/restrictionlock}}
@@ -106,7 +106,7 @@
     {{/ core_courseformat/local/content/section/badges }}
 </div>
 {{#collapsemenu}}
-<div class="flex-fill d-flex justify-content-end mr-2 align-self-start mt-2">
+<div class="flex-fill d-flex justify-content-end me-2 align-self-start mt-2">
     <a
         id="collapsesections"
         class="section-collapsemenu"
@@ -126,7 +126,7 @@
     {{/ core_courseformat/local/content/section/controlmenu }}
 {{/controlmenu}}
 </div>
-<div id="coursecontentcollapse{{num}}"
+<div id="coursecontentcollapseid{{id}}"
     class="content {{^iscoursedisplaymultipage}}
         {{^displayonesection}}course-content-item-content collapse {{^contentcollapsed}}show{{/contentcollapsed}}{{/displayonesection}}
     {{/iscoursedisplaymultipage}}">

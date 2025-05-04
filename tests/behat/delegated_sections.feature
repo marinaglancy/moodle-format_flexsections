@@ -2,9 +2,7 @@
 Feature: Testing delegated sections in format_flexsections
 
   Background:
-    Given the site is running Moodle version 4.5 or higher
-    And I enable "subsection" "mod" plugin
-    And the following "course" exists:
+    Given the following "course" exists:
       | fullname      | Course 1 |
       | shortname     | C1       |
       | category      | 0        |

@@ -364,7 +364,7 @@ export default class extends BaseComponent {
             event.preventDefault();
             const afterId = parseInt(target.dataset.after);
             const parentId = parseInt(target.dataset.parentid);
-            this.reactive.dispatch('sectionMove', [sectionId], afterId ? afterId : -parentId);
+            this.reactive.dispatch('sectionMoveAfter', [sectionId], afterId ? afterId : -parentId);
 
             this._destroyModal(modal, element);
         });

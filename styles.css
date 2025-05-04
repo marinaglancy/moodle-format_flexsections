@@ -45,3 +45,7 @@
         padding-right: 15px;
     }
 }
+
+.course-content ul.flexsections .course-section .sectionname > a {
+    color: var(--bs-link-color);
+}

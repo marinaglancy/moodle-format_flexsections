@@ -31,20 +31,24 @@ use moodle_exception;
  */
 class stateactions extends  \core_courseformat\stateactions {
     /**
-     * Moving a section
+     * Move course sections after to another location in the same course.
      *
-     * @param stateupdates $updates
-     * @param stdClass $course
-     * @param array $ids
+     * @param stateupdates $updates the affected course elements track
+     * @param stdClass $course the course object
+     * @param int[] $ids the list of affected course module ids
      * @param int|null $targetsectionid if positive number, move AFTER this section under the same parent
      *     if negative number, move TO the parent with id abs($targetsectionid) as the first child
      *     if 0, move to parent=0 as the first child
      *     (it's quite hacky but unfortunately we can only use one argument here so have to be creative)
-     * @param int|null $targetcmid
-     * @return void
+     * @param int|null $targetcmid optional target cm id
      */
-    public function section_move(stateupdates $updates, stdClass $course, array $ids,
-                                 ?int $targetsectionid = null, ?int $targetcmid = null): void {
+    public function section_move_after(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids,
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
         $this->validate_sections($course, $ids, __FUNCTION__);
 
         $coursecontext = context_course::instance($course->id);
