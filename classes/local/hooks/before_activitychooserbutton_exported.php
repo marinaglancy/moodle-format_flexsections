@@ -38,7 +38,6 @@ class before_activitychooserbutton_exported {
     public static function callback(\core_course\hook\before_activitychooserbutton_exported $hook): void {
         $activitychooserbutton = $hook->get_activitychooserbutton();
         $section = $hook->get_section();
-        $cm = $hook->get_cm();
         $format = course_get_format($section->course);
 
         if ($format->get_format() !== 'flexsections') {
@@ -46,30 +45,11 @@ class before_activitychooserbutton_exported {
         }
 
         // Remove action link added by submodule. Use Reflections to set protected property $activitychooserbutton->actionlinks.
-        $refObject   = new \ReflectionObject( $activitychooserbutton );
-        $refProperty = $refObject->getProperty( 'actionlinks' );
-        $refProperty->setAccessible( true );
-        $refProperty->setValue($activitychooserbutton, []);
-
-        // Add the 'Add subsection' action link from format_flexsections.
-        // $coursecontext = context_course::instance($section->course);
-        // $sectiondepth = $format->get_section_depth($section);
-        // if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
-        //     $sectiondepth < $format->get_max_section_depth() &&
-        //     (!$section->collapsed || $section->section == $format->get_viewed_section())) {
-
-        //     $attributes = [
-        //         'class' => 'dropdown-item editing_addsubsection',
-        //         'data-action-flexsections' => 'addSubSection',
-        //         'data-parentid' => $section->id,
-        //     ];
-        //     $hook->get_activitychooserbutton()->add_action_link(new action_link(
-        //         new moodle_url('#'),
-        //         get_string('addsubsection', 'format_flexsections'), // TODO change to "Subsection"
-        //         null,
-        //         $attributes,
-        //         new pix_icon('subsection', '', 'mod_subsection')
-        //     ));
-        // }
+        $refobject = new \ReflectionObject($activitychooserbutton);
+        $refproperty = $refobject->getProperty('actionlinks');
+        $refproperty->setAccessible(true);
+        $actionlinks = $refproperty->getValue($activitychooserbutton);
+        $actionlinks = array_filter($actionlinks, fn($a) => ($a->attributes['data-modname'] ?? null) !== 'subsection');
+        $refproperty->setValue($activitychooserbutton, array_values($actionlinks));
     }
 }

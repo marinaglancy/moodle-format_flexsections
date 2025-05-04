@@ -210,6 +210,10 @@ class content extends \core_courseformat\output\local\content {
     private function get_sections_to_display(course_modinfo $modinfo): array {
         $viewedsection = $this->format->get_viewed_section();
         return array_values(array_filter($modinfo->get_section_info_all(), function($s) use ($viewedsection) {
+            global $CFG;
+            if ((int)$CFG->branch >= 405 && $s->is_delegated()) {
+                return false;
+            }
             return (!$s->section) ||
                 (!$viewedsection && !$s->parent && $this->format->is_section_visible($s)) ||
                 ($viewedsection && $s->section == $viewedsection);
