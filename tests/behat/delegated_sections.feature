@@ -37,7 +37,7 @@ Feature: Testing delegated sections in format_flexsections
     And I press "Save and display"
     And I should see "Subsection1"
     And I turn editing mode on
-    When I open section "Subsection1" edit menu
+    And I click on "#action-menu-toggle-3" "css_element"
     And I choose "Delete" in the open action menu
     And I click on "Delete" "button" in the "Delete subsection?" "dialogue"
     And I should not see "Subsection1"
