@@ -32,6 +32,7 @@ class header extends \core_courseformat\output\local\content\section\header {
      * @return string
      */
     public function get_template_name(\renderer_base $renderer): string {
+        // Mdlcode uses: template 'format_flexsections/local/content/section/header'.
         return 'format_flexsections/local/content/section/header';
     }
 

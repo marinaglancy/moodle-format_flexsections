@@ -214,9 +214,11 @@ class format_flexsections extends core_courseformat\base {
      */
     public function get_view_url($section, $options = []) {
         $url = new moodle_url('/course/view.php', ['id' => $this->courseid]);
+        $permalink = !empty($options['permalink']);
 
         $sectionno = $this->resolve_section_number($section);
         $section = $this->get_section($sectionno);
+        $sectionid = $section->id;
         if ($sectionno && !$this->is_section_visible($section)) {
             return empty($options['navigation']) ? $url : null;
         }
@@ -231,19 +233,27 @@ class format_flexsections extends core_courseformat\base {
             // Return to the page for section with number $sr.
             $url->param('section', $options['sr']);
             if ($sectionno) {
-                $url->set_anchor('section-'.$sectionno);
+                $url->set_anchor($permalink ? "sectionid-{$sectionid}" : "section-{$sectionno}");
             }
         } else if ($sectionno) {
             // Check if this section has separate page.
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
-                $url->param('section', $section->section);
+                if ($permalink) {
+                    $url->param('sectionid', $sectionid);
+                } else {
+                    $url->param('section', $section->section);
+                }
                 return $url;
             }
             // Find the parent (or grandparent) page that is displayed on separate page.
             if ($parent = $this->find_collapsed_parent($section->parent)) {
-                $url->param('section', $parent);
+                if ($permalink && ($parentsection = $this->get_section($parent))) {
+                    $url->param('sectionid', $parentsection->id);
+                } else {
+                    $url->param('section', $parent);
+                }
             }
-            $url->set_anchor('section-'.$sectionno);
+            $url->set_anchor($permalink ? "sectionid-{$sectionid}" : "section-{$sectionno}");
         }
         return $url;
     }
