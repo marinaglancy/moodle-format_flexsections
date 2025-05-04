@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+### Added
+- Bulk edit of activity modules (except for "Move" aciton) #103 #67
 ### Fixed
 - (4.4+) Item 'Permalink' in the course section edit menu displays the copy-to-clipboard popup
   and allows to copy the link to the section #95
