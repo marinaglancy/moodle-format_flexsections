@@ -2,7 +2,7 @@
 Feature: Testing bulk_actions in format_flexsections
 
   Background:
-    Given the site is running Moodle version 4.3 or higher
+    Given the site is running Moodle version 4.2 or higher
     Given the following "course" exists:
       | fullname     | Course 1 |
       | shortname    | C1       |
