@@ -5,7 +5,6 @@ Feature: Duplicate a section in format_flexsections
   I need to duplicate sections inside the same course
 
   Background:
-    Given the site is running Moodle version 4.2 or higher
     Given the following "courses" exist:
       | fullname | shortname | category | enablecompletion | numsections | format       |
       | Course 1 | C1        | 0        | 1                | 5           | flexsections |
@@ -108,27 +107,12 @@ Feature: Duplicate a section in format_flexsections
     And I should see "Back to 'Section A0'"
 
   @javascript
-  Scenario: Duplicate a subsection on a page of the parent section on Moodle 4.4 and above
-    Given the site is running Moodle version 4.4 or higher
+  Scenario: Duplicate a subsection on a page of the parent section
     And I click on "Section B0" "link" in the "region-main" "region"
-    And I open section "4" edit menu
+    And I open section "Section B1" edit menu
     And I choose "Duplicate" in the open action menu
     And "Section B1 (copy)" "text" should appear after "Section B1" "text" in the "region-main" "region"
-    And I click on "#action-menu-toggle-4" "css_element"
-    And I choose "Display as a link" in the open action menu
-    And I click on "Section B1 (copy)" "link" in the "region-main" "region"
-    And I should see "Section B1 (copy)"
-    And "Activity sample B1" "activity" should exist
-    And I should see "Back to 'Section B0'"
-
-  @javascript
-  Scenario: Duplicate a subsection on a page of the parent section on Moodle 4.2-4.3
-    Given the site is running Moodle version 4.3.99 or lower
-    And I click on "Section B0" "link" in the "region-main" "region"
-    And I open section "4" edit menu
-    And I choose "Duplicate" in the open action menu
-    And "Section B1 (copy)" "text" should appear after "Section B1" "text" in the "region-main" "region"
-    And I click on "#action-menu-toggle-6" "css_element"
+    And I open section "Section B1 (copy)" edit menu
     And I choose "Display as a link" in the open action menu
     And I click on "Section B1 (copy)" "link" in the "region-main" "region"
     And I should see "Section B1 (copy)"

@@ -2,7 +2,6 @@
 Feature: Testing bulk_actions in format_flexsections
 
   Background:
-    Given the site is running Moodle version 4.3 or higher
     Given the following "course" exists:
       | fullname     | Course 1 |
       | shortname    | C1       |
@@ -98,21 +97,7 @@ Feature: Testing bulk_actions in format_flexsections
     Then I should see "Available but not shown on course page" in the "Activity sample 1" "activity"
     And I should see "Available but not shown on course page" in the "Activity sample 3" "activity"
 
-  Scenario: Bulk duplicate activities in 4.2-4.3
-    Given the site is running Moodle version 4.3.99 or lower
-    Given I click on "Select activity Activity sample 1" "checkbox"
-    And I click on "Select activity Activity sample 3" "checkbox"
-    And I should see "2 selected" in the "sticky-footer" "region"
-    When I click on "Duplicate activities" "button" in the "sticky-footer" "region"
-    Then I should see "Activity sample 1" in the "Topic 1" "section"
-    And I should see "Activity sample 1 (copy)" in the "Topic 1" "section"
-    And "Activity sample 1 (copy)" "activity" should appear after "Activity sample 1" "activity"
-    And I should see "Activity sample 3" in the "Topic 2" "section"
-    And I should see "Activity sample 3 (copy)" in the "Topic 2" "section"
-    And "Activity sample 3 (copy)" "activity" should appear after "Activity sample 3" "activity"
-
-  Scenario: Bulk duplicate activities in 4.4 and above
-    Given the site is running Moodle version 4.4 or higher
+  Scenario: Bulk duplicate activities
     Given I click on "Select activity Activity sample 1" "checkbox"
     And I click on "Select activity Activity sample 3" "checkbox"
     And I should see "2 selected" in the "sticky-footer" "region"
@@ -124,25 +109,7 @@ Feature: Testing bulk_actions in format_flexsections
     And I should see "Activity sample 3 (copy)" in the "Section 2" "section"
     And "Activity sample 3 (copy)" "activity" should appear after "Activity sample 3" "activity"
 
-  Scenario: Bulk delete activities in 4.2-4.3
-    Given the site is running Moodle version 4.3.99 or lower
-    Given I should see "Activity sample 1" in the "Topic 1" "section"
-    And I should see "Activity sample 2" in the "Topic 1" "section"
-    And I should see "Activity sample 3" in the "Topic 2" "section"
-    And I should see "Activity sample 4" in the "Topic 2" "section"
-    And I click on "Select activity Activity sample 1" "checkbox"
-    And I click on "Select activity Activity sample 3" "checkbox"
-    And I should see "2 selected" in the "sticky-footer" "region"
-    When I click on "Delete activities" "button" in the "sticky-footer" "region"
-    And I click on "Delete" "button" in the "Delete selected activities?" "dialogue"
-    Then I should not see "Activity sample 1" in the "Topic 1" "section"
-    And I should see "Activity sample 2" in the "Topic 1" "section"
-    And I should not see "Activity sample 3" in the "Topic 2" "section"
-    And I should see "Activity sample 4" in the "Topic 2" "section"
-    And I should see "0 selected" in the "sticky-footer" "region"
-
-  Scenario: Bulk delete activities in 4.4 and above
-    Given the site is running Moodle version 4.4 or higher
+  Scenario: Bulk delete activities
     Given I should see "Activity sample 1" in the "Section 1" "section"
     And I should see "Activity sample 2" in the "Section 1" "section"
     And I should see "Activity sample 3" in the "Section 2" "section"

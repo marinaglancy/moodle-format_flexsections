@@ -153,21 +153,6 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
-     * Generate the title for this section page.
-     *
-     * @return string the page title
-     */
-    public function page_title(): string {
-        global $CFG;
-        if ((int)$CFG->branch >= 404) {
-            // TODO it is possible it is not used anymore. Review.
-            return 'Topic outline';
-        } else {
-            return get_string('topicoutline');
-        }
-    }
-
-    /**
      * Returns the section relative number regardless whether argument is an object or an int
      *
      * @param int|section_info $section
@@ -181,25 +166,6 @@ class format_flexsections extends core_courseformat\base {
         } else {
             return (int)$section;
         }
-    }
-
-    /**
-     * Get if the current format instance will show multiple sections or an individual one.
-     *
-     * Only available in Moodle 4.4 or later
-     *
-     * Some formats has the hability to swith from one section to multiple sections per page,
-     * output components will use this method to know if the current display is a single or
-     * multiple sections.
-     *
-     * @return int|null null for all sections or the sectionid.
-     */
-    public function get_sectionid(): ?int {
-        global $CFG;
-        if ((int)$CFG->branch >= 404) {
-            return parent::get_sectionid();
-        }
-        return 0;
     }
 
     /**
@@ -1425,39 +1391,6 @@ class format_flexsections extends core_courseformat\base {
             $maxsections = 52;
         }
         return $maxsections;
-    }
-
-    /**
-     * Set the current section number to display.
-     * Some formats has the hability to swith from one section to multiple sections per page.
-     *
-     * @param int|null $sectionnum null for all sections or a sectionid.
-     */
-    public function set_section_number(int $sectionnum): void {
-        global $CFG;
-        if ((int)$CFG->branch >= 404) {
-            parent::set_sectionnum($sectionnum);
-        } else {
-            parent::set_section_number($sectionnum);
-        }
-    }
-
-    /**
-     * Set if the current format instance will show multiple sections or an individual one.
-     *
-     * Some formats has the hability to swith from one section to multiple sections per page,
-     * output components will use this method to know if the current display is a single or
-     * multiple sections.
-     *
-     * @return int zero for all sections or the sectin number
-     */
-    public function get_section_number(): int {
-        global $CFG;
-        if ((int)$CFG->branch >= 404) {
-            return (int)parent::get_sectionnum();
-        } else {
-            return parent::get_section_number();
-        }
     }
 
     /**

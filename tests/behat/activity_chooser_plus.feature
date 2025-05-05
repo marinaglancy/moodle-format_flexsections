@@ -5,8 +5,7 @@ Feature: Use the activity chooser to insert activities anywhere in a section in 
   I should be able to add an activity anywhere in a section.
 
   Background:
-    Given the site is running Moodle version 4.2 or higher
-    And the following "users" exist:
+    Given the following "users" exist:
       | username  | firstname | lastname  | email               |
       | teacher   | Teacher   | 1         | teacher@example.com |
     And the following "courses" exist:
@@ -23,15 +22,7 @@ Feature: Use the activity chooser to insert activities anywhere in a section in 
     And I log in as "teacher"
     And I am on "Course" course homepage with editing mode on
 
-  Scenario: The activity chooser icon is hidden by default and be made visible on hover for Moodle 4.1-4.3
-    Given the site is running Moodle version 4.3.99 or lower
-    Given I hover ".navbar-brand" "css_element"
-    And "[data-action='insert-before-Test Forum'] button" "css_element" should not be visible
-    When I hover "Insert an activity or resource before 'Test Forum'" "button"
-    Then "[data-action='insert-before-Test Forum'] button" "css_element" should be visible
-
-  Scenario: The activity chooser icon is hidden by default and be made visible on hover for Moodle 4.4 and above
-    Given the site is running Moodle version 4.4 or higher
+  Scenario: The activity chooser icon is hidden by default and be made visible on hover
     Given I hover ".navbar-brand" "css_element"
     #And "[data-action='insert-before-Test Forum'] button" "css_element" should not be visible
     When I hover "Insert an activity or resource before 'Test Forum'" "button"

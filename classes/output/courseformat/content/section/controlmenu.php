@@ -52,7 +52,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         $format = $this->format;
         $section = $this->section;
         $course = $format->get_course();
-        $sectionreturn = $format->get_section_number();
+        $sectionreturn = (int)$format->get_sectionnum();
         $sectiondepth = $format->get_section_depth($section);
 
         $coursecontext = context_course::instance($course->id);
@@ -70,17 +70,16 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
                 $sectiondepth < $format->get_max_section_depth() &&
                 (!$section->collapsed || $section->section == $this->format->get_viewed_section())) {
             $addsubsectionurl = new moodle_url($url, ['addchildsection' => $section->section]);
-            $controls['addsubsection'] = [
-                'url' => $addsubsectionurl,
-                'icon' => 't/add',
-                'name' => get_string('addsubsection', 'format_flexsections'),
-                'pixattr' => ['class' => ''],
-                'attr' => [
+            $controls['addsubsection'] = new \core\output\action_menu\link_secondary(
+                $addsubsectionurl,
+                new pix_icon('t/add', '', 'moodle', ['class' => 'iconsmall']),
+                get_string('addsubsection', 'format_flexsections'),
+                [
                     'class' => 'editing_addsubsection',
                     'data-action-flexsections' => 'addSubSection',
                     'data-parentid' => $section->id,
-                ],
-            ];
+                ]
+            );
         }
 
         if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
@@ -88,29 +87,27 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
                 $markerurl->param('marker', 0);
                 $highlightoff = get_string('highlightoff');
-                $controls['highlight'] = [
-                    'url' => $markerurl,
-                    'icon' => 'i/marked',
-                    'name' => $highlightoff,
-                    'pixattr' => ['class' => ''],
-                    'attr' => [
+                $controls['highlight'] = new \core\output\action_menu\link_secondary(
+                    $markerurl,
+                    new pix_icon('i/marked', '', 'moodle', ['class' => 'iconsmall']),
+                    $highlightoff,
+                    [
                         'class' => 'editing_highlight',
                         'data-action' => 'removemarker',
-                    ],
-                ];
+                    ]
+                );
             } else {
                 $markerurl->param('marker', $section->section);
                 $highlight = get_string('highlight');
-                $controls['highlight'] = [
-                    'url' => $markerurl,
-                    'icon' => 'i/marker',
-                    'name' => $highlight,
-                    'pixattr' => ['class' => ''],
-                    'attr' => [
+                $controls['highlight'] = new \core\output\action_menu\link_secondary(
+                    $markerurl,
+                    new pix_icon('i/marker', '', 'moodle', ['class' => 'iconsmall']),
+                    $highlight,
+                    [
                         'class' => 'editing_highlight',
                         'data-action' => 'setmarker',
-                    ],
-                ];
+                    ]
+                );
             }
         }
 
@@ -123,55 +120,47 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
                 'data-id' => $section->id,
             ];
             if ($section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
-                $controls['collapsed'] = [
-                    'url' => $collapseurl,
-                    'icon' => 't/expanded',
-                    'name' => get_string('showexpanded', 'format_flexsections'),
-                    'pixattr' => ['class' => ''],
-                    'attr' => $attrs,
-                ];
+                $controls['collapsed'] = new \core\output\action_menu\link_secondary(
+                    $collapseurl,
+                    new pix_icon('t/expanded', '', 'moodle', ['class' => 'iconsmall']),
+                    get_string('showexpanded', 'format_flexsections'),
+                    $attrs
+                );
             } else {
-                $controls['collapsed'] = [
-                    'url' => $collapseurl,
-                    'icon' => 't/collapsed',
-                    'name' => get_string('showcollapsed', 'format_flexsections'),
-                    'pixattr' => ['class' => ''],
-                    'attr' => $attrs,
-                ];
+                $controls['collapsed'] = new \core\output\action_menu\link_secondary(
+                    $collapseurl,
+                    new pix_icon('t/collapsed', '', 'moodle', ['class' => 'iconsmall']),
+                    get_string('showcollapsed', 'format_flexsections'),
+                    $attrs
+                );
             }
         }
 
         if ($section->parent && has_capability('moodle/course:update', $coursecontext) &&
                 $section->section != $this->format->get_viewed_section()) {
             $mergeupurl = new moodle_url($url, ['mergeup' => $section->section]);
-            $controls['mergeup'] = [
-                'url' => $mergeupurl,
-                'icon' => 'mergeup',
-                'iconcomponent' => 'format_flexsections',
-                'name' => get_string('mergeup', 'format_flexsections'),
-                'pixattr' => ['class' => ''],
-                'attr' => [
+            $controls['mergeup'] = new \core\output\action_menu\link_secondary(
+                $mergeupurl,
+                new pix_icon('mergeup', '', 'format_flexsections', ['class' => 'iconsmall']),
+                get_string('mergeup', 'format_flexsections'), [
                     'class' => 'editing_mergeup',
                     'data-action-flexsections' => 'mergeup',
                     'data-id' => $section->id,
-                ],
-            ];
+                ]
+            );
         }
 
         if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
                 (!$section->collapsed || $section->section != $this->format->get_viewed_section())) {
             $moveurl = new moodle_url('#');
-            $controls['moveflexsections'] = [
-                'url' => $moveurl,
-                'icon' => 'i/dragdrop',
-                'name' => get_string('move', 'moodle'),
-                'pixattr' => ['class' => ''],
-                'attr' => [
+            $controls['moveflexsections'] = new \core\output\action_menu\link_secondary(
+                $moveurl,
+                new pix_icon('i/dragdrop', '', 'moodle', ['class' => 'iconsmall']),
+                get_string('move', 'moodle'), [
                     'data-action-flexsections' => 'moveSection',
                     'data-id' => $section->id,
                     'data-ctxid' => context_course::instance($this->format->get_courseid())->id,
-                ],
-            ];
+                ]);
         }
 
         $parentcontrols = parent::section_control_items();
@@ -180,14 +169,24 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             // Deleting section that is currently viewed does not really work in AJAX (as well as mergeup).
             // Maybe we re-write it at some moment so it redirects to the parent section.
             unset($parentcontrols['delete']);
-        } else {
+        } else if (!empty($parentcontrols['delete'])) {
             // Override delete to use plugin action.
-            unset($parentcontrols['delete']['attr']['data-action']);
-            $parentcontrols['delete']['attr']['data-action-flexsections'] = 'delete';
+            $parentcontrols['delete']->attributes['data-action-flexsections'] = 'delete';
+            $parentcontrols['delete']->attributes['data-action'] = null;
+            $parentcontrols['delete']->text = get_string('deletesection', 'format_flexsections');
+        }
+
+        // Change some labels from parent class.
+        if (!empty($parentcontrols['visibility'])) {
+            $parentcontrols['visibility']->text = $parentcontrols['visibility']->attributes['data-action'] === 'sectionHide' ?
+                get_string('hidefromothers', 'format_flexsections') : get_string('showfromothers', 'format_flexsections');
+        }
+        if (!empty($parentcontrols['edit'])) {
+            $parentcontrols['edit']->text = get_string('editsection', 'format_flexsections');
         }
 
         if (array_key_exists('permalink', $parentcontrols)) {
-            $parentcontrols['permalink']['url'] = $this->format->get_view_url($section, ['permalink' => true]);
+            $parentcontrols['permalink']->url = $this->format->get_view_url($section, ['permalink' => true]);
         }
 
         // If the edit key exists, we are going to insert our controls after it.
@@ -218,8 +217,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
      * @return array data context for a mustache template
      */
     public function export_for_template(renderer_base $output): stdClass {
-        global $CFG;
-        if ((int)$CFG->branch >= 405 && $this->section->is_delegated()) {
+        if ($this->section->is_delegated()) {
             return parent::export_for_template($output);
         }
 
@@ -238,18 +236,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         $menu->attributes['class'] .= ' section-actions';
         $menu->attributes['data-sectionid'] = $this->section->id;
         foreach ($controls as $value) {
-            $url = empty($value['url']) ? '' : $value['url'];
-            $icon = empty($value['icon']) ? '' : $value['icon'];
-            $name = empty($value['name']) ? '' : $value['name'];
-            $attr = empty($value['attr']) ? [] : $value['attr'];
-            $class = empty($value['pixattr']['class']) ? '' : $value['pixattr']['class'];
-            $al = new action_menu_link_secondary(
-                new moodle_url($url),
-                new pix_icon($icon, '', $value['iconcomponent'] ?? null, ['class' => "smallicon " . $class]),
-                $name,
-                $attr
-            );
-            $menu->add($al);
+            $menu->add($value);
         }
 
         $data = (object)[

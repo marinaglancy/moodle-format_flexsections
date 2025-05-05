@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.0] - 2025-05-10
+### Added
+- Support for Moodle 5.0
+
 ## [4.1.4] - 2025-05-10
 ### Added
 - Bulk edit of activity modules (except for "Move" aciton) #103 #67

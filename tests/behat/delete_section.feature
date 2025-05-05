@@ -20,28 +20,28 @@ Feature: Deleting sections in flexsections format
     And I turn editing mode on
     And I follow "Add section"
     And I should see "Topic 1"
-    And I add an "Assignment" to section "1" using the activity chooser
+    And I add an "Assignment" to section "1" in flexsections using the activity chooser
     And I set the following fields to these values:
       | Assignment name | First module |
       | Description | Test |
     And I press "Save and return to course"
     And I open section "1" edit menu
     And I click on "Add subsection" "link" in the "li#section-1" "css_element"
-    And I add an "Forum" to section "2" using the activity chooser
+    And I add an "Forum" to section "2" in flexsections using the activity chooser
     And I set the following fields to these values:
       | Forum name | Second module |
       | Description | Test |
     And I press "Save and return to course"
     And I open section "1" edit menu
     And I click on "Add subsection" "link" in the "li#section-1" "css_element"
-    And I add an "Forum" to section "3" using the activity chooser
+    And I add an "Forum" to section "3" in flexsections using the activity chooser
     And I set the following fields to these values:
       | Forum name | Third module |
       | Description | Test |
     And I press "Save and return to course"
     And I click on "Add section" "link" in the "li#section-1" "css_element"
     And I click on "Add section" "link" in the "li#section-4" "css_element"
-    And I add an "Forum" to section "5" using the activity chooser
+    And I add an "Forum" to section "5" in flexsections using the activity chooser
     And I set the following fields to these values:
       | Forum name | Fourth module |
       | Description | Test |
