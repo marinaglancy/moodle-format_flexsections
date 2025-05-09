@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - (4.5+) If the subsections (mod_subsection) already exist in the course (i.e. they were added
   before the course format was changed to flexible sections), display them correctly and
   allow to delete them.
+- Use lock when deleting sections to avoid course corruption #82
 
 ## [4.1.3] - 2024-12-08
 ### Fixed
