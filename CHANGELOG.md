@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [4.1.4] - 2025-05-10
 ### Added
 - Bulk edit of activity modules (except for "Move" aciton) #103 #67
 ### Fixed
