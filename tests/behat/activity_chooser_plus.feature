@@ -28,11 +28,27 @@ Feature: Use the activity chooser to insert activities anywhere in a section in 
     When I hover "Insert an activity or resource before 'Test Forum'" "button"
     Then "button[aria-label=\"Insert an activity or resource before 'Test Forum'\"]" "css_element" should be visible
 
-  Scenario: The activity chooser can be used to insert modules before existing modules
+  Scenario: The activity chooser can be used to insert modules before existing modules in 5.0
+    Given the site is running Moodle version 5.0.99 or lower
     Given I hover "Insert an activity or resource before 'Test Forum'" "button"
     And I press "Insert an activity or resource before 'Test Forum'"
     And I should see "Add an activity or resource" in the ".modal-title" "css_element"
     When I click on "Add a new Assignment" "link" in the "Add an activity or resource" "dialogue"
+    And I set the following fields to these values:
+      | Assignment name | Test Assignment |
+    And I press "Save and return to course"
+    And I should see "Test Assignment" in the "Topic 1" "section"
+    # Ensure the new assignment is in the middle of the two existing modules.
+    Then "Test Page" "text" should appear before "Test Assignment" "text" in the "region-main" "region"
+    And "Test Assignment" "text" should appear before "Test Forum" "text" in the "region-main" "region"
+
+  Scenario: The activity chooser can be used to insert modules before existing modules in 5.1 and above
+    Given the site is running Moodle version 5.1 or higher
+    Given I hover "Insert an activity or resource before 'Test Forum'" "button"
+    And I press "Insert an activity or resource before 'Test Forum'"
+    And I should see "Add an activity or resource" in the ".modal-title" "css_element"
+    When I click on "Add a new Assignment" "link" in the "Add an activity or resource" "dialogue"
+    And I click on "Add selected activity" "button" in the "Add an activity or resource" "dialogue"
     And I set the following fields to these values:
       | Assignment name | Test Assignment |
     And I press "Save and return to course"
