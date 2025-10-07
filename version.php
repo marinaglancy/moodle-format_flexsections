@@ -29,5 +29,5 @@ $plugin->requires  = 2025041400.00;          // Requires Moodle 5.0 or above.
 $plugin->release   = "5.0";
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->component = 'format_flexsections';  // Full name of the plugin (used for diagnostics).
-$plugin->supported = [500, 500];
+$plugin->supported = [500, 501];
 
