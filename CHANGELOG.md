@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.0.1] - 2025-10-07
+### Changed
+- Added tests to ensure compatibility with Moodle 5.1
+
 ## [5.0] - 2025-05-10
 ### Added
 - Support for Moodle 5.0
