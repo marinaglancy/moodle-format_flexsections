@@ -38,6 +38,6 @@ Feature: Testing delegated sections in format_flexsections
     And I click on "#action-menu-toggle-3" "css_element"
     And I choose "Delete" in the open action menu
     And I click on "Delete" "button" in the "Delete subsection?" "dialogue"
-    And I should not see "Subsection1"
+    And I should not see "Subsection1" in the "region-main" "region"
     And I reload the page
     And I should not see "Subsection1"
