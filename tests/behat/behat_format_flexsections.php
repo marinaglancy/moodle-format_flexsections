@@ -41,6 +41,7 @@ class behat_format_flexsections extends behat_base {
      * @param int $sectionnum
      */
     public function i_add_to_section_in_flexsections_using_the_activity_chooser($activityname, $sectionnum) {
+        global $CFG;
 
         $this->require_javascript('Please use the \'the following "activity" exists:\' data generator instead.');
 
@@ -55,14 +56,33 @@ class behat_format_flexsections extends behat_base {
             'NodeElement',
         ]);
 
-        // Clicks the selected activity if it exists.
-        $activityliteral = behat_context_helper::escape(ucfirst($activityname));
-        $activityxpath = "//div[contains(concat(' ', normalize-space(@class), ' '), ' modchooser ')]" .
-            "/descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' optioninfo ')]" .
-            "/descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' optionname ')]" .
-            "[normalize-space(.)=$activityliteral]" .
-            "/parent::a";
+        if ($CFG->branch >= 501) {
+            // Clicks the selected activity if it exists.
+            $activityliteral = behat_context_helper::escape(ucfirst($activityname));
+            $activityxpath = "//div[contains(concat(' ', normalize-space(@class), ' '), ' modchooser ')]" .
+                "/descendant::*[contains(concat(' ', normalize-space(@class), ' '), ' optioninfo ')]" .
+                "/descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' optionname ')]" .
+                "[normalize-space(.)=$activityliteral]" .
+                "/parent::a";
 
-        $this->execute('behat_general::i_click_on', [$activityxpath, 'xpath']);
+            $this->execute('behat_general::i_click_on', [$activityxpath, 'xpath']);
+
+            $this->execute('behat_general::i_click_on_in_the', [
+                "Add selected activity",
+                'button',
+                "Add an activity or resource",
+                'dialogue',
+            ]);
+        } else {
+            // Clicks the selected activity if it exists.
+            $activityliteral = behat_context_helper::escape(ucfirst($activityname));
+            $activityxpath = "//div[contains(concat(' ', normalize-space(@class), ' '), ' modchooser ')]" .
+                "/descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' optioninfo ')]" .
+                "/descendant::div[contains(concat(' ', normalize-space(@class), ' '), ' optionname ')]" .
+                "[normalize-space(.)=$activityliteral]" .
+                "/parent::a";
+
+            $this->execute('behat_general::i_click_on', [$activityxpath, 'xpath']);
+        }
     }
 }

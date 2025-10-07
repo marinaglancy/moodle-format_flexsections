@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:15
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -32,13 +32,19 @@ jobs:
       matrix:
         include:
           - php: '8.4'
-            # Main job. Run all checks that do not require setup and only need to be run once.
-            runchecks: 'all'
             moodle-branch: 'MOODLE_500_STABLE'
             database: 'mariadb'
           - php: '8.2'
             moodle-branch: 'MOODLE_500_STABLE'
             database: 'pgsql'
+          - php: '8.4'
+            # Main job. Run all checks that do not require setup and only need to be run once.
+            runchecks: 'all'
+            moodle-branch: 'MOODLE_501_STABLE'
+            database: 'pgsql'
+          - php: '8.2'
+            moodle-branch: 'MOODLE_501_STABLE'
+            database: 'mariadb'
 
     steps:
       - name: Check out repository code
