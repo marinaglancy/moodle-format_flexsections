@@ -372,6 +372,39 @@ class stateactions extends \core_courseformat\stateactions {
     }
 
     /**
+     * Show or hide course sections recursively.
+     *
+     * @param stateupdates $updates the affected course elements track
+     * @param stdClass $course the course object
+     * @param int[] $ids section ids
+     * @param int $visible the new visible value
+     */
+    protected function set_section_visibility(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids,
+        int $visible
+    ) {
+        global $DB;
+        $format  = course_get_format($course);
+        if (!$format instanceof \format_flexsections) {
+            return;
+        }
+        foreach ($ids as $id) {
+            $sectionnum = $DB->get_field('course_sections', 'section', ['id' => $id]);
+            $section = $format->get_section($sectionnum);
+            // Set visiblity to all child sections.
+            if ($subsections = $format->get_subsections($section)) {
+                foreach ($subsections as $subsection) {
+                    $this->set_section_visibility($updates, $course, [$subsection->id], $visible);
+                }
+            }
+
+        }
+        parent::set_section_visibility($updates, $course, $ids, $visible);
+    }
+
+    /**
      * Switch collapsed state (display as link/ display on the same page)
      *
      * @param \core_courseformat\stateupdates $updates
