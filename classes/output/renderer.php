@@ -34,7 +34,6 @@ use stdClass;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends section_renderer {
-
     /**
      * Constructor method, calls the parent constructor.
      *
@@ -83,7 +82,7 @@ class renderer extends section_renderer {
      * @param course_format $format the course format
      * @return string the course index HTML.
      */
-    public function course_index_drawer(course_format $format): ?String {
+    public function course_index_drawer(course_format $format): ?string {
         if ($format->uses_course_index()) {
             include_course_editor($format);
             return $this->render_from_template('format_flexsections/local/courseindex/drawer', []);

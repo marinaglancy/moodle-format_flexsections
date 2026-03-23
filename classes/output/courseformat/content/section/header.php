@@ -24,7 +24,6 @@ namespace format_flexsections\output\courseformat\content\section;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class header extends \core_courseformat\output\local\content\section\header {
-
     /**
      * Template name
      *

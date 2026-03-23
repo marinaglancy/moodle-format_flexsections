@@ -24,7 +24,6 @@ namespace format_flexsections\output\courseformat\state;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cm extends \core_courseformat\output\local\state\cm {
-
     /**
      * Export this data so it can be used as state object in the course editor.
      *
