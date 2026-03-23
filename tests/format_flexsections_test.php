@@ -18,7 +18,7 @@ namespace format_flexsections;
 
 use context_course;
 use core_external;
-use external_api;
+use core_external\external_api;
 use moodle_exception;
 use moodle_url;
 use testable_course_edit_form;
@@ -139,7 +139,6 @@ final class format_flexsections_test extends \advanced_testcase {
     /**
      * Test web service updating section name.
      *
-     * @runInSeparateProcess
      * @return void
      */
     public function test_update_inplace_editable(): void {
@@ -179,7 +178,6 @@ final class format_flexsections_test extends \advanced_testcase {
     /**
      * Test callback updating section name.
      *
-     * @runInSeparateProcess
      * @return void
      */
     public function test_inplace_editable(): void {

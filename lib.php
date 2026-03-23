@@ -1600,7 +1600,6 @@ class format_flexsections extends core_courseformat\base {
  */
 function format_flexsections_inplace_editable($itemtype, $itemid, $newvalue) {
     global $DB, $CFG;
-    require_once($CFG->libdir . '/externallib.php');
     require_once($CFG->dirroot . '/course/lib.php');
     if ($itemtype === 'sectionname' || $itemtype === 'sectionnamenl') {
         $section = $DB->get_record_sql(
