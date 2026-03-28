@@ -1499,6 +1499,7 @@ class format_flexsections extends core_courseformat\base {
      * @return section_info The new duplicated section
      */
     public function duplicate_section(section_info $originalsection): section_info {
+        global $CFG;
         $course = $this->get_course();
         $modinfo = $this->get_modinfo();
         $oldsectioninfo = $modinfo->get_section_info($originalsection->section);
@@ -1539,7 +1540,15 @@ class format_flexsections extends core_courseformat\base {
         foreach ($sectionstocopy as $s) {
             foreach (($modinfo->sections[$s->section] ?? []) as $modnumber) {
                 $originalcm = $modinfo->cms[$modnumber];
-                duplicate_module($course, $originalcm, $parentmapping[$s->section]->id, false);
+                if ($CFG->branch < 502) {
+                    duplicate_module($course, $originalcm, $parentmapping[$s->section]->id, false);
+                } else {
+                    \core_courseformat\formatactions::cm($course->id)->duplicate(
+                        cmid: $originalcm->id,
+                        targetsectionid: $parentmapping[$s->section]->id,
+                        newname: $originalcm->name,
+                    );
+                }
             }
         }
 

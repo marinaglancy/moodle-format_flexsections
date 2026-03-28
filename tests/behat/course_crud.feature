@@ -17,6 +17,7 @@ Feature: Creating, updating and deleting courses in flexsections format
       | manager1 | manager | Category     | CAT1      |
 
   Scenario: Creating course in flexsections format when default format is topics
+    Given the site is running Moodle version 5.1.99 or lower
     When I log in as "manager1"
     And I am on site homepage
     When I press "Add a new course"
@@ -32,12 +33,48 @@ Feature: Creating, updating and deleting courses in flexsections format
     And I should see "Topic 5"
     And I should not see "Topic 6"
 
+  Scenario: Creating course in flexsections format when default format is topics in 5.2+
+    Given the site is running Moodle version 5.2 or higher
+    When I log in as "manager1"
+    And I am on site homepage
+    When I press "Create course"
+    And I set the following fields to these values:
+      | Course full name  | My first course          |
+      | Course short name | myfirstcourse            |
+      | Format            | Flexible sections format |
+    And I wait to be redirected
+    And I expand all fieldsets
+    And I set the field "Number of sections" to "5"
+    And I press "Save and display"
+    And I should see "Topic 1"
+    And I should see "Topic 5"
+    And I should not see "Topic 6"
+
   Scenario: Creating course in flexsections format when default format is flexsections
+    Given the site is running Moodle version 5.1.99 or lower
     Given the following config values are set as admin:
       | format | flexsections | moodlecourse |
     When I log in as "manager1"
     And I am on site homepage
     When I press "Add a new course"
+    And I set the following fields to these values:
+      | Course full name  | My first course          |
+      | Course short name | myfirstcourse            |
+    And the following fields match these values:
+      | Format            | Flexible sections format |
+    And I set the field "Number of sections" to "5"
+    And I press "Save and display"
+    And I should see "Topic 1"
+    And I should see "Topic 5"
+    And I should not see "Topic 6"
+
+  Scenario: Creating course in flexsections format when default format is flexsections in 5.2+
+    Given the site is running Moodle version 5.2 or higher
+    Given the following config values are set as admin:
+      | format | flexsections | moodlecourse |
+    When I log in as "manager1"
+    And I am on site homepage
+    When I press "Create course"
     And I set the following fields to these values:
       | Course full name  | My first course          |
       | Course short name | myfirstcourse            |
