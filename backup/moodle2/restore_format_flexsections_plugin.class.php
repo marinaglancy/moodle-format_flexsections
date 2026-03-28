@@ -154,7 +154,7 @@ class restore_format_flexsections_plugin extends restore_format_plugin {
         $remainingsections = $changed
             ? $DB->get_records('course_sections', ['course' => $courseid], 'section ASC')
             : $sections;
-        $renumbermap = []; // old section number => new section number.
+        $renumbermap = []; // Old section number => new section number.
         $num = 0;
         foreach ($remainingsections as $section) {
             if ($section->section != $num) {
