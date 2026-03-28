@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
 - Partial course import no longer creates orphan "Topic N" sections when
   subsections are excluded #17
 
+### Added
+- Addressed deprecations and UI changes in Moodle 5.2
+
 ## [5.0.1] - 2025-10-07
 ### Changed
 - Added tests to ensure compatibility with Moodle 5.1
