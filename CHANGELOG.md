@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
   where parent classes for bulk edit tools do not exist #111
 - Hiding a section with subsections now recursively hides all subsections and their
   activities from students #107
+- Partial course import no longer creates orphan "Topic N" sections when
+  subsections are excluded #17
 
 ## [4.1.4] - 2025-05-10
 ### Added
