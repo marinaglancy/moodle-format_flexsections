@@ -14,8 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Bulk edit tools for format_flexsections.
+ *
+ * @package    format_flexsections
+ * @copyright  Marina Glancy
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace format_flexsections\output\courseformat\content;
 
+defined('MOODLE_INTERNAL') || die();
+
+// phpcs:disable Generic.Classes.DuplicateClassName.Found
+// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
 // The parent class only exists in Moodle 4.2+.
 if (class_exists(\core_courseformat\output\local\content\bulkedittools::class)) {
 
