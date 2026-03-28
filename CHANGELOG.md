@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
   a single section page #109
 - Hiding a section with subsections now recursively hides all subsections and their
   activities from students #107
+- Partial course import no longer creates orphan "Topic N" sections when
+  subsections are excluded #17
 
 ## [5.0.1] - 2025-10-07
 ### Changed
