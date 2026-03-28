@@ -24,7 +24,6 @@ namespace format_flexsections\output\courseformat\state;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course extends \core_courseformat\output\local\state\course {
-
     /** @var \format_flexsections the course format class */
     protected $format;
 
@@ -38,11 +37,13 @@ class course extends \core_courseformat\output\local\state\course {
         $data = parent::export_for_template($output);
 
         // Build list of first-level sections (used by courseindex).
-        $data->sectionlist = array_values(array_filter($data->sectionlist,
-        function($sectionid) {
-            $section = $this->format->get_modinfo()->get_section_info_by_id($sectionid);
-            return $section && !$section->parent;
-        }));
+        $data->sectionlist = array_values(array_filter(
+            $data->sectionlist,
+            function ($sectionid) {
+                $section = $this->format->get_modinfo()->get_section_info_by_id($sectionid);
+                return $section && !$section->parent;
+            }
+        ));
 
         // Build sections hierarchy.
         $allsections = $this->format->get_modinfo()->get_section_info_all();

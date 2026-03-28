@@ -39,12 +39,17 @@ class format_flexsections_generator extends component_generator_base {
         unset($data['courseid'], $data['parent']);
         $lastsection = (int)$DB->get_field_sql(
             'SELECT max(section) from {course_sections} WHERE course = ?',
-            [$courseid]);
+            [$courseid]
+        );
         $section = course_create_section($courseid, $lastsection + 1, true);
         course_update_section($courseid, $section, $data);
         if (strlen('' . $parentname)) {
-            $parentsection = $DB->get_field('course_sections', 'section',
-                ['course' => $courseid, 'name' => $parentname], MUST_EXIST);
+            $parentsection = $DB->get_field(
+                'course_sections',
+                'section',
+                ['course' => $courseid, 'name' => $parentname],
+                MUST_EXIST
+            );
             /** @var format_flexsections $format */
             $format = course_get_format($courseid);
             $format->move_section($section->section, $parentsection);

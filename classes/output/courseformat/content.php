@@ -28,7 +28,6 @@ use stdClass;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class content extends \core_courseformat\output\local\content {
-
     /** @var \format_flexsections the course format class */
     protected $format;
 
@@ -106,7 +105,7 @@ class content extends \core_courseformat\output\local\content {
         }
 
         $viewedsection = $this->format->get_viewed_section();
-        return array_values(array_filter($modinfo->get_section_info_all(), function($s) use ($viewedsection) {
+        return array_values(array_filter($modinfo->get_section_info_all(), function ($s) use ($viewedsection) {
             if ($s->is_delegated()) {
                 return false;
             }

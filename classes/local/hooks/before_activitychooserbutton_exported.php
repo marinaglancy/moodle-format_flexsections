@@ -24,7 +24,6 @@ namespace format_flexsections\local\hooks;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class before_activitychooserbutton_exported {
-
     /**
      * This hook is triggered when a activity chooser button is exported.
      *
