@@ -267,6 +267,37 @@ final class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
+     * Test get_view_url() with null section when section number is set.
+     *
+     * Regression test for https://github.com/marinaglancy/moodle-format_flexsections/issues/109
+     * When viewing a single section page and get_view_url is called with null,
+     * it should not produce a warning about reading property on null.
+     *
+     * @return void
+     */
+    public function test_get_view_url_with_section_number_set(): void {
+        $this->resetAfterTest();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['format' => 'flexsections']);
+        course_create_sections_if_missing($course, [0, 1]);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+
+        // Simulate being on a single section page by setting the section number.
+        $format->set_sectionnum(1);
+
+        // This should not produce a PHP warning "Attempt to read property 'id' on null".
+        $url = $format->get_view_url(null);
+        $this->assertNotEmpty($url);
+
+        // Also test with navigation option.
+        $url = $format->get_view_url(null, ['navigation' => true]);
+        $this->assertTrue($url === null || $url instanceof moodle_url);
+    }
+
+    /**
      * Tests for format_flexsections::delete_section_with_children.
      */
     public function test_delete_section_with_children(): void {

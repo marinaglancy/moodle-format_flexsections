@@ -189,7 +189,7 @@ class format_flexsections extends core_courseformat\base {
             return empty($options['navigation']) ? $url : null;
         }
 
-        if ($this->get_sectionid() && $this->get_sectionid() == $section->id &&
+        if ($this->get_sectionid() && $this->get_sectionid() == $sectionid &&
                 (strpos(qualified_me(), '/course/section.php') !== false) && !empty($options['navigation'])) {
             // When we are already on /course/section.php page, return URL for this page so that the breadcrumb sets correctly.
             return new moodle_url('/course/section.php', ['id' => $section->id]);
