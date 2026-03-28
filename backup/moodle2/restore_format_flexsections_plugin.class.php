@@ -149,27 +149,47 @@ class restore_format_flexsections_plugin extends restore_format_plugin {
             }
         }
 
-        // Renumber sections to close any gaps.
+        // Renumber sections to close any gaps, using the two-step negative-number
+        // approach to avoid unique constraint violations (same as move_section in lib.php).
         $remainingsections = $changed
             ? $DB->get_records('course_sections', ['course' => $courseid], 'section ASC')
             : $sections;
+        $renumbermap = []; // old section number => new section number.
         $num = 0;
-        $renumbered = false;
         foreach ($remainingsections as $section) {
             if ($section->section != $num) {
-                $DB->execute(
-                    "UPDATE {course_format_options}
-                        SET value = ?
-                      WHERE courseid = ? AND format = 'flexsections' AND name = 'parent' AND value = ?",
-                    [(string)$num, $courseid, (string)$section->section]
-                );
-                $DB->set_field('course_sections', 'section', $num, ['id' => $section->id]);
-                $renumbered = true;
+                $renumbermap[$section->section] = $num;
             }
             $num++;
         }
 
-        if ($changed || $renumbered) {
+        if (!empty($renumbermap)) {
+            // Step 1: Set to negative numbers to avoid uniqueness constraint.
+            foreach ($renumbermap as $old => $new) {
+                $DB->execute(
+                    "UPDATE {course_sections} SET section = ? WHERE course = ? AND section = ?",
+                    [-$new - 1, $courseid, $old]
+                );
+            }
+            // Step 2: Set to correct positive numbers.
+            foreach ($renumbermap as $old => $new) {
+                $DB->execute(
+                    "UPDATE {course_sections} SET section = ? WHERE course = ? AND section = ?",
+                    [$new, $courseid, -$new - 1]
+                );
+            }
+            // Update parent references.
+            foreach ($renumbermap as $old => $new) {
+                $DB->execute(
+                    "UPDATE {course_format_options}
+                        SET value = ?
+                      WHERE courseid = ? AND format = 'flexsections' AND name = 'parent' AND value = ?",
+                    [(string)$new, $courseid, (string)$old]
+                );
+            }
+        }
+
+        if ($changed || !empty($renumbermap)) {
             rebuild_course_cache($courseid);
         }
     }
