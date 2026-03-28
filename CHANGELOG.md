@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed "Attempt to read property id on null" warning in get_view_url() when viewing
   a single section page #109
+- Hiding a section with subsections now recursively hides all subsections and their
+  activities from students #107
 
 ## [5.0.1] - 2025-10-07
 ### Changed

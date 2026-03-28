@@ -348,4 +348,74 @@ final class format_flexsections_test extends \advanced_testcase {
         // Sanity check, expect 5 sections in total (section 0-4).
         $this->assertCount(5, $courseformat->get_sections());
     }
+
+    /**
+     * Test that hiding a section via stateactions also hides subsections recursively.
+     *
+     * Regression test for https://github.com/marinaglancy/moodle-format_flexsections/issues/107
+     * When a section containing subsections is hidden using the AJAX action (section_hide),
+     * activities in subsections must also become hidden from students.
+     */
+    public function test_section_hide_recursive(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        $user = $generator->create_user();
+        $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
+        $generator->enrol_user($user->id, $course->id, $teacherrole->id);
+        $this->setUser($user);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+
+        // Create subsection under section 1, and sub-subsection under that.
+        $subsectionnum = $format->create_new_section(1);
+        $subsubsectionnum = $format->create_new_section($subsectionnum);
+
+        // Add activities to each level.
+        $generator->create_module('assign', ['course' => $course->id, 'section' => 1]);
+        $generator->create_module('forum', ['course' => $course->id, 'section' => $subsectionnum]);
+        $generator->create_module('page', ['course' => $course->id, 'section' => $subsubsectionnum]);
+
+        // Get section info.
+        $modinfo = get_fast_modinfo($course);
+        $section1 = $modinfo->get_section_info(1);
+        $subsection = $modinfo->get_section_info($subsectionnum);
+        $subsubsection = $modinfo->get_section_info($subsubsectionnum);
+
+        // Verify parent hierarchy is correct.
+        $this->assertEquals(1, $subsection->parent, 'Subsection parent should be section 1');
+        $this->assertEquals($subsectionnum, $subsubsection->parent, 'Sub-subsection parent should be subsection');
+
+        // Verify all sections are visible initially.
+        $this->assertEquals(1, $section1->visible);
+        $this->assertEquals(1, $subsection->visible);
+        $this->assertEquals(1, $subsubsection->visible);
+
+        // Hide section 1 via stateactions (simulating the AJAX hide action).
+        $updates = new \core_courseformat\stateupdates($format);
+        $actions = $format->get_stateactions_instance();
+        $actions->section_hide($updates, $course, [$section1->id]);
+
+        // Verify that section 1 and all its subsections are now hidden.
+        $modinfo = get_fast_modinfo($course);
+        $this->assertEquals(0, $modinfo->get_section_info(1)->visible, 'Section 1 should be hidden');
+        $this->assertEquals(0, $modinfo->get_section_info($subsectionnum)->visible, 'Subsection should be hidden');
+        $this->assertEquals(0, $modinfo->get_section_info($subsubsectionnum)->visible, 'Sub-subsection should be hidden');
+
+        // Now show section 1 and verify subsections become visible again.
+        $updates = new \core_courseformat\stateupdates($format);
+        $actions = $format->get_stateactions_instance();
+        $actions->section_show($updates, $course, [$section1->id]);
+
+        $modinfo = get_fast_modinfo($course);
+        $this->assertEquals(1, $modinfo->get_section_info(1)->visible, 'Section 1 should be visible');
+        $this->assertEquals(1, $modinfo->get_section_info($subsectionnum)->visible, 'Subsection should be visible');
+        $this->assertEquals(1, $modinfo->get_section_info($subsubsectionnum)->visible, 'Sub-subsection should be visible');
+    }
 }
