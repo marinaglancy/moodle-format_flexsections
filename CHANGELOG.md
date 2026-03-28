@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+### Fixed
+- Fixed "Attempt to read property id on null" warning in get_view_url() when viewing
+  a single section page #109
+
 ## [4.1.4] - 2025-05-10
 ### Added
 - Bulk edit of activity modules (except for "Move" aciton) #103 #67
