@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed "Attempt to read property id on null" warning in get_view_url() when viewing
   a single section page #109
+- Fixed unit test failure (test_get_component_classes_in_namespace_provider) on Moodle versions
+  where parent classes for bulk edit tools do not exist #111
 
 ## [4.1.4] - 2025-05-10
 ### Added

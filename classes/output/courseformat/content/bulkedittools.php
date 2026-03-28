@@ -16,40 +16,57 @@
 
 namespace format_flexsections\output\courseformat\content;
 
-/**
- * Class bulkedittools
- *
- * @package    format_flexsections
- * @copyright  Marina Glancy
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class bulkedittools extends \core_courseformat\output\local\content\bulkedittools {
+// The parent class only exists in Moodle 4.2+.
+if (class_exists(\core_courseformat\output\local\content\bulkedittools::class)) {
 
     /**
-     * Generate the bulk edit control items of a course module.
+     * Class bulkedittools
      *
-     * Format plugins can override the method to add or remove elements
-     * from the toolbar.
-     *
-     * @return array of edit control items
+     * @package    format_flexsections
+     * @copyright  Marina Glancy
+     * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    protected function cm_control_items(): array {
-        $items = parent::cm_control_items();
-        // TODO "Move" action from the parent class is not working with flexsections.
-        unset($items['move']);
-        return $items;
+    class bulkedittools extends \core_courseformat\output\local\content\bulkedittools {
+
+        /**
+         * Generate the bulk edit control items of a course module.
+         *
+         * Format plugins can override the method to add or remove elements
+         * from the toolbar.
+         *
+         * @return array of edit control items
+         */
+        protected function cm_control_items(): array {
+            $items = parent::cm_control_items();
+            // TODO "Move" action from the parent class is not working with flexsections.
+            unset($items['move']);
+            return $items;
+        }
+
+        /**
+         * Generate the bulk edit control items of a section.
+         *
+         * Format plugins can override the method to add or remove elements
+         * from the toolbar.
+         *
+         * @return array of edit control items
+         */
+        protected function section_control_items(): array {
+            // TODO Section controls are not working with flexsections.
+            return [];
+        }
     }
+} else {
+
+    // Stub to satisfy unittest (test_get_component_classes_in_namespace_provider).
 
     /**
-     * Generate the bulk edit control items of a section.
+     * Class bulkedittools
      *
-     * Format plugins can override the method to add or remove elements
-     * from the toolbar.
-     *
-     * @return array of edit control items
+     * @package    format_flexsections
+     * @copyright  Marina Glancy
+     * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    protected function section_control_items(): array {
-        // TODO Section controls are not working with flexsections.
-        return [];
+    class bulkedittools {
     }
 }
