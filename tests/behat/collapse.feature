@@ -98,7 +98,7 @@ Feature: Collapsing and expanding sections in flexsections format
     And I should see "t211" in the "region-main" "region"
     # Collapse all will collapse all sections except for general
     # Use JS click to avoid the fixed-top navbar intercepting the click.
-    And I click on "Collapse all" "link" skipping visibility check
+    And I click on "//div[contains(@id,'region-main')]//a[@id='collapsesections']" "xpath_element" skipping visibility check
     And I should see "Page in General section" in the "region-main" "region"
     And I should not see "Page in first section" in the "region-main" "region"
     And I should not see "t110" in the "region-main" "region"
