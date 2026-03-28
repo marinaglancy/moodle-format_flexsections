@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [5.0.2] - 2026-03-28
 ### Fixed
 - Fixed "Attempt to read property id on null" warning in get_view_url() when viewing
   a single section page #109
