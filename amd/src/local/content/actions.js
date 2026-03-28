@@ -16,7 +16,7 @@
 import {BaseComponent} from 'core/reactive';
 import {get_string as getString, get_strings as getStrings} from "core/str";
 import Notification from "core/notification";
-import ModalFactory from "core/modal_factory";
+import ModalCancel from "core/modal_cancel";
 import Templates from "core/templates";
 import Pending from "core/pending";
 
@@ -196,8 +196,7 @@ export default class extends BaseComponent {
         buildParents(data.sections, '');
         data.lastchildid = data.sections.length ? data.sections[data.sections.length - 1].id : 0;
 
-        ModalFactory.create({
-            type: ModalFactory.types.CANCEL,
+        ModalCancel.create({
             title: getString('movecoursesection', 'core'),
             large: true,
             buttons: {cancel: getString('closebuttontitle', 'core')},
@@ -241,8 +240,7 @@ export default class extends BaseComponent {
         data.cmid = cmInfo.id;
         data.cmname = cmInfo.name;
 
-        ModalFactory.create({
-            type: ModalFactory.types.CANCEL,
+        ModalCancel.create({
             title: getString('movecoursemodule', 'core'),
             large: true,
             buttons: {cancel: getString('closebuttontitle', 'core')},
