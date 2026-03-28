@@ -399,7 +399,6 @@ class stateactions extends \core_courseformat\stateactions {
                     $this->set_section_visibility($updates, $course, [$subsection->id], $visible);
                 }
             }
-
         }
         parent::set_section_visibility($updates, $course, $ids, $visible);
     }
