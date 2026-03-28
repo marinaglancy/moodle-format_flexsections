@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
   a single section page #109
 - Fixed unit test failure (test_get_component_classes_in_namespace_provider) on Moodle versions
   where parent classes for bulk edit tools do not exist #111
+- Hiding a section with subsections now recursively hides all subsections and their
+  activities from students #107
 
 ## [4.1.4] - 2025-05-10
 ### Added
