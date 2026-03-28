@@ -27,7 +27,6 @@ use core_text;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 trait preferences {
-
     /**
      * Name for the part of the preference
      *
@@ -47,7 +46,7 @@ trait preferences {
      * @return void
      */
     public static function set_long_preference(string $name, ?string $value): void {
-        $allpreferences = array_filter(get_user_preferences(), function($prefname) use ($name) {
+        $allpreferences = array_filter(get_user_preferences(), function ($prefname) use ($name) {
             return $prefname === $name || (strpos($prefname, "{$name}#") === 0);
         }, ARRAY_FILTER_USE_KEY);
         $len = ceil(core_text::strlen((string)$value) / 1300);
@@ -68,7 +67,7 @@ trait preferences {
      * @return string
      */
     public static function get_long_preference(string $name): string {
-        $allpreferences = array_filter(get_user_preferences(), function($prefname) use ($name) {
+        $allpreferences = array_filter(get_user_preferences(), function ($prefname) use ($name) {
             return $prefname === $name || (strpos($prefname, "{$name}#") === 0);
         }, ARRAY_FILTER_USE_KEY);
         $value = '';

@@ -32,7 +32,6 @@ use testable_course_edit_form;
  * @covers     \format_flexsections
  */
 final class format_flexsections_test extends \advanced_testcase {
-
     /**
      * Shared setup for the testcase.
      */
@@ -52,8 +51,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get section names for course.
         $coursesections = $DB->get_records('course_sections', ['course' => $course->id]);
@@ -78,8 +79,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get section names for course.
         $coursesections = $DB->get_records('course_sections', ['course' => $course->id]);
@@ -112,8 +115,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get section names for course.
         $coursesections = $DB->get_records('course_sections', ['course' => $course->id]);
@@ -144,8 +149,10 @@ final class format_flexsections_test extends \advanced_testcase {
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
-        $course = $this->getDataGenerator()->create_course(['numsections' => 5, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $this->getDataGenerator()->create_course(
+            ['numsections' => 5, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
         $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => 2]);
 
         // Call webservice without necessary permissions.
@@ -153,8 +160,10 @@ final class format_flexsections_test extends \advanced_testcase {
             core_external::update_inplace_editable('format_flexsections', 'sectionname', $section->id, 'New section name');
             $this->fail('Exception expected');
         } catch (moodle_exception $e) {
-            $this->assertEquals('Course or activity not accessible. (Not enrolled)',
-                    $e->getMessage());
+            $this->assertEquals(
+                'Course or activity not accessible. (Not enrolled)',
+                $e->getMessage()
+            );
         }
 
         // Change to teacher and make sure that section name can be updated using web service update_inplace_editable().
@@ -178,8 +187,10 @@ final class format_flexsections_test extends \advanced_testcase {
 
         $this->resetAfterTest();
         $user = $this->getDataGenerator()->create_user();
-        $course = $this->getDataGenerator()->create_course(['numsections' => 5, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $this->getDataGenerator()->create_course(
+            ['numsections' => 5, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
         $teacherrole = $DB->get_record('role', ['shortname' => 'editingteacher']);
         $this->getDataGenerator()->enrol_user($user->id, $course->id, $teacherrole->id);
         $this->setUser($user);
@@ -187,8 +198,11 @@ final class format_flexsections_test extends \advanced_testcase {
         $section = $DB->get_record('course_sections', ['course' => $course->id, 'section' => 2]);
 
         // Call callback format_flexsections_inplace_editable() directly.
-        $tmpl = component_callback('format_flexsections', 'inplace_editable',
-            ['sectionname', $section->id, 'Rename me again']);
+        $tmpl = component_callback(
+            'format_flexsections',
+            'inplace_editable',
+            ['sectionname', $section->id, 'Rename me again']
+        );
         $this->assertInstanceOf('core\output\inplace_editable', $tmpl);
         $res = $tmpl->export_for_template($PAGE->get_renderer('core'));
         $this->assertEquals('Rename me again', $res['value']);
@@ -239,7 +253,6 @@ final class format_flexsections_test extends \advanced_testcase {
 
         $format = course_get_format($course->id);
         $this->assertEquals($enddate, $format->get_default_course_enddate($courseform->get_quick_form()));
-
     }
 
     /**
@@ -307,8 +320,10 @@ final class format_flexsections_test extends \advanced_testcase {
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
         $numsections = 5;
-        $course = $generator->create_course(['numsections' => $numsections, 'format' => 'flexsections'],
-            ['createsections' => true]);
+        $course = $generator->create_course(
+            ['numsections' => $numsections, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
 
         // Get last section.
         $courseformat = course_get_format($course);

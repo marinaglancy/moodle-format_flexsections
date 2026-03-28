@@ -39,7 +39,6 @@ if (class_exists(\core_courseformat\output\local\content\cm\delegatedcontrolmenu
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
     class delegatedcontrolmenu extends \core_courseformat\output\local\content\cm\delegatedcontrolmenu {
-
         /**
          * Generate the edit control items of a section.
          *

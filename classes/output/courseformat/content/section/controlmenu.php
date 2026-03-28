@@ -33,7 +33,6 @@ use stdClass;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class controlmenu extends \core_courseformat\output\local\content\section\controlmenu {
-
     /** @var \format_flexsections the course format class */
     protected $format;
 
@@ -66,9 +65,11 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
 
         $controls = [];
 
-        if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
+        if (
+            has_capability('moodle/course:update', $coursecontext) && $section->section &&
                 $sectiondepth < $format->get_max_section_depth() &&
-                (!$section->collapsed || $section->section == $this->format->get_viewed_section())) {
+                (!$section->collapsed || $section->section == $this->format->get_viewed_section())
+        ) {
             $addsubsectionurl = new moodle_url($url, ['addchildsection' => $section->section]);
             $controls['addsubsection'] = [
                 'url' => $addsubsectionurl,
@@ -114,8 +115,10 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             }
         }
 
-        if ($section->section && has_capability('moodle/course:update', $coursecontext) &&
-                $section->section != $this->format->get_viewed_section()) {
+        if (
+            $section->section && has_capability('moodle/course:update', $coursecontext) &&
+                $section->section != $this->format->get_viewed_section()
+        ) {
             $collapseurl = new moodle_url($url, ['switchcollapsed' => $section->section]);
             $attrs = [
                 'data-action-flexsections' => 'sectionSwitchCollapsed',
@@ -141,8 +144,10 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             }
         }
 
-        if ($section->parent && has_capability('moodle/course:update', $coursecontext) &&
-                $section->section != $this->format->get_viewed_section()) {
+        if (
+            $section->parent && has_capability('moodle/course:update', $coursecontext) &&
+                $section->section != $this->format->get_viewed_section()
+        ) {
             $mergeupurl = new moodle_url($url, ['mergeup' => $section->section]);
             $controls['mergeup'] = [
                 'url' => $mergeupurl,
@@ -158,8 +163,10 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
             ];
         }
 
-        if (has_capability('moodle/course:update', $coursecontext) && $section->section &&
-                (!$section->collapsed || $section->section != $this->format->get_viewed_section())) {
+        if (
+            has_capability('moodle/course:update', $coursecontext) && $section->section &&
+                (!$section->collapsed || $section->section != $this->format->get_viewed_section())
+        ) {
             $moveurl = new moodle_url('#');
             $controls['moveflexsections'] = [
                 'url' => $moveurl,

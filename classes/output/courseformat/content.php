@@ -28,7 +28,6 @@ use stdClass;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class content extends \core_courseformat\output\local\content {
-
     /** @var \format_flexsections the course format class */
     protected $format;
 
@@ -110,8 +109,12 @@ class content extends \core_courseformat\output\local\content {
             // The course/view.php check the section existence but the output can be called
             // from other parts so we need to check it.
             if (!$thissection) {
-                throw new \moodle_exception('unknowncoursesection', 'error',
-                    course_get_url($course), format_string($course->fullname));
+                throw new \moodle_exception(
+                    'unknowncoursesection',
+                    'error',
+                    course_get_url($course),
+                    format_string($course->fullname)
+                );
             }
 
             $section = new $this->sectionclass($format, $thissection);
@@ -154,7 +157,7 @@ class content extends \core_courseformat\output\local\content {
         }
 
         $viewedsection = $this->format->get_viewed_section();
-        return array_values(array_filter($modinfo->get_section_info_all(), function($s) use ($viewedsection) {
+        return array_values(array_filter($modinfo->get_section_info_all(), function ($s) use ($viewedsection) {
             global $CFG;
             if ((int)$CFG->branch >= 405 && $s->is_delegated()) {
                 return false;

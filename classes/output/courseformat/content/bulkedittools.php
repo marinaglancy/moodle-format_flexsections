@@ -39,7 +39,6 @@ if (class_exists(\core_courseformat\output\local\content\bulkedittools::class)) 
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
     class bulkedittools extends \core_courseformat\output\local\content\bulkedittools {
-
         /**
          * Generate the bulk edit control items of a course module.
          *
@@ -69,7 +68,6 @@ if (class_exists(\core_courseformat\output\local\content\bulkedittools::class)) 
         }
     }
 } else {
-
     // Stub to satisfy unittest (test_get_component_classes_in_namespace_provider).
 
     /**

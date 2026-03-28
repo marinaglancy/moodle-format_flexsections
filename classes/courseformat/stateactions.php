@@ -29,7 +29,7 @@ use moodle_exception;
  * @copyright 2022 Marina Glancy
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class stateactions extends  \core_courseformat\stateactions {
+class stateactions extends \core_courseformat\stateactions {
     /**
      * Moving a section
      *
@@ -43,8 +43,13 @@ class stateactions extends  \core_courseformat\stateactions {
      * @param int|null $targetcmid
      * @return void
      */
-    public function section_move(stateupdates $updates, stdClass $course, array $ids,
-                                 ?int $targetsectionid = null, ?int $targetcmid = null): void {
+    public function section_move(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids,
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
         $this->validate_sections($course, $ids, __FUNCTION__);
 
         $coursecontext = context_course::instance($course->id);
@@ -96,7 +101,7 @@ class stateactions extends  \core_courseformat\stateactions {
      */
     protected function find_next_section(\course_modinfo $modinfo, \section_info $thissection): ?\section_info {
         // Build array of same parent sections starting from next to $thissection.
-        $sections = array_filter($modinfo->get_section_info_all(), function($s) use ($thissection) {
+        $sections = array_filter($modinfo->get_section_info_all(), function ($s) use ($thissection) {
             return ($s->parent == $thissection->parent) && ($s->section > $thissection->section);
         });
 
@@ -269,8 +274,13 @@ class stateactions extends  \core_courseformat\stateactions {
      * @param int|null $targetcmid not used
      * @return void
      */
-    public function section_add_subsection(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
-                            ?int $targetsectionid = null, ?int $targetcmid = null): void {
+    public function section_add_subsection(
+        \core_courseformat\stateupdates $updates,
+        stdClass $course,
+        array $ids,
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
         require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
@@ -294,8 +304,13 @@ class stateactions extends  \core_courseformat\stateactions {
      * @param int|null $targetcmid not used
      * @return void
      */
-    public function section_insert_subsection(stateupdates $updates, stdClass $course, array $ids,
-                            ?int $targetsectionid = null, ?int $targetcmid = null): void {
+    public function section_insert_subsection(
+        stateupdates $updates,
+        stdClass $course,
+        array $ids,
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
         require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
@@ -366,8 +381,13 @@ class stateactions extends  \core_courseformat\stateactions {
      * @param int|null $targetcmid not used
      * @return void
      */
-    public function section_switch_collapsed(\core_courseformat\stateupdates $updates, stdClass $course, array $ids,
-                                           ?int $targetsectionid = null, ?int $targetcmid = null): void {
+    public function section_switch_collapsed(
+        \core_courseformat\stateupdates $updates,
+        stdClass $course,
+        array $ids,
+        ?int $targetsectionid = null,
+        ?int $targetcmid = null
+    ): void {
         $this->validate_sections($course, $ids, __FUNCTION__);
         require_capability('moodle/course:update', context_course::instance($course->id));
         /** @var \format_flexsections $format */
@@ -392,5 +412,4 @@ class stateactions extends  \core_courseformat\stateactions {
         // The section order is at a course level.
         $updates->add_course_put();
     }
-
 }

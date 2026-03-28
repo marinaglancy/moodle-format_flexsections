@@ -30,4 +30,3 @@ $plugin->release   = "4.1.4";
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->component = 'format_flexsections';  // Full name of the plugin (used for diagnostics).
 $plugin->supported = [401, 405];
-
