@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+### Fixed
+- Missing sesskey validation for `addchildsection` and `movesection` URL handlers in non-JS fallbacks -
+  detected by https://mdlshield.com/
+- $_SERVER['HTTP_REFERER'] replaced with a safer alternative `get_caller_page_url()`
+- PARAM_RAW replaced with more specific PARAM_INT for moving section parameters
+
 ## [5.0.2] - 2026-03-28
 ### Fixed
 - Fixed "Attempt to read property id on null" warning in get_view_url() when viewing

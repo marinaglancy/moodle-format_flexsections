@@ -717,7 +717,8 @@ class format_flexsections extends core_courseformat\base {
         global $PAGE, $FULLME;
         $url = $PAGE->has_set_url() ? $PAGE->url : new moodle_url($FULLME);
         if ($url->compare(new moodle_url('/lib/ajax/service.php'), URL_MATCH_BASE)) {
-            return !empty($_SERVER['HTTP_REFERER']) ? new moodle_url($_SERVER['HTTP_REFERER']) : $url;
+            $referer = get_local_referer(false);
+            return $referer ? new moodle_url($referer) : $url;
         }
         return $url;
     }
@@ -823,7 +824,7 @@ class format_flexsections extends core_courseformat\base {
 
             // If requested, create new section and redirect to course view page.
             $addchildsection = optional_param('addchildsection', null, PARAM_INT);
-            if ($addchildsection !== null && has_capability('moodle/course:update', $context)) {
+            if ($addchildsection !== null && has_capability('moodle/course:update', $context) && confirm_sesskey()) {
                 $sectionnum = $this->create_new_section($addchildsection);
                 $url = course_get_url($this->courseid, $sectionnum);
                 redirect($url);
@@ -854,13 +855,14 @@ class format_flexsections extends core_courseformat\base {
             // If requested, move section.
             $movesection = optional_param('movesection', null, PARAM_INT);
             $moveparent = optional_param('moveparent', null, PARAM_INT);
-            $movebefore = optional_param('movebefore', null, PARAM_RAW);
-            $sr = optional_param('sr', null, PARAM_RAW);
+            $movebefore = optional_param('movebefore', null, PARAM_INT);
+            $sr = optional_param('sr', null, PARAM_INT);
             $options = [];
             if ($sr !== null) {
                 $options = ['sr' => $sr];
             }
-            if ($movesection !== null && $moveparent !== null && has_capability('moodle/course:update', $context)) {
+            if ($movesection !== null && $moveparent !== null && has_capability('moodle/course:update', $context)
+                    && confirm_sesskey()) {
                 $newsectionnum = $this->move_section($movesection, $moveparent, $movebefore);
                 redirect(course_get_url($this->courseid, $newsectionnum, $options));
             }
@@ -961,9 +963,6 @@ class format_flexsections extends core_courseformat\base {
         }
         $neworder = [];
         $this->reorder_sections($neworder, 0, $section->section, $parent, $before);
-        if (count($origorder) != count($neworder)) {
-            die('Error in sections hierarchy'); // TODO.
-        }
         $changes = [];
         foreach ($origorder as $id => $num) {
             if ($num == $section->section) {
