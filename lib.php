@@ -861,8 +861,10 @@ class format_flexsections extends core_courseformat\base {
             if ($sr !== null) {
                 $options = ['sr' => $sr];
             }
-            if ($movesection !== null && $moveparent !== null && has_capability('moodle/course:update', $context)
-                    && confirm_sesskey()) {
+            if (
+                $movesection !== null && $moveparent !== null && has_capability('moodle/course:update', $context)
+                    && confirm_sesskey()
+            ) {
                 $newsectionnum = $this->move_section($movesection, $moveparent, $movebefore);
                 redirect(course_get_url($this->courseid, $newsectionnum, $options));
             }
