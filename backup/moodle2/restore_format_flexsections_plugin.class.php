@@ -83,6 +83,11 @@ class restore_format_flexsections_plugin extends restore_format_plugin {
 
         $courseid = $this->step->get_task()->get_courseid();
 
+        $format = $DB->get_field('course', 'format', ['id' => $courseid]);
+        if ($format !== 'flexsections') {
+            return;
+        }
+
         // Get all sections and their parent format options.
         $sections = $DB->get_records(
             'course_sections',

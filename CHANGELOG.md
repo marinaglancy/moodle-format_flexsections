@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- Restore cleanup no longer runs when restoring into courses using another course format
+
 ## [4.1.5] - 2026-03-28
 ### Fixed
 - Fixed "Attempt to read property id on null" warning in get_view_url() when viewing
