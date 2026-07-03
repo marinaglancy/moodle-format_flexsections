@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.0.4] - 2026-07-02
+### Fixed
+- Restore cleanup no longer runs when restoring into courses using another course format
+
 ## [5.0.3] - 2026-04-17
 ### Fixed
 - Missing sesskey validation for `addchildsection` and `movesection` URL handlers in non-JS fallbacks -
