@@ -1,0 +1,49 @@
+# camp listing manifest — descriptive content for your plugin's page.
+# Edit freely and commit; camp ingests this file at each tagged release.
+# Schema: https://camp-registry.org/schema/listing.schema.json
+name: Flexible sections format
+summary: Organises course content in any number of sections that can be nested. Each section can be displayed on the same page or on a separate page
+category: Course format
+description: |
+  The course is divided into sections, each section can be displayed on the
+  course page or as a link. Sections can have subsections.
+
+  - Sections can be added inside other sections. The number of top-level
+    sections is limited by the site setting `maxsections`, the number of
+    subsections is unlimited, but the nesting depth can be capped with the
+    "Max subsection depth" setting.
+  - Each section, regardless of its nesting level, can be shown either on the
+    same page as its parent or on a separate page. Teachers switch between the
+    two in edit mode.
+  - When a section is displayed on a separate page, its name becomes a link,
+    and that page shows a "Back to ..." link to the parent.
+  - Hiding a section also hides all of its subsections and their activities.
+  - Optional "accordion" effect: expanding one section collapses the others.
+  - The course index can show sections and activities, sections only, or be
+    hidden altogether.
+  - Activities can display a "Back to ..." link that returns to the section
+    they belong to.
+
+  If a section contains both activities and subsections, the activities are
+  displayed first.
+labels:
+  # Required disclosure labels — pick all that apply (RFC §4.7):
+  #   fully-free | freemium | paid-service | external-account
+  #   donation-supported | commercial-support-available
+  - fully-free
+screenshots:
+  - path: .camp/screenshots/overview.png
+    caption: Course page with nested sections. "Other Uses" and "Glossaries" are displayed as links to their own pages.
+  - path: .camp/screenshots/subsection-page.png
+    caption: A subsection shown on a separate page, with a "Back to" link to its parent section.
+  - path: .camp/screenshots/edit-mode.png
+    caption: In edit mode the section menu offers "Add subsection" and "Display as a link".
+badges:
+  # camp fetches the endpoint JSON itself and renders the chip; the
+  # img.shields.io wrapper URL is only needed for markdown badges.
+  - endpoint: https://mdlshield.com/api/badge/format_flexsections
+    link: https://mdlshield.com/plugins/format_flexsections
+links:
+  docs: https://github.com/marinaglancy/moodle-format_flexsections#readme
+  issues: https://github.com/marinaglancy/moodle-format_flexsections/issues
+  changelog: https://github.com/marinaglancy/moodle-format_flexsections/blob/HEAD/CHANGELOG.md
