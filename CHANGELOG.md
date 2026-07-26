@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.1.6] - 2026-07-26
 ### Fixed
 - Restore cleanup no longer runs when restoring into courses using another course format
 
