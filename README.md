@@ -1,3 +1,5 @@
+[![MDL Shield](https://img.shields.io/endpoint?url=https%3A%2F%2Fmdlshield.com%2Fapi%2Fbadge%2Fformat_flexsections)](https://mdlshield.com/plugins/format_flexsections)
+
 # Flexible sections course format for Moodle
 
 In this course format:
