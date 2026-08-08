@@ -478,6 +478,13 @@ class format_flexsections extends core_courseformat\base {
                 'cachedefault' => FORMAT_FLEXSECTIONS_EXPANDED,
                 'default' => COURSE_DISPLAY_SINGLEPAGE,
             ],
+            'cssflex' => [
+                'type' => PARAM_TEXT,
+                'label' => get_string('cssflex', 'format_flexsections'),
+                'element_type' => 'text',
+                'cache' => true,
+
+            ],
         ];
     }
 

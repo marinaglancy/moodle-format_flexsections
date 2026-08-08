@@ -54,6 +54,7 @@ class section extends \core_courseformat\output\local\content\section {
         $course = $format->get_course();
 
         $data = parent::export_for_template($output);
+        $data->cssflex = $this->section->cssflex;
 
         if ((int)$CFG->branch == 404) {
             // Fixed in MDL-81766 in 4.5 but not in 4.4.

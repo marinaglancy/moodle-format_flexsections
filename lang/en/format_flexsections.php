@@ -70,6 +70,8 @@ $string['showsection0title'] = 'Show top section title';
 $string['showsection0title_help'] = 'When enabled, the general section will have a title and will be collapsible, same as it behaves in the Topics format.';
 $string['showsection0titledefault'] = 'Show top section title by default';
 $string['showsection0titledefaultdesc'] = 'This defines default setting that will be used for new and existing courses, it can be changed for individual courses in their settings.';
+$string['cssflex'] ='CSS Class for this section';
+
 
 // Deprecated since 4.1.
 $string['addsubsectionfor'] = 'Add subsection for \'{$a}\'';
