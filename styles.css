@@ -10,7 +10,7 @@
     padding: 0;
 }
 
-/* Sections without a title (for example "General" when "Show top section title" is off).
+/* The "General" section when "Show top section title" is off, unless it is hidden or has access restrictions.
    The header is only needed in editing mode (for the section menu). */
 body:not(.editing) .course-section.flexsections-notitle > .section-item > .course-section-header {
     /* stylelint-disable-next-line declaration-no-important */

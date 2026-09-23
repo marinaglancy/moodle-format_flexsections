@@ -68,6 +68,9 @@ class header extends \core_courseformat\output\local\content\section\header {
         if (!$course->showsection0title && $this->section->section === 0) {
             // Do not display header title for the "General" section.
             $data->hidetitle = true;
+            // Without the title the header is only needed in editing mode, unless it has to show
+            // that the section is hidden or has access restrictions.
+            $data->noheader = $this->section->visible && empty($this->section->availability);
         }
 
         $data->headerdisplaymultipage = !empty($data->headerdisplaymultipage);
