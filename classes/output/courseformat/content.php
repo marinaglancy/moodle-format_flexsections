@@ -52,6 +52,7 @@ class content extends \core_courseformat\output\local\content {
      * @return \stdClass data context for a mustache template
      */
     public function export_for_template(\renderer_base $output) {
+        global $CFG;
         $data = parent::export_for_template($output);
 
         // If we are on course view page for particular section.
@@ -83,6 +84,11 @@ class content extends \core_courseformat\output\local\content {
         }
         $data->accordion = $this->format->get_accordion_setting() ? 1 : '';
         $data->mainsection = $this->format->get_viewed_section();
+
+        // Display "Collapse all/Expand all" above the list of sections. Since Moodle 5.3 core displays it
+        // as a button with icons (MDL-88410), in earlier versions it is a link.
+        $data->collapsemenu = true;
+        $data->collapsemenubutton = $CFG->branch >= 503;
 
         return $data;
     }

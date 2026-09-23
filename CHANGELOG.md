@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- Support for Moodle 5.3: sections are displayed as cards, similar to the core course formats
+### Fixed
+- JavaScript error in Moodle 5.3 when moving a section into another section
+- Replaced deprecated Bootstrap 4 CSS classes
+
 ## [5.0.4] - 2026-07-26
 ### Fixed
 - Restore cleanup no longer runs when restoring into courses using another course format

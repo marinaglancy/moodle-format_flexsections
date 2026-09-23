@@ -79,7 +79,9 @@
             }
         ],
         "format": "flexsections",
-        "sectionreturn": 1
+        "sectionreturn": 1,
+        "collapsemenu": true,
+        "collapsemenubutton": true
     }
 }}
 
@@ -89,7 +91,41 @@
         data-flexsections-mainsection="{{mainsection}}">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
-    <ul class="{{format}} flexsections-level-0" data-for="course_sectionlist">
+    {{#collapsemenu}}
+        <div class="d-flex justify-content-end mb-1">
+            {{#collapsemenubutton}}
+                <button type="button"
+                        id="collapsesections"
+                        class="section-collapsemenu aabtn"
+                        aria-expanded="true"
+                        data-toggle="toggleall"
+                >
+                    <span class="collapseall text-nowrap">
+                        {{#pix}} t/collapseall, core {{/pix}}
+                        <span class="collapsemenu-text">{{#str}}collapseall{{/str}}</span>
+                    </span>
+                    <span class="expandall text-nowrap">
+                        {{#pix}} t/expandall, core {{/pix}}
+                        <span class="collapsemenu-text">{{#str}}expandall{{/str}}</span>
+                    </span>
+                </button>
+            {{/collapsemenubutton}}
+            {{^collapsemenubutton}}
+                <a id="collapsesections"
+                   class="section-collapsemenu"
+                   href="#"
+                   aria-expanded="true"
+                   role="button"
+                   data-toggle="toggleall"
+                >
+                    <span class="collapseall text-nowrap">{{#str}}collapseall{{/str}}</span>
+                    <span class="expandall text-nowrap">{{#str}}expandall{{/str}}</span>
+                </a>
+            {{/collapsemenubutton}}
+        </div>
+    {{/collapsemenu}}
+    <ul class="{{format}} flexsections-level-0 section-list{{#collapsemenu}} has-collapsemenu{{/collapsemenu}}"
+        data-for="course_sectionlist">
         {{#initialsection}}
             {{> format_flexsections/local/content/section }}
         {{/initialsection}}

@@ -74,4 +74,28 @@ export default class extends Mutations {
         const updates = await this._callEditWebservice('section_switch_collapsed', course.id, [sectionId]);
         stateManager.processUpdates(updates);
     }
+
+    /**
+     * Get log entry for the current action (called by the core mutations in Moodle 5.3 and above).
+     *
+     * Flexsections moves sections to the beginning of another section by calling "section_move_after"
+     * with the negated id of the parent section. This id does not exist in the course state, so the
+     * feedback message is built from the parent section instead.
+     *
+     * @param {StateManager} stateManager the current state manager
+     * @param {string} action the action name
+     * @param {int[]|null} itemIds the element ids
+     * @param {Object|undefined} data extra params for the log entry
+     * @return {Object} the log entry
+     */
+    async _getLoggerEntry(stateManager, action, itemIds, data = {}) {
+        if (action === 'section_move_after' && data.targetSectionId < 0) {
+            return super._getLoggerEntry(stateManager, 'section_move_into', itemIds, {
+                ...data,
+                targetSectionId: -data.targetSectionId,
+                component: 'format_flexsections',
+            });
+        }
+        return super._getLoggerEntry(stateManager, action, itemIds, data);
+    }
 }

@@ -1,12 +1,8 @@
-.course-content ul.flexsections {
+.course-content ul.flexsections,
+.course-content ul[data-for="course_subsectionlist"] {
     padding: 0;
     margin: 0;
     list-style: none;
-}
-
-.course-content ul.flexsections li.section {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
 }
 
 .course-content ul.flexsections li.section .content {
@@ -14,11 +10,52 @@
     padding: 0;
 }
 
-@media (min-width: 576px) {
-    .course-content ul.flexsections li.section .summary,
-    .course-content ul.flexsections li.section .content > .availabilityinfo {
-        margin-left: 25px;
-    }
+/* Sections without a title (for example "General" when "Show top section title" is off).
+   The header is only needed in editing mode (for the section menu). */
+body:not(.editing) .course-section.flexsections-notitle > .section-item > .course-section-header {
+    /* stylelint-disable-next-line declaration-no-important */
+    display: none !important; /* Override the .d-flex utility class. */
+}
+
+/* On section pages core displays the main section without a card. Subsections are still cards, the same as core
+   displays its own subsections there. The --mds-* variables only exist in Moodle 5.3+, before that these rules
+   have no effect. */
+.single-section .course-section .course-section > .section-item {
+    border: var(--mds-stroke-weight-sm) solid var(--mds-border-subtle);
+    border-radius: var(--mds-border-radius-xl);
+    background-color: var(--mds-bg-surface-default);
+}
+
+.single-section .course-section .course-section > .section-item > .course-section-header {
+    padding: var(--mds-spacing-md);
+    border-radius: var(--mds-border-radius-xl);
+}
+
+/* Core indents the description to align it with the title after the collapse/expand button. Do not indent it when
+   there is no title or no icon before the title. When the header is not shown, the description starts the card.
+   The --mds-* variables only exist in the card design of Moodle 5.3+. */
+.course-section.flexsections-notitle > .section-item > .course-content-item-content > [data-for="sectioninfo"],
+.course-section.flexsections-noindent > .section-item > .course-content-item-content > [data-for="sectioninfo"] {
+    padding-left: var(--mds-spacing-md);
+}
+
+body:not(.editing) .course-section.flexsections-notitle > .section-item > .course-content-item-content > [data-for="sectioninfo"] {
+    padding-top: var(--mds-spacing-md);
+}
+
+/* Without a title and a description the section is not displayed as a card, only its activities are shown.
+   These rules must stay after the rules above, they have the same specificity. */
+body:not(.editing) .flexsections-notitle:not(.flexsections-hassummary) > .section-item {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+}
+
+body:not(.editing) .flexsections-notitle:not(.flexsections-hassummary) > .section-item > .content > [data-for="sectioninfo"],
+body:not(.editing) .flexsections-notitle:not(.flexsections-hassummary) > .section-item > .content > .section-content-inner {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
 }
 
 .course-content ul.flexsections li.section .left,

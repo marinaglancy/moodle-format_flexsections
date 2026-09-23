@@ -94,23 +94,21 @@
 <li id="section-{{num}}"
     class="section course-section main {{#onlysummary}} section-summary {{/onlysummary}} clearfix
             {{#ishidden}} hidden {{/ishidden}} {{#iscurrent}} current {{/iscurrent}}
-            {{#isstealth}} orphaned {{/isstealth}}"
+            {{#isstealth}} orphaned {{/isstealth}}
+            {{#header.hidetitle}} flexsections-notitle {{/header.hidetitle}}
+            {{#singleheader.hidetitle}} flexsections-notitle {{/singleheader.hidetitle}}
+            {{#summary.summarytext}} flexsections-hassummary {{/summary.summarytext}}
+            {{#header.headerdisplaymultipage}}{{^header.indenttitle}} flexsections-noindent {{/header.indenttitle}}{{/header.headerdisplaymultipage}}"
     data-sectionid="{{num}}"
     data-sectionreturnid="{{sectionreturnid}}"
     data-for="section"
     data-id="{{id}}"
     data-number="{{num}}"
 >
-    <div class="course-section-header d-flex"
-        id="sectionid-{{id}}"
-        data-for="section_title"
-        data-id="{{id}}"
-        data-number="{{num}}"
-    >
+    <div class="section-item">
         {{$ core_courseformat/local/content/section/content }}
             {{> format_flexsections/local/content/section/content }}
-       {{/ core_courseformat/local/content/section/content }}
-
+        {{/ core_courseformat/local/content/section/content }}
     </div>
 
     {{#addsectionafter}}
