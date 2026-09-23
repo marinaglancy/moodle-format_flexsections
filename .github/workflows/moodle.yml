@@ -1,6 +1,6 @@
 name: Moodle Plugin CI
 
-on: [push, pull_request]
+on: [push, workflow_dispatch]
 
 permissions:
   contents: read
