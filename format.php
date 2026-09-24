@@ -44,4 +44,3 @@ if (!empty($displaysection)) {
 $outputclass = $format->get_output_classname('content');
 $widget = new $outputclass($format);
 echo $renderer->render($widget);
-
