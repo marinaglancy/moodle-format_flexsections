@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Deleting a section could remove the highlight from another section, and merging a highlighted
   section with its parent could highlight the next added section
 - Hiding or showing a section that another user had just deleted could hide or show all sections in the course
+- Restoring, copying or importing a whole course deleted all empty sections that had no name
 
 ## [5.0.4] - 2026-07-26
 ### Fixed
