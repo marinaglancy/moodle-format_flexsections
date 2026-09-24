@@ -520,4 +520,44 @@ final class format_flexsections_test extends \advanced_testcase {
         $this->assertEquals(1, $modinfo->get_section_info($subsectionnum)->visible, 'Subsection should be visible');
         $this->assertEquals(1, $modinfo->get_section_info($subsubsectionnum)->visible, 'Sub-subsection should be visible');
     }
+
+    /**
+     * Hiding a section that does not exist (i.e. was deleted by another user) must not change any sections.
+     */
+    public function test_section_hide_missing_section(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        $othercourse = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $format->create_new_section(1);
+        $deletedsectionid = $format->get_section(3)->id;
+        $format->delete_section_with_children($format->get_section(3));
+        $othersectionid = course_get_format($othercourse)->get_section(1)->id;
+
+        $format = course_get_format($course);
+        foreach ([$deletedsectionid, $othersectionid] as $sectionid) {
+            try {
+                $updates = new \core_courseformat\stateupdates($format);
+                $format->get_stateactions_instance()->section_hide($updates, $course, [$sectionid]);
+                $this->fail('Exception expected');
+            } catch (moodle_exception $e) {
+                // Expected, the section does not exist in this course.
+                $this->assertNotEmpty($e->errorcode);
+            }
+        }
+
+        $this->assertEquals(0, $DB->count_records('course_sections', ['course' => $course->id, 'visible' => 0]));
+        $this->assertEquals(0, $DB->count_records('course_sections', ['course' => $othercourse->id, 'visible' => 0]));
+    }
 }

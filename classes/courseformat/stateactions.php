@@ -384,19 +384,17 @@ class stateactions extends \core_courseformat\stateactions {
         array $ids,
         int $visible
     ) {
-        global $DB;
         $format  = course_get_format($course);
         if (!$format instanceof \format_flexsections) {
             return;
         }
-        foreach ($ids as $id) {
-            $sectionnum = $DB->get_field('course_sections', 'section', ['id' => $id]);
-            $section = $format->get_section($sectionnum);
+        // Make sure all sections exist in this course before changing anything.
+        $modinfo = get_fast_modinfo($course);
+        $sections = array_map(fn($id) => $modinfo->get_section_info_by_id($id, MUST_EXIST), $ids);
+        foreach ($sections as $section) {
             // Set visiblity to all child sections.
-            if ($subsections = $format->get_subsections($section)) {
-                foreach ($subsections as $subsection) {
-                    $this->set_section_visibility($updates, $course, [$subsection->id], $visible);
-                }
+            foreach ($format->get_subsections($section) as $subsection) {
+                $this->set_section_visibility($updates, $course, [$subsection->id], $visible);
             }
         }
         parent::set_section_visibility($updates, $course, $ids, $visible);
