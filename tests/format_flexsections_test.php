@@ -412,6 +412,7 @@ final class format_flexsections_test extends \advanced_testcase {
         $format->delete_section_with_children($format->get_section($sectionnum('S2')));
         $this->assertEquals(['T1', 'T2', 'T3'], $this->get_section_names($course->id));
         $this->assertEquals(0, $DB->get_field('course', 'marker', ['id' => $course->id]));
+        $this->assertDebuggingNotCalled();
     }
 
     /**
@@ -469,6 +470,41 @@ final class format_flexsections_test extends \advanced_testcase {
         $this->assertEquals(1, $modinfo->get_section_info(2)->parent);
         $this->assertEquals(['PT1', 'PS1'], array_map(fn($cmid) => $modinfo->get_cm($cmid)->name, $modinfo->sections[1]));
         $this->assertEquals(0, $DB->get_field('course', 'marker', ['id' => $course->id]));
+        $this->assertDebuggingNotCalled();
+    }
+
+    /**
+     * Moving a section under a hidden parent hides it, moving it back shows it again.
+     */
+    public function test_move_section_hidden_parent(): void {
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
+        /** @var \format_flexsections_generator $flexgenerator */
+        $flexgenerator = $generator->get_plugin_generator('format_flexsections');
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S1', 'parent' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T2', 'visible' => 0]);
+        $cm = $generator->create_module('page', ['course' => $course->id, 'section' => 2]);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course->id);
+        $this->assertEquals(3, $format->move_section(2, 3));
+        $modinfo = get_fast_modinfo($course->id);
+        $this->assertEquals(['T1', 'T2', 'S1'], $this->get_section_names($course->id));
+        $this->assertEquals(0, $modinfo->get_section_info(3)->visible);
+        $this->assertEquals(1, $modinfo->get_section_info(3)->visibleold);
+        $this->assertEquals(0, $modinfo->get_cm($cm->cmid)->visible);
+
+        $format = course_get_format($course->id);
+        $this->assertEquals(2, $format->move_section(3, 1));
+        $modinfo = get_fast_modinfo($course->id);
+        $this->assertEquals(['T1', 'S1', 'T2'], $this->get_section_names($course->id));
+        $this->assertEquals(1, $modinfo->get_section_info(2)->visible);
+        $this->assertEquals(1, $modinfo->get_cm($cm->cmid)->visible);
+        $this->assertDebuggingNotCalled();
     }
 
     /**
