@@ -965,6 +965,8 @@ class format_flexsections extends core_courseformat\base {
         }
         $neworder = [];
         $this->reorder_sections($neworder, 0, $section->section, $parent, $before);
+        // Do not use $this->get_course()->marker, it can be outdated if the marker was changed in this request.
+        $marker = (int)$DB->get_field('course', 'marker', ['id' => $this->courseid]);
         $changes = [];
         foreach ($origorder as $id => $num) {
             if ($num == $section->section) {
@@ -972,7 +974,7 @@ class format_flexsections extends core_courseformat\base {
             }
             if ($num != $neworder[$id]) {
                 $changes[$id] = ['old' => $num, 'new' => $neworder[$id]];
-                if ($num && $this->get_course()->marker == $num) {
+                if ($num && $marker == $num) {
                     $changemarker = $neworder[$id];
                 }
             }

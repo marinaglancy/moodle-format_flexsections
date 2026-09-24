@@ -438,6 +438,40 @@ final class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
+     * Merging a section with its parent.
+     */
+    public function test_mergeup_section(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
+        /** @var \format_flexsections_generator $flexgenerator */
+        $flexgenerator = $generator->get_plugin_generator('format_flexsections');
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S1', 'parent' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S11', 'parent' => 'S1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T2']);
+        $generator->create_module('page', ['course' => $course->id, 'section' => 1, 'name' => 'PT1']);
+        $generator->create_module('page', ['course' => $course->id, 'section' => 2, 'name' => 'PS1']);
+        $this->assertEquals(['T1', 'S1', 'S11', 'T2'], $this->get_section_names($course->id));
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course->id);
+        $format->section_action($format->get_section(2), 'setmarker', 0);
+        $this->assertEquals(2, $DB->get_field('course', 'marker', ['id' => $course->id]));
+
+        $format->mergeup_section($format->get_section(2));
+
+        $this->assertEquals(['T1', 'S11', 'T2'], $this->get_section_names($course->id));
+        $modinfo = get_fast_modinfo($course->id);
+        $this->assertEquals(1, $modinfo->get_section_info(2)->parent);
+        $this->assertEquals(['PT1', 'PS1'], array_map(fn($cmid) => $modinfo->get_cm($cmid)->name, $modinfo->sections[1]));
+        $this->assertEquals(0, $DB->get_field('course', 'marker', ['id' => $course->id]));
+    }
+
+    /**
      * Names of the course sections (except for section 0) ordered by section number
      *
      * @param int $courseid

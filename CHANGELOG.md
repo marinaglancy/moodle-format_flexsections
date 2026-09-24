@@ -9,7 +9,8 @@ All notable changes to this project will be documented in this file.
 - Replaced deprecated Bootstrap 4 CSS classes
 - When "Max subsection depth" was set to 1, deleting a subsection also deleted all sections after it
   together with their activities, and subsections could not be moved to the top level
-- Deleting a section could remove the highlight from another section
+- Deleting a section could remove the highlight from another section, and merging a highlighted
+  section with its parent could highlight the next added section
 - Hiding or showing a section that another user had just deleted could hide or show all sections in the course
 
 ## [5.0.4] - 2026-07-26
