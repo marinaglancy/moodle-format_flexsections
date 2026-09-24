@@ -214,7 +214,7 @@ export default class extends BaseComponent {
                 modal.show();
                 return modal;
             })
-            .fail(() => null);
+            .catch(() => null);
     }
 
     /**
@@ -258,7 +258,7 @@ export default class extends BaseComponent {
                 modal.show();
                 return modal;
             })
-            .fail(() => null);
+            .catch(() => null);
     }
 
     /**

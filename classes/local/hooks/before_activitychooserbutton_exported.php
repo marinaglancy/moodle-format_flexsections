@@ -41,7 +41,6 @@ class before_activitychooserbutton_exported {
         // Remove action link added by submodule. Use Reflections to set protected property $activitychooserbutton->actionlinks.
         $refobject = new \ReflectionObject($activitychooserbutton);
         $refproperty = $refobject->getProperty('actionlinks');
-        $refproperty->setAccessible(true);
         $actionlinks = $refproperty->getValue($activitychooserbutton);
         $actionlinks = array_filter($actionlinks, fn($a) => ($a->attributes['data-modname'] ?? null) !== 'subsection');
         $refproperty->setValue($activitychooserbutton, array_values($actionlinks));

@@ -13,6 +13,11 @@ All notable changes to this project will be documented in this file.
   section with its parent could highlight the next added section
 - Hiding or showing a section that another user had just deleted could hide or show all sections in the course
 - Restoring, copying or importing a whole course deleted all empty sections that had no name
+- JavaScript error in the browser console when opening the "Move" dialogue for a section or an activity
+- Deleting and moving sections now require the same permissions as in Moodle core, including
+  the permission to delete each activity in the section
+- Duplicating a section now copies the files in the section summary and skips activities that are being deleted
+- Saving an outdated section edit form could change the parent of the section
 
 ## [5.0.4] - 2026-07-26
 ### Fixed

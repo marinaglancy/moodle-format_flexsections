@@ -463,7 +463,15 @@ final class format_flexsections_test extends \advanced_testcase {
         $format->section_action($format->get_section(2), 'setmarker', 0);
         $this->assertEquals(2, $DB->get_field('course', 'marker', ['id' => $course->id]));
 
+        $sectionid = $format->get_section(2)->id;
+        $sink = $this->redirectEvents();
         $format->mergeup_section($format->get_section(2));
+        $events = array_values(array_filter(
+            $sink->get_events(),
+            fn($event) => $event instanceof \core\event\course_section_deleted
+        ));
+        $this->assertCount(1, $events);
+        $this->assertEquals($sectionid, $events[0]->objectid);
 
         $this->assertEquals(['T1', 'S11', 'T2'], $this->get_section_names($course->id));
         $modinfo = get_fast_modinfo($course->id);
@@ -505,6 +513,196 @@ final class format_flexsections_test extends \advanced_testcase {
         $this->assertEquals(1, $modinfo->get_section_info(2)->visible);
         $this->assertEquals(1, $modinfo->get_cm($cm->cmid)->visible);
         $this->assertDebuggingNotCalled();
+    }
+
+    /**
+     * Sections with activities that the user can not delete can not be deleted.
+     */
+    public function test_section_delete_protected_activity(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 2, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        $teacher = $generator->create_and_enrol($course, 'editingteacher');
+        $page = $generator->create_module('page', ['course' => $course->id, 'section' => 1]);
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+        assign_capability('moodle/course:manageactivities', CAP_PROHIBIT, $roleid, \context_module::instance($page->cmid)->id);
+        $this->setUser($teacher);
+
+        $format = course_get_format($course);
+        $actions = $format->get_stateactions_instance();
+        $actions->section_delete(new \core_courseformat\stateupdates($format), $course, [$format->get_section(1)->id]);
+        $this->assertEquals(3, $DB->count_records('course_sections', ['course' => $course->id]));
+        $this->assertTrue($DB->record_exists('course_modules', ['id' => $page->cmid]));
+
+        $actions->section_delete(new \core_courseformat\stateupdates($format), $course, [$format->get_section(2)->id]);
+        $this->assertEquals(2, $DB->count_records('course_sections', ['course' => $course->id]));
+    }
+
+    /**
+     * Adding a section in the middle of the course requires the capability to move sections.
+     */
+    public function test_section_add_requires_movesections(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 2, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        $teacher = $generator->create_and_enrol($course, 'editingteacher');
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+        assign_capability('moodle/course:movesections', CAP_PROHIBIT, $roleid, context_course::instance($course->id)->id);
+        $this->setUser($teacher);
+
+        $format = course_get_format($course);
+        $actions = $format->get_stateactions_instance();
+        $actions->section_add(new \core_courseformat\stateupdates($format), $course);
+        $this->assertEquals(4, $DB->count_records('course_sections', ['course' => $course->id]));
+
+        $this->expectException(\required_capability_exception::class);
+        $actions->section_add(new \core_courseformat\stateupdates($format), $course, [], $format->get_section(1)->id);
+    }
+
+    /**
+     * Broken parent references do not cause infinite recursion and can not be saved in the section edit form.
+     */
+    public function test_broken_parent(): void {
+        global $CFG;
+        require_once($CFG->libdir . '/formslib.php');
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course(
+            ['numsections' => 3, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+
+        // The parent can not be changed in the section edit form.
+        $mform = new \MoodleQuickForm('testform', 'post', '');
+        $format->create_edit_form_elements($mform, true);
+        $this->assertTrue($mform->elementExists('collapsed'));
+        $this->assertFalse($mform->elementExists('parent'));
+        $this->assertFalse($mform->elementExists('visibleold'));
+
+        // Create a cycle: section 2 is a child of section 3 and section 3 is a child of section 2.
+        $format->update_section_format_options(['id' => $format->get_section(2)->id, 'parent' => 3]);
+        $format->update_section_format_options(['id' => $format->get_section(3)->id, 'parent' => 2]);
+        rebuild_course_cache($course->id, true);
+
+        $format = course_get_format($course);
+        $this->assertEquals(1, $format->get_section_depth($format->get_section(2)));
+        $this->assertEquals(2, $format->get_section_depth($format->get_section(3)));
+        $this->assertEquals(0, $format->find_collapsed_parent(3));
+        $this->assertNotEmpty($format->get_view_url(3));
+    }
+
+    /**
+     * Duplicating a section copies the files in the summary and skips the activities that are being deleted.
+     */
+    public function test_duplicate_section_files_and_deleted_activities(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 1, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $section = $format->get_section(1);
+        $context = context_course::instance($course->id);
+        get_file_storage()->create_file_from_string([
+            'contextid' => $context->id,
+            'component' => 'course',
+            'filearea' => 'section',
+            'itemid' => $section->id,
+            'filepath' => '/',
+            'filename' => 'image.png',
+        ], 'Image content');
+        $generator->create_module('page', ['course' => $course->id, 'section' => 1, 'name' => 'Page 1']);
+        $page2 = $generator->create_module('page', ['course' => $course->id, 'section' => 1, 'name' => 'Page 2']);
+        $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $page2->cmid]);
+        rebuild_course_cache($course->id, true);
+
+        $format = course_get_format($course);
+        $newsection = $format->duplicate_section($format->get_section(1));
+
+        $files = get_file_storage()->get_area_files($context->id, 'course', 'section', $newsection->id, 'filename', false);
+        $this->assertEquals(['image.png'], array_values(array_map(fn($f) => $f->get_filename(), $files)));
+        $modinfo = get_fast_modinfo($course->id);
+        $this->assertEquals(
+            ['Page 1'],
+            array_map(fn($cmid) => $modinfo->get_cm($cmid)->name, $modinfo->sections[$newsection->section])
+        );
+    }
+
+    /**
+     * Deleting a course removes all parts of the long section preferences.
+     */
+    public function test_delete_format_data(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course1 = $generator->create_course(['format' => 'flexsections']);
+        $course2 = $generator->create_course(['format' => 'flexsections']);
+        $user = $generator->create_user();
+        $this->setUser($user);
+        $value = str_repeat('x', 3000);
+        \format_flexsections::set_long_preference('coursesectionspreferences_' . $course1->id, $value);
+        \format_flexsections::set_long_preference('coursesectionspreferences_' . $course2->id, $value);
+        $this->assertEquals(6, $DB->count_records('user_preferences', ['userid' => $user->id]));
+
+        delete_course($course1, false);
+
+        $names = $DB->get_fieldset_select('user_preferences', 'name', 'userid = ?', [$user->id]);
+        sort($names);
+        $prefix = 'coursesectionspreferences_' . $course2->id;
+        $this->assertEquals([$prefix, $prefix . '#1', $prefix . '#2'], $names);
+    }
+
+    /**
+     * Course state does not reveal the hidden subsections to students.
+     */
+    public function test_state_hierarchy_hidden_subsections(): void {
+        global $PAGE;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 1, 'format' => 'flexsections'], ['createsections' => true]);
+        $student = $generator->create_and_enrol($course, 'student');
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $hiddennum = $format->create_new_section(1);
+        $visiblenum = $format->create_new_section(1);
+        $hiddenid = $format->get_section($hiddennum)->id;
+        $format->get_stateactions_instance()->section_hide(new \core_courseformat\stateupdates($format), $course, [$hiddenid]);
+
+        $getchildren = function () use ($course, $PAGE) {
+            // Format instance caches the modinfo of the user who was logged in before.
+            \core_courseformat\base::reset_course_cache($course->id);
+            $format = course_get_format($course);
+            $stateclass = $format->get_output_classname('state\\course');
+            $state = new $stateclass($format);
+            $data = $state->export_for_template($format->get_renderer($PAGE));
+            $children = array_column($data->hierarchy, 'children', 'section');
+            return $children[1];
+        };
+        $visibleid = $format->get_section($visiblenum)->id;
+        $this->assertEquals([$hiddenid, $visibleid], $getchildren());
+
+        $this->setUser($student);
+        $this->assertEquals([$visibleid], $getchildren());
     }
 
     /**

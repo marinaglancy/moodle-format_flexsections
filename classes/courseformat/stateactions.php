@@ -248,6 +248,8 @@ class stateactions extends \core_courseformat\stateactions {
         $parentsection = 0;
         $insertposition = null;
         if ($targetsectionid) {
+            // Inserting sections at any position except in the very end requires capability to move sections.
+            require_capability('moodle/course:movesections', $coursecontext);
             $targetsection = get_fast_modinfo($course)->get_section_info_by_id($targetsectionid, MUST_EXIST);
             $parentsection = $targetsection->parent ? $format->get_section($targetsection->parent) : 0;
             $insertposition = $this->find_next_sibling($course, $targetsection->parent, $targetsection->section);
@@ -356,14 +358,17 @@ class stateactions extends \core_courseformat\stateactions {
         $sectionid = array_shift($ids);
 
         $section = $modinfo->get_section_info_by_id($sectionid, MUST_EXIST);
-        [$sectionstodelete, $modulestodelete] = $format->delete_section_with_children($section);
+        // Same as in core, skip the section if the user is not allowed to delete it.
+        if (course_can_delete_section($course, $section)) {
+            [$sectionstodelete, $modulestodelete] = $format->delete_section_with_children($section);
 
-        foreach ($modulestodelete as $cmid) {
-            $updates->add_cm_remove($cmid);
-        }
+            foreach ($modulestodelete as $cmid) {
+                $updates->add_cm_remove($cmid);
+            }
 
-        foreach ($sectionstodelete as $sid) {
-            $updates->add_section_remove($sid);
+            foreach ($sectionstodelete as $sid) {
+                $updates->add_section_remove($sid);
+            }
         }
 
         // Removing a section affects the full course structure.
