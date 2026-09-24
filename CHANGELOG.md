@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Support for Moodle 5.3: sections are displayed as cards, similar to the core course formats
 ### Fixed
 - JavaScript error in Moodle 5.3 when moving a section into another section
+- Random JavaScript failures on the course page in Moodle 5.3, for example the activity chooser not opening
 - Replaced deprecated Bootstrap 4 CSS classes
 - When "Max subsection depth" was set to 1, deleting a subsection also deleted all sections after it
   together with their activities, and subsections could not be moved to the top level
