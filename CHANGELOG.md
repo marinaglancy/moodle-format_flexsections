@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - JavaScript error in Moodle 5.3 when moving a section into another section
 - Replaced deprecated Bootstrap 4 CSS classes
+- When "Max subsection depth" was set to 1, deleting a subsection also deleted all sections after it
+  together with their activities, and subsections could not be moved to the top level
+- Deleting a section could remove the highlight from another section
 
 ## [5.0.4] - 2026-07-26
 ### Fixed

@@ -314,6 +314,7 @@ final class format_flexsections_test extends \advanced_testcase {
     public function test_delete_section_with_children(): void {
         global $DB;
         $this->resetAfterTest(true);
+        $this->setAdminUser();
 
         // Generate a course with 5 sections.
         $generator = $this->getDataGenerator();
@@ -347,6 +348,107 @@ final class format_flexsections_test extends \advanced_testcase {
         }
         // Sanity check, expect 5 sections in total (section 0-4).
         $this->assertCount(5, $courseformat->get_sections());
+    }
+
+    /**
+     * Deleting a subsection when the maximum depth is lower than the existing depth of subsections.
+     *
+     * Only the subsection and its children may be deleted, the following sections must stay.
+     */
+    public function test_delete_subsection_with_max_depth(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
+        /** @var \format_flexsections_generator $flexgenerator */
+        $flexgenerator = $generator->get_plugin_generator('format_flexsections');
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S1', 'parent' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S11', 'parent' => 'S1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S2', 'parent' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T2']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T3']);
+        $sectionnum = fn(string $name) => (int)$DB->get_field(
+            'course_sections',
+            'section',
+            ['course' => $course->id, 'name' => $name],
+            MUST_EXIST
+        );
+        foreach (['S1', 'S11', 'S2', 'T2', 'T3'] as $name) {
+            $generator->create_module('page', ['course' => $course->id, 'section' => $sectionnum($name), 'name' => "P$name"]);
+        }
+        $this->assertEquals(['T1', 'S1', 'S11', 'S2', 'T2', 'T3'], $this->get_section_names($course->id));
+
+        // Lower the max depth after the subsections were created and highlight the last section.
+        set_config('maxsectiondepth', 1, 'format_flexsections');
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course->id);
+        $format->section_action($format->get_section($sectionnum('T3')), 'setmarker', 0);
+        $this->assertEquals($sectionnum('T3'), $DB->get_field('course', 'marker', ['id' => $course->id]));
+
+        // Subsections can still be moved to the top level.
+        $this->assertTrue($format->can_move_section_to($format->get_section($sectionnum('S2')), 0));
+
+        [$deletedsections, $deletedcms] = $format->delete_section_with_children($format->get_section($sectionnum('S1')));
+
+        $this->assertCount(2, $deletedsections);
+        $this->assertCount(2, $deletedcms);
+        $this->assertEquals(['T1', 'S2', 'T2', 'T3'], $this->get_section_names($course->id));
+        $modinfo = get_fast_modinfo($course->id);
+        $this->assertEquals($sectionnum('T1'), $modinfo->get_section_info($sectionnum('S2'))->parent);
+        $this->assertEquals(0, $modinfo->get_section_info($sectionnum('T2'))->parent);
+        $cmnames = array_values(array_map(fn($cm) => $cm->name, $modinfo->get_cms()));
+        sort($cmnames);
+        $this->assertEquals(['PS2', 'PT2', 'PT3'], $cmnames);
+        // The highlighted section is still the same.
+        $this->assertEquals($sectionnum('T3'), $DB->get_field('course', 'marker', ['id' => $course->id]));
+
+        // Deleting the highlighted section removes the marker.
+        $format = course_get_format($course->id);
+        $format->section_action($format->get_section($sectionnum('S2')), 'setmarker', 0);
+        $this->assertEquals($sectionnum('S2'), $DB->get_field('course', 'marker', ['id' => $course->id]));
+        $format->delete_section_with_children($format->get_section($sectionnum('S2')));
+        $this->assertEquals(['T1', 'T2', 'T3'], $this->get_section_names($course->id));
+        $this->assertEquals(0, $DB->get_field('course', 'marker', ['id' => $course->id]));
+    }
+
+    /**
+     * Deleting a section that can not be moved to the end of the course must not delete other sections.
+     */
+    public function test_delete_section_without_permission(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections'],
+            ['createsections' => true]
+        );
+        $format = course_get_format($course->id);
+
+        try {
+            $format->delete_section_with_children($format->get_section(1));
+            $this->fail('Exception expected');
+        } catch (moodle_exception $e) {
+            $this->assertEquals('nopermissions', $e->errorcode);
+        }
+        $this->assertEquals(4, $DB->count_records('course_sections', ['course' => $course->id]));
+    }
+
+    /**
+     * Names of the course sections (except for section 0) ordered by section number
+     *
+     * @param int $courseid
+     * @return string[]
+     */
+    protected function get_section_names(int $courseid): array {
+        global $DB;
+        $sections = $DB->get_records('course_sections', ['course' => $courseid], 'section', 'id, section, name');
+        // Make sure there are no gaps in the section numbers.
+        $this->assertEquals(range(0, count($sections) - 1), array_map('intval', array_column($sections, 'section')));
+        return array_slice(array_column($sections, 'name'), 1);
     }
 
     /**

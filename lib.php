@@ -1161,8 +1161,8 @@ class format_flexsections extends core_courseformat\base {
         if ($section->section == $parent->section || $this->section_has_parent($parent, $section->section)) {
             return false;
         }
-        if ($section->parent != $parent->section) {
-            // When moving to another parent, check the depth.
+        if ($section->parent != $parent->section && $parent->section) {
+            // When moving to another parent, check the depth. Moving to the top level is always allowed.
             if ($this->get_section_depth($parent) + 1 > $this->get_max_section_depth()) {
                 return false;
             }
@@ -1252,37 +1252,55 @@ class format_flexsections extends core_courseformat\base {
         }
 
         try {
-            $sectionid = $section->id;
             $course = $this->get_course();
+
+            // Find the ids of the section and all its subsections. The list of visited sections
+            // protects from infinite loops if the parent references are broken.
+            $subtreeids = [];
+            $queue = [$section];
+            while ($s = array_shift($queue)) {
+                if (!$s->section || isset($subtreeids[$s->id])) {
+                    continue;
+                }
+                $subtreeids[$s->id] = $s->id;
+                $queue = array_merge($queue, array_values($this->get_subsections($s)));
+            }
 
             // Move the section to be removed to the end (this will re-number other sections).
             $this->move_section($section->section, 0);
 
             $modinfo = get_fast_modinfo($this->courseid);
-            $allsections = $modinfo->get_section_info_all();
-            $process = false;
             $sectionstodelete = [];
-            $modulestodelete = [];
-            foreach ($allsections as $sectioninfo) {
-                if ($sectioninfo->id == $sectionid) {
-                    // This is the section to be deleted. Since we have already
-                    // moved it to the end we know that we need to delete this section
-                    // and all the following (which can only be its subsections).
-                    $process = true;
-                }
-                if ($process) {
+            $sectionnumbers = [];
+            foreach ($modinfo->get_section_info_all() as $sectioninfo) {
+                if (isset($subtreeids[$sectioninfo->id])) {
                     $sectionstodelete[] = $sectioninfo->id;
-                    if (!empty($modinfo->sections[$sectioninfo->section])) {
-                        $modulestodelete = array_merge(
-                            $modulestodelete,
-                            $modinfo->sections[$sectioninfo->section]
-                        );
-                    }
-                    // Remove the marker if it points to this section.
-                    if ($sectioninfo->section == $course->marker) {
-                        course_set_marker($course->id, 0);
-                    }
+                    $sectionnumbers[] = $sectioninfo->section;
+                } else if ($sectionstodelete) {
+                    // The section was not moved to the end, this only happens if the user is not allowed
+                    // to update the course. Deleting it now would leave gaps in the section numbers.
+                    throw new moodle_exception(
+                        'nopermissions',
+                        'error',
+                        '',
+                        get_string('deletesection', 'format_flexsections')
+                    );
                 }
+            }
+            if (!$sectionstodelete) {
+                return [[], []];
+            }
+
+            $modulestodelete = [];
+            foreach ($sectionnumbers as $sectionnum) {
+                $modulestodelete = array_merge($modulestodelete, $modinfo->sections[$sectionnum] ?? []);
+            }
+
+            // Remove the marker if it points to one of the deleted sections. Read the marker from the
+            // database because moving the section may have changed it.
+            $marker = (int)$DB->get_field('course', 'marker', ['id' => $this->courseid]);
+            if ($marker && in_array($marker, $sectionnumbers)) {
+                course_set_marker($this->courseid, 0);
             }
 
             foreach ($modulestodelete as $cmid) {
