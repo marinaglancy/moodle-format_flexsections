@@ -17,7 +17,6 @@ All notable changes to this project will be documented in this file.
 - Deleting and moving sections now require the same permissions as in Moodle core, including
   the permission to delete each activity in the section
 - Duplicating a section now copies the files in the section summary and skips activities that are being deleted
-- Saving an outdated section edit form could change the parent of the section
 
 ## [5.0.4] - 2026-07-26
 ### Fixed

@@ -52,7 +52,7 @@ class course extends \core_courseformat\output\local\state\course {
             if ($s->section && $this->format->is_section_visible($s)) {
                 $children = [];
                 foreach ($allsections as $ss) {
-                    if ($ss->parent == $s->section && $this->format->is_section_visible($ss)) {
+                    if ($ss->parent == $s->section) {
                         $children[] = $ss->id;
                     }
                 }

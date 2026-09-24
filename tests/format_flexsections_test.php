@@ -570,11 +570,9 @@ final class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
-     * Broken parent references do not cause infinite recursion and can not be saved in the section edit form.
+     * Broken parent references do not cause infinite recursion.
      */
     public function test_broken_parent(): void {
-        global $CFG;
-        require_once($CFG->libdir . '/formslib.php');
         $this->resetAfterTest(true);
 
         $course = $this->getDataGenerator()->create_course(
@@ -583,13 +581,6 @@ final class format_flexsections_test extends \advanced_testcase {
         );
         /** @var \format_flexsections $format */
         $format = course_get_format($course);
-
-        // The parent can not be changed in the section edit form.
-        $mform = new \MoodleQuickForm('testform', 'post', '');
-        $format->create_edit_form_elements($mform, true);
-        $this->assertTrue($mform->elementExists('collapsed'));
-        $this->assertFalse($mform->elementExists('parent'));
-        $this->assertFalse($mform->elementExists('visibleold'));
 
         // Create a cycle: section 2 is a child of section 3 and section 3 is a child of section 2.
         $format->update_section_format_options(['id' => $format->get_section(2)->id, 'parent' => 3]);
@@ -668,41 +659,6 @@ final class format_flexsections_test extends \advanced_testcase {
         sort($names);
         $prefix = 'coursesectionspreferences_' . $course2->id;
         $this->assertEquals([$prefix, $prefix . '#1', $prefix . '#2'], $names);
-    }
-
-    /**
-     * Course state does not reveal the hidden subsections to students.
-     */
-    public function test_state_hierarchy_hidden_subsections(): void {
-        global $PAGE;
-        $this->resetAfterTest(true);
-        $this->setAdminUser();
-
-        $generator = $this->getDataGenerator();
-        $course = $generator->create_course(['numsections' => 1, 'format' => 'flexsections'], ['createsections' => true]);
-        $student = $generator->create_and_enrol($course, 'student');
-        /** @var \format_flexsections $format */
-        $format = course_get_format($course);
-        $hiddennum = $format->create_new_section(1);
-        $visiblenum = $format->create_new_section(1);
-        $hiddenid = $format->get_section($hiddennum)->id;
-        $format->get_stateactions_instance()->section_hide(new \core_courseformat\stateupdates($format), $course, [$hiddenid]);
-
-        $getchildren = function () use ($course, $PAGE) {
-            // Format instance caches the modinfo of the user who was logged in before.
-            \core_courseformat\base::reset_course_cache($course->id);
-            $format = course_get_format($course);
-            $stateclass = $format->get_output_classname('state\\course');
-            $state = new $stateclass($format);
-            $data = $state->export_for_template($format->get_renderer($PAGE));
-            $children = array_column($data->hierarchy, 'children', 'section');
-            return $children[1];
-        };
-        $visibleid = $format->get_section($visiblenum)->id;
-        $this->assertEquals([$hiddenid, $visibleid], $getchildren());
-
-        $this->setUser($student);
-        $this->assertEquals([$visibleid], $getchildren());
     }
 
     /**

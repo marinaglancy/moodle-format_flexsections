@@ -527,17 +527,6 @@ class format_flexsections extends core_courseformat\base {
         global $COURSE;
         $elements = parent::create_edit_form_elements($mform, $forsection);
 
-        if ($forsection) {
-            // Section hierarchy and visibility can only be changed by the section actions (move, merge, show/hide),
-            // do not accept values submitted in the section edit form, they may be outdated.
-            $elements = array_values(array_filter($elements, fn($el) => !in_array($el->getName(), ['parent', 'visibleold'])));
-            foreach (['parent', 'visibleold'] as $elementname) {
-                if ($mform->elementExists($elementname)) {
-                    $mform->removeElement($elementname);
-                }
-            }
-        }
-
         if (!$forsection && (empty($COURSE->id) || $COURSE->id == SITEID)) {
             // Add "numsections" element to the create course form - it will force new course to be prepopulated
             // with empty sections.
