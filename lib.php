@@ -548,12 +548,33 @@ class format_flexsections extends core_courseformat\base {
     /**
      * Whether this format allows to delete sections.
      *
+     * Deleting a section also deletes all its subsections with their activities. Core function
+     * {@see course_can_delete_section()} only checks that the user can delete the activities in the
+     * section itself, this function checks the activities in all subsections.
+     *
      * Do not call this function directly, instead use {@see course_can_delete_section()}
      *
      * @param int|stdClass|section_info $section
      * @return bool
      */
     public function can_delete_section($section) {
+        $modinfo = get_fast_modinfo($this->courseid);
+        // The list of visited sections protects from infinite loops if the parent references are broken.
+        $visited = [];
+        $queue = [$this->resolve_section_number($section)];
+        while ($queue) {
+            $sectionnum = array_shift($queue);
+            if (!$sectionnum || isset($visited[$sectionnum])) {
+                continue;
+            }
+            $visited[$sectionnum] = true;
+            foreach ($modinfo->sections[$sectionnum] ?? [] as $cmid) {
+                if (!has_capability('moodle/course:manageactivities', context_module::instance($cmid))) {
+                    return false;
+                }
+            }
+            $queue = array_merge($queue, array_keys($this->get_subsections($sectionnum)));
+        }
         return true;
     }
 
@@ -639,15 +660,6 @@ class format_flexsections extends core_courseformat\base {
             course_update_section($this->courseid, $section, ['collapsed' => $newvalue]);
             // TODO what to return?
             return null;
-        }
-
-        $mergeup = optional_param('mergeup', null, PARAM_INT);
-        if ($mergeup && has_capability('moodle/course:update', context_course::instance($this->courseid))) {
-            require_sesskey();
-            $section = $this->get_section($mergeup, MUST_EXIST);
-            $this->mergeup_section($section);
-            $url = course_get_url($this->courseid, $section->parent);
-            redirect($url);
         }
 
         // For show/hide actions call the parent method and return the new content for .section_availability element.
@@ -840,6 +852,9 @@ class format_flexsections extends core_courseformat\base {
             $mergeup = optional_param('mergeup', null, PARAM_INT);
             if ($mergeup && confirm_sesskey() && has_capability('moodle/course:update', $context)) {
                 $section = $this->get_section($mergeup, MUST_EXIST);
+                if (!$this->can_mergeup_section($section)) {
+                    throw new moodle_exception('nopermissions', 'error', '', get_string('mergeup', 'format_flexsections'));
+                }
                 $this->mergeup_section($section);
                 $url = course_get_url($this->courseid, $section->parent);
                 redirect($url);
@@ -1404,10 +1419,36 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Can the current user merge the section with its parent
+     *
+     * Merging moves all activities of the section to the parent section. As in core, moving an activity
+     * requires the capability to manage it.
+     *
+     * @param section_info $section
+     * @return bool
+     */
+    public function can_mergeup_section(section_info $section): bool {
+        if (!$section->section || !$section->parent) {
+            return false;
+        }
+        if (!has_capability('moodle/course:update', context_course::instance($this->courseid))) {
+            return false;
+        }
+        foreach (get_fast_modinfo($this->courseid)->sections[$section->section] ?? [] as $cmid) {
+            if (!has_capability('moodle/course:manageactivities', context_module::instance($cmid))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Moves the section content to the parent section and deletes it
      *
      * Moves all activities and subsections to the parent section (section 0
      * can never be deleted)
+     *
+     * Do not call this function without checking {@see self::can_mergeup_section()}
      *
      * @param section_info $section
      */

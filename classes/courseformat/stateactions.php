@@ -156,6 +156,9 @@ class stateactions extends \core_courseformat\stateactions {
         if (!$targetsection->parent) {
             throw new moodle_exception("Action section_mergeup can't merge top level parentless sections");
         }
+        if (!$format->can_mergeup_section($targetsection)) {
+            throw new moodle_exception('nopermissions', 'error', '', get_string('mergeup', 'format_flexsections'));
+        }
 
         $format->mergeup_section($targetsection);
         $updates->add_section_remove($targetsectionid);

@@ -544,6 +544,89 @@ final class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
+     * Sections can not be deleted if their subsections contain activities that the user can not delete.
+     */
+    public function test_section_delete_protected_activity_in_subsection(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
+        /** @var \format_flexsections_generator $flexgenerator */
+        $flexgenerator = $generator->get_plugin_generator('format_flexsections');
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S1', 'parent' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S11', 'parent' => 'S1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T2']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S2', 'parent' => 'T2']);
+        $page = $generator->create_module('page', ['course' => $course->id, 'section' => 3]);
+        $generator->create_module('page', ['course' => $course->id, 'section' => 5]);
+
+        $teacher = $generator->create_and_enrol($course, 'editingteacher');
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+        assign_capability('moodle/course:manageactivities', CAP_PROHIBIT, $roleid, \context_module::instance($page->cmid)->id);
+        $this->setUser($teacher);
+
+        $format = course_get_format($course);
+        $this->assertFalse(course_can_delete_section($course, $format->get_section(1)));
+        $this->assertFalse(course_can_delete_section($course, $format->get_section(2)));
+        $this->assertFalse(course_can_delete_section($course, $format->get_section(3)));
+        $this->assertTrue(course_can_delete_section($course, $format->get_section(4)));
+
+        $actions = $format->get_stateactions_instance();
+        $actions->section_delete(new \core_courseformat\stateupdates($format), $course, [$format->get_section(1)->id]);
+        $this->assertEquals(['T1', 'S1', 'S11', 'T2', 'S2'], $this->get_section_names($course->id));
+        $this->assertTrue($DB->record_exists('course_modules', ['id' => $page->cmid]));
+
+        $format = course_get_format($course);
+        $actions->section_delete(new \core_courseformat\stateupdates($format), $course, [$format->get_section(4)->id]);
+        $this->assertEquals(['T1', 'S1', 'S11'], $this->get_section_names($course->id));
+    }
+
+    /**
+     * Sections can not be merged with their parent if they contain activities that the user can not manage.
+     */
+    public function test_mergeup_protected_activity(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
+        /** @var \format_flexsections_generator $flexgenerator */
+        $flexgenerator = $generator->get_plugin_generator('format_flexsections');
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S1', 'parent' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S2', 'parent' => 'T1']);
+        $page = $generator->create_module('page', ['course' => $course->id, 'section' => 2]);
+        $generator->create_module('page', ['course' => $course->id, 'section' => 3]);
+
+        $teacher = $generator->create_and_enrol($course, 'editingteacher');
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+        assign_capability('moodle/course:manageactivities', CAP_PROHIBIT, $roleid, \context_module::instance($page->cmid)->id);
+        $this->setUser($teacher);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $this->assertFalse($format->can_mergeup_section($format->get_section(1)));
+        $this->assertFalse($format->can_mergeup_section($format->get_section(2)));
+        $this->assertTrue($format->can_mergeup_section($format->get_section(3)));
+
+        $actions = $format->get_stateactions_instance();
+        try {
+            $actions->section_mergeup(new \core_courseformat\stateupdates($format), $course, [], $format->get_section(2)->id);
+            $this->fail('Exception expected');
+        } catch (moodle_exception $e) {
+            $this->assertEquals('nopermissions', $e->errorcode);
+        }
+        $this->assertEquals(['T1', 'S1', 'S2'], $this->get_section_names($course->id));
+
+        $actions->section_mergeup(new \core_courseformat\stateupdates($format), $course, [], $format->get_section(3)->id);
+        $this->assertEquals(['T1', 'S1'], $this->get_section_names($course->id));
+    }
+
+    /**
      * Adding a section in the middle of the course requires the capability to move sections.
      */
     public function test_section_add_requires_movesections(): void {

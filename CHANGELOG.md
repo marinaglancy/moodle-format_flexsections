@@ -16,7 +16,8 @@ All notable changes to this project will be documented in this file.
 - Restoring, copying or importing a whole course deleted all empty sections that had no name
 - JavaScript error in the browser console when opening the "Move" dialogue for a section or an activity
 - Deleting and moving sections now require the same permissions as in Moodle core, including
-  the permission to delete each activity in the section
+  the permission to delete each activity in the section and in all its subsections
+- Merging a section with its parent now requires the permission to manage each activity in it
 - Duplicating a section now copies the files in the section summary and skips activities that are being deleted
 
 ## [5.0.4] - 2026-07-26
