@@ -66,18 +66,18 @@
                 <span class="collapsed-icon icon-no-margin me-1"
                       data-bs-toggle="tooltip" title="{{#str}} expand, core {{/str}}">
                     {{#pix}} t/collapsed, core {{/pix}}
-                    <span class="sr-only">{{#str}} expand, core {{/str}}</span>
+                    <span class="visually-hidden">{{#str}} expand, core {{/str}}</span>
                 </span>
             <span class="expanded-icon icon-no-margin me-1"
                   data-bs-toggle="tooltip" title="{{#str}} collapse, core {{/str}}">
                     {{#pix}} t/expanded, core {{/pix}}
-                <span class="sr-only">{{#str}} collapse, core {{/str}}</span>
+                <span class="visually-hidden">{{#str}} collapse, core {{/str}}</span>
                 </span>
         </a>
         {{{title}}}
     </div>
     <div id="movemodalcollapse{{number}}"
-         class="collapse-list-item-content collapse pl-3 {{^contentcollapsed}}show{{/contentcollapsed}}"
+         class="collapse-list-item-content collapse ps-3 {{^contentcollapsed}}show{{/contentcollapsed}}"
          aria-labelledby="movemodalsection{{number}}"
          role="group"
     >

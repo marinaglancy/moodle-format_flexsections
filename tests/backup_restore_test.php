@@ -347,6 +347,39 @@ final class backup_restore_test extends \advanced_testcase {
     }
 
     /**
+     * Test that restoring or importing a whole flexsections course keeps the empty sections.
+     */
+    public function test_full_restore_keeps_empty_sections(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course1 = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections', 'shortname' => 'source'],
+            ['createsections' => true]
+        );
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course1);
+        $this->assertEquals(2, $format->create_new_section(1));
+
+        // Restore into a new course.
+        $course2id = $this->backup_and_restore($course1);
+        $sections = get_fast_modinfo($course2id)->get_section_info_all();
+        $this->assertEquals(range(0, 4), array_keys($sections));
+        $this->assertEquals(1, $sections[2]->parent);
+
+        // Import into an existing course that has its own empty sections.
+        $course3 = $generator->create_course(
+            ['numsections' => 6, 'format' => 'flexsections', 'shortname' => 'target'],
+            ['createsections' => true]
+        );
+        $this->backup_and_restore($course1, $course3, backup::TARGET_CURRENT_ADDING);
+        $sections = get_fast_modinfo($course3->id)->get_section_info_all();
+        $this->assertEquals(range(0, 6), array_keys($sections));
+        $this->assertEquals(1, $sections[2]->parent);
+    }
+
+    /**
      * Back a course up and restore it into a new or an existing course.
      *
      * @param \stdClass $srccourse course to back up

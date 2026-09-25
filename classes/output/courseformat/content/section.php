@@ -79,13 +79,6 @@ class section extends \core_courseformat\output\local\content\section {
             $data->contentcollapsed = false;
         }
 
-        if ($this->section->section === 0 || $this->section->section === $this->format->get_viewed_section()) {
-            // Show collapse/expand all menu at top section header.
-            $data->collapsemenu = true;
-        } else {
-            $data->collapsemenu = false;
-        }
-
         $data->addsectionafter = false;
         $data->insertsubsection = false;
         if (
@@ -149,7 +142,7 @@ class section extends \core_courseformat\output\local\content\section {
      */
     protected function default_section_properties(): array {
         return [
-            'collapsemenu' => false, 'summary' => [],
+            'summary' => [],
             'insertafter' => false, 'numsections' => false,
             'availability' => [], 'restrictionlock' => false, 'hasavailability' => false,
             'isstealth' => false, 'ishidden' => false, 'notavailable' => false, 'hiddenfromstudents' => false,

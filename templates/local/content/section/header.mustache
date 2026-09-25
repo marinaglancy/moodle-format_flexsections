@@ -27,20 +27,21 @@
         "url": "#",
         "headerdisplaymultipage": true,
         "hidetitle": false,
+        "headingclass": "h4",
         "editing": 0
     }
 }}
 
-<div class="d-flex align-items-start position-relative">
+<div class="d-flex align-items-center position-relative">
     {{#headerdisplaymultipage}}
         {{^hidetitle}}
         {{#indenttitle}}
-            <span class="icon-no-margin p-2 dimmed_text me-1" style="color: #dee2e6">
+            <span class="btn-icon icon-no-margin dimmed_text me-3" style="color: #dee2e6">
                 <span class="dir-rtl-hide">{{#pix}} t/collapsedchevron, core {{/pix}}</span>
                 <span class="dir-ltr-hide">{{#pix}} t/collapsedchevron_rtl, core {{/pix}}</span>
             </span>
         {{/indenttitle}}
-        <h3 class="sectionid-{{id}}-title sectionname course-content-item d-flex align-self-stretch align-items-center mb-0"
+        <h3 class="sectionid-{{id}}-title {{headingclass}} sectionname course-content-item d-flex align-self-stretch align-items-center mb-0"
             id="coursecontentsection{{num}}" data-for="section_title" data-id="{{id}}" data-number="{{num}}">
             {{{title}}}
         </h3>
@@ -48,13 +49,13 @@
     {{/headerdisplaymultipage}}
     {{^headerdisplaymultipage}}
         {{^hidetitle}}
-            <div class="d-flex align-items-start position-relative">
+            <div class="d-flex align-items-center position-relative">
                 <a role="button" data-bs-toggle="collapse"
                    href="#coursecontentcollapseid{{id}}"
                    id="collapssesection{{num}}"
                    aria-expanded="{{^contentcollapsed}}true{{/contentcollapsed}}{{#contentcollapsed}}false{{/contentcollapsed}}"
                    aria-controls="coursecontentcollapseid{{id}}"
-                   class="btn btn-icon me-1 icons-collapse-expand justify-content-center
+                   class="btn btn-icon me-3 icons-collapse-expand justify-content-center
                        {{^editing}} stretched-link {{/editing}}
                        {{#contentcollapsed}} collapsed {{/contentcollapsed}}"
                    aria-label="{{name}}">
@@ -66,7 +67,7 @@
                     <span class="dir-ltr-hide">{{#pix}} t/collapsedchevron_rtl, core {{/pix}}</span>
                 </span>
                 </a>
-                <h3 class="sectionid-{{id}}-title sectionname course-content-item d-flex align-self-stretch align-items-center mb-0"
+                <h3 class="sectionid-{{id}}-title {{headingclass}} sectionname course-content-item d-flex align-self-stretch align-items-center mb-0"
                     id="coursecontentsection{{num}}" data-for="section_title" data-id="{{id}}" data-number="{{num}}">
                     {{{title}}}
                 </h3>

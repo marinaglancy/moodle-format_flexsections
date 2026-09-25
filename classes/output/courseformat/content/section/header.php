@@ -42,10 +42,13 @@ class header extends \core_courseformat\output\local\content\section\header {
      * @return \stdClass
      */
     public function export_for_template(\renderer_base $output): \stdClass {
+        global $CFG;
 
         $data = parent::export_for_template($output);
         $data->indenttitle = false;
         $data->hidetitle = false;
+        // Match the size of section titles in core course formats, they are smaller since Moodle 5.3.
+        $data->headingclass = $CFG->branch >= 503 ? 'h5' : 'h4';
         $course = $this->format->get_course();
 
         if ($this->section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
@@ -65,6 +68,9 @@ class header extends \core_courseformat\output\local\content\section\header {
         if (!$course->showsection0title && $this->section->section === 0) {
             // Do not display header title for the "General" section.
             $data->hidetitle = true;
+            // Without the title the header is only needed in editing mode, unless it has to show
+            // that the section is hidden or has access restrictions.
+            $data->noheader = $this->section->visible && empty($this->section->availability);
         }
 
         $data->headerdisplaymultipage = !empty($data->headerdisplaymultipage);

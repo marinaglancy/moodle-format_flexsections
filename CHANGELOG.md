@@ -1,6 +1,25 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- Support for Moodle 5.3: sections are displayed as cards, similar to the core course formats
+### Fixed
+- JavaScript error in Moodle 5.3 when moving a section into another section
+- Random JavaScript failures on the course page in Moodle 5.3, for example the activity chooser not opening
+- Replaced deprecated Bootstrap 4 CSS classes
+- When "Max subsection depth" was set to 1, deleting a subsection also deleted all sections after it
+  together with their activities, and subsections could not be moved to the top level
+- Deleting a section could remove the highlight from another section, and merging a highlighted
+  section with its parent could highlight the next added section
+- Hiding or showing a section that another user had just deleted could hide or show all sections in the course
+- Restoring, copying or importing a whole course deleted all empty sections that had no name
+- JavaScript error in the browser console when opening the "Move" dialogue for a section or an activity
+- Deleting and moving sections now require the same permissions as in Moodle core, including
+  the permission to delete each activity in the section and in all its subsections
+- Merging a section with its parent now requires the permission to manage each activity in it
+- Duplicating a section now copies the files in the section summary and skips activities that are being deleted
+
 ## [5.0.4] - 2026-07-26
 ### Fixed
 - Restore cleanup no longer runs when restoring into courses using another course format

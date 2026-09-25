@@ -359,7 +359,7 @@ export default class FlexsectionComponent extends Component {
         if ((window.location.hash ?? '').length <= 1) {
             return;
         }
-        const target = document.querySelector(`${window.location.hash}${this.selectors.SECTION}`);
+        const target = document.querySelector(`#${CSS.escape(window.location.hash.slice(1))}${this.selectors.SECTION}`);
         if (!target) {
             return;
         }

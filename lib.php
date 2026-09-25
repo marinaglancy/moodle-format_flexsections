@@ -130,8 +130,12 @@ class format_flexsections extends core_courseformat\base {
      * @return int Depth of the section in hierarchy.
      */
     public function get_section_depth(section_info $section): int {
+        if (!$section->parent || $section->parent >= $section->section) {
+            // Parent always has a smaller section number, stop on broken data instead of recursing forever.
+            return 1;
+        }
         $parent = $this->get_section($section->parent);
-        return $parent && $parent->section ? $this->get_section_depth($parent) + 1 : 1;
+        return $parent ? $this->get_section_depth($parent) + 1 : 1;
     }
 
     /**
@@ -544,12 +548,33 @@ class format_flexsections extends core_courseformat\base {
     /**
      * Whether this format allows to delete sections.
      *
+     * Deleting a section also deletes all its subsections with their activities. Core function
+     * {@see course_can_delete_section()} only checks that the user can delete the activities in the
+     * section itself, this function checks the activities in all subsections.
+     *
      * Do not call this function directly, instead use {@see course_can_delete_section()}
      *
      * @param int|stdClass|section_info $section
      * @return bool
      */
     public function can_delete_section($section) {
+        $modinfo = get_fast_modinfo($this->courseid);
+        // The list of visited sections protects from infinite loops if the parent references are broken.
+        $visited = [];
+        $queue = [$this->resolve_section_number($section)];
+        while ($queue) {
+            $sectionnum = array_shift($queue);
+            if (!$sectionnum || isset($visited[$sectionnum])) {
+                continue;
+            }
+            $visited[$sectionnum] = true;
+            foreach ($modinfo->sections[$sectionnum] ?? [] as $cmid) {
+                if (!has_capability('moodle/course:manageactivities', context_module::instance($cmid))) {
+                    return false;
+                }
+            }
+            $queue = array_merge($queue, array_keys($this->get_subsections($sectionnum)));
+        }
         return true;
     }
 
@@ -625,7 +650,7 @@ class format_flexsections extends core_courseformat\base {
         if ($section->section && ($action === 'setmarker' || $action === 'removemarker')) {
             // Format 'flexsections' allows to set and remove markers in addition to common section actions.
             require_capability('moodle/course:setcurrentsection', context_course::instance($this->courseid));
-            course_set_marker($this->courseid, ($action === 'setmarker') ? $section->section : 0);
+            $this->update_course_marker(($action === 'setmarker') ? $section->section : 0);
             return null;
         }
 
@@ -635,15 +660,6 @@ class format_flexsections extends core_courseformat\base {
             course_update_section($this->courseid, $section, ['collapsed' => $newvalue]);
             // TODO what to return?
             return null;
-        }
-
-        $mergeup = optional_param('mergeup', null, PARAM_INT);
-        if ($mergeup && has_capability('moodle/course:update', context_course::instance($this->courseid))) {
-            require_sesskey();
-            $section = $this->get_section($mergeup, MUST_EXIST);
-            $this->mergeup_section($section);
-            $url = course_get_url($this->courseid, $section->parent);
-            redirect($url);
         }
 
         // For show/hide actions call the parent method and return the new content for .section_availability element.
@@ -704,7 +720,9 @@ class format_flexsections extends core_courseformat\base {
         if (!$section->section || $section->collapsed == FORMAT_FLEXSECTIONS_COLLAPSED) {
             return $returnid ? $section->id : $section->section;
         } else {
-            return $this->find_collapsed_parent($section->parent, $returnid);
+            // Parent always has a smaller section number, treat the section as top-level if the data is broken.
+            $parent = $section->parent < $section->section ? $section->parent : 0;
+            return $this->find_collapsed_parent($parent, $returnid);
         }
     }
 
@@ -834,6 +852,9 @@ class format_flexsections extends core_courseformat\base {
             $mergeup = optional_param('mergeup', null, PARAM_INT);
             if ($mergeup && confirm_sesskey() && has_capability('moodle/course:update', $context)) {
                 $section = $this->get_section($mergeup, MUST_EXIST);
+                if (!$this->can_mergeup_section($section)) {
+                    throw new moodle_exception('nopermissions', 'error', '', get_string('mergeup', 'format_flexsections'));
+                }
                 $this->mergeup_section($section);
                 $url = course_get_url($this->courseid, $section->parent);
                 redirect($url);
@@ -846,6 +867,9 @@ class format_flexsections extends core_courseformat\base {
                 && optional_param('confirm', 0, PARAM_INT) == 1
             ) {
                 $section = $this->get_section($deletesection, MUST_EXIST);
+                if (!course_can_delete_section($this->get_course(), $section)) {
+                    throw new moodle_exception('nopermissions', 'error', '', get_string('deletesection', 'format_flexsections'));
+                }
                 $parent = $section->parent;
                 $this->delete_section_with_children($section);
                 $url = course_get_url($this->courseid, $parent);
@@ -862,8 +886,8 @@ class format_flexsections extends core_courseformat\base {
                 $options = ['sr' => $sr];
             }
             if (
-                $movesection !== null && $moveparent !== null && has_capability('moodle/course:update', $context)
-                    && confirm_sesskey()
+                $movesection !== null && $moveparent !== null && confirm_sesskey()
+                    && has_all_capabilities(['moodle/course:update', 'moodle/course:movesections'], $context)
             ) {
                 $newsectionnum = $this->move_section($movesection, $moveparent, $movebefore);
                 redirect(course_get_url($this->courseid, $newsectionnum, $options));
@@ -897,7 +921,7 @@ class format_flexsections extends core_courseformat\base {
                 if ($marker > 0) {
                     // Set marker.
                     $url = course_get_url($this->courseid, $marker, ['sr' => $this->get_viewed_section()]);
-                    course_set_marker($this->courseid, $marker);
+                    $this->update_course_marker($marker);
                     redirect($url);
                 } else if ($this->get_course()->marker) {
                     // Remove marker.
@@ -906,7 +930,7 @@ class format_flexsections extends core_courseformat\base {
                         $this->get_course()->marker,
                         ['sr' => $this->get_viewed_section()]
                     );
-                    course_set_marker($this->courseid, 0);
+                    $this->update_course_marker(0);
                     redirect($url);
                 }
             }
@@ -965,6 +989,8 @@ class format_flexsections extends core_courseformat\base {
         }
         $neworder = [];
         $this->reorder_sections($neworder, 0, $section->section, $parent, $before);
+        // Do not use $this->get_course()->marker, it can be outdated if the marker was changed in this request.
+        $marker = (int)$DB->get_field('course', 'marker', ['id' => $this->courseid]);
         $changes = [];
         foreach ($origorder as $id => $num) {
             if ($num == $section->section) {
@@ -972,7 +998,7 @@ class format_flexsections extends core_courseformat\base {
             }
             if ($num != $neworder[$id]) {
                 $changes[$id] = ['old' => $num, 'new' => $neworder[$id]];
-                if ($num && $this->get_course()->marker == $num) {
+                if ($num && $marker == $num) {
                     $changemarker = $neworder[$id];
                 }
             }
@@ -1012,7 +1038,7 @@ class format_flexsections extends core_courseformat\base {
         $transaction->allow_commit();
         rebuild_course_cache($this->courseid, true);
         if (isset($changemarker)) {
-            course_set_marker($this->courseid, $changemarker);
+            $this->update_course_marker($changemarker);
         }
         if (isset($updatesectionvisible)) {
             $this->set_section_visible($newsectionnumber, $updatesectionvisible, $updatesectionvisibleold);
@@ -1053,7 +1079,7 @@ class format_flexsections extends core_courseformat\base {
         }
         foreach ($subsections as $s) {
             if ($s->section == $sectionnumber) {
-                set_section_visible($this->courseid, $s->section, $visibility);
+                $this->set_single_section_visible($s, $visibility);
                 if ($setvisibleold === null) {
                     $setvisibleold = $visibility;
                 }
@@ -1061,15 +1087,53 @@ class format_flexsections extends core_courseformat\base {
             } else {
                 if ($visibility) {
                     if ($s->visibleold) {
-                        set_section_visible($this->courseid, $s->section, $s->visibleold);
+                        $this->set_single_section_visible($s, $s->visibleold);
                     }
                 } else {
                     if ($s->visible) {
-                        set_section_visible($this->courseid, $s->section, $visibility);
+                        $this->set_single_section_visible($s, $visibility);
                         $this->update_section_format_options(['id' => $s->id, 'visibleold' => $s->visible]);
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Shows or hides one section and its activities (but not its subsections)
+     *
+     * @param stdClass|section_info $section object with the section id and number
+     * @param int $visibility
+     */
+    protected function set_single_section_visible($section, int $visibility): void {
+        global $CFG;
+        if ($CFG->branch < 502) {
+            set_section_visible($this->courseid, $section->section, $visibility);
+            return;
+        }
+        // Do not use $this->get_modinfo(), it can be outdated after the sections were renumbered.
+        if ($sectioninfo = get_fast_modinfo($this->courseid)->get_section_info_by_id($section->id)) {
+            \core_courseformat\formatactions::section($this->courseid)->set_visibility($sectioninfo, (bool)$visibility);
+        }
+    }
+
+    /**
+     * Highlights the section in the course or removes the highlight
+     *
+     * @param int $sectionnum section number to highlight, 0 to remove the highlight
+     */
+    protected function update_course_marker(int $sectionnum): void {
+        global $CFG;
+        if ($CFG->branch < 502) {
+            course_set_marker($this->courseid, $sectionnum);
+            return;
+        }
+        $actions = \core_courseformat\formatactions::section($this->courseid);
+        if (!$sectionnum) {
+            $actions->remove_all_markers();
+        } else if ($sectioninfo = get_fast_modinfo($this->courseid)->get_section_info($sectionnum)) {
+            // Do not use $this->get_modinfo(), it can be outdated after the sections were renumbered.
+            $actions->set_marker($sectioninfo, true);
         }
     }
 
@@ -1161,8 +1225,8 @@ class format_flexsections extends core_courseformat\base {
         if ($section->section == $parent->section || $this->section_has_parent($parent, $section->section)) {
             return false;
         }
-        if ($section->parent != $parent->section) {
-            // When moving to another parent, check the depth.
+        if ($section->parent != $parent->section && $parent->section) {
+            // When moving to another parent, check the depth. Moving to the top level is always allowed.
             if ($this->get_section_depth($parent) + 1 > $this->get_max_section_depth()) {
                 return false;
             }
@@ -1239,7 +1303,7 @@ class format_flexsections extends core_courseformat\base {
      * @return array Array containing arrays of section ids and course mod ids that were deleted
      */
     public function delete_section_with_children(section_info $section): array {
-        global $DB;
+        global $DB, $CFG;
         if (!$section->section) {
             // Section 0 does not have parent.
             return [[], []];
@@ -1247,46 +1311,68 @@ class format_flexsections extends core_courseformat\base {
 
         $lockfactory = \core\lock\lock_config::get_lock_factory('format_flexsections_delete_section');
 
-        if (!($lock = $lockfactory->get_lock('course_modification_lock', 10))) {
+        if (!($lock = $lockfactory->get_lock('course_modification_lock_' . $this->courseid, 10))) {
             throw new moodle_exception('locktimeout');
         }
 
         try {
-            $sectionid = $section->id;
             $course = $this->get_course();
+
+            // Find the ids of the section and all its subsections. The list of visited sections
+            // protects from infinite loops if the parent references are broken.
+            $subtreeids = [];
+            $queue = [$section];
+            while ($s = array_shift($queue)) {
+                if (!$s->section || isset($subtreeids[$s->id])) {
+                    continue;
+                }
+                $subtreeids[$s->id] = $s->id;
+                $queue = array_merge($queue, array_values($this->get_subsections($s)));
+            }
 
             // Move the section to be removed to the end (this will re-number other sections).
             $this->move_section($section->section, 0);
 
             $modinfo = get_fast_modinfo($this->courseid);
-            $allsections = $modinfo->get_section_info_all();
-            $process = false;
             $sectionstodelete = [];
-            $modulestodelete = [];
-            foreach ($allsections as $sectioninfo) {
-                if ($sectioninfo->id == $sectionid) {
-                    // This is the section to be deleted. Since we have already
-                    // moved it to the end we know that we need to delete this section
-                    // and all the following (which can only be its subsections).
-                    $process = true;
-                }
-                if ($process) {
+            $sectionnumbers = [];
+            foreach ($modinfo->get_section_info_all() as $sectioninfo) {
+                if (isset($subtreeids[$sectioninfo->id])) {
                     $sectionstodelete[] = $sectioninfo->id;
-                    if (!empty($modinfo->sections[$sectioninfo->section])) {
-                        $modulestodelete = array_merge(
-                            $modulestodelete,
-                            $modinfo->sections[$sectioninfo->section]
-                        );
-                    }
-                    // Remove the marker if it points to this section.
-                    if ($sectioninfo->section == $course->marker) {
-                        course_set_marker($course->id, 0);
-                    }
+                    $sectionnumbers[] = $sectioninfo->section;
+                } else if ($sectionstodelete) {
+                    // The section was not moved to the end, this only happens if the user is not allowed
+                    // to update the course. Deleting it now would leave gaps in the section numbers.
+                    throw new moodle_exception(
+                        'nopermissions',
+                        'error',
+                        '',
+                        get_string('deletesection', 'format_flexsections')
+                    );
                 }
+            }
+            if (!$sectionstodelete) {
+                return [[], []];
+            }
+
+            $modulestodelete = [];
+            foreach ($sectionnumbers as $sectionnum) {
+                $modulestodelete = array_merge($modulestodelete, $modinfo->sections[$sectionnum] ?? []);
+            }
+
+            // Remove the marker if it points to one of the deleted sections. Read the marker from the
+            // database because moving the section may have changed it.
+            $marker = (int)$DB->get_field('course', 'marker', ['id' => $this->courseid]);
+            if ($marker && in_array($marker, $sectionnumbers)) {
+                $this->update_course_marker(0);
             }
 
             foreach ($modulestodelete as $cmid) {
-                course_delete_module($cmid);
+                if ($CFG->branch < 502) {
+                    course_delete_module($cmid);
+                } else {
+                    \core_courseformat\formatactions::cm($this->courseid)->delete($cmid);
+                }
             }
 
             [$sectionsql, $params] = $DB->get_in_or_equal($sectionstodelete);
@@ -1333,15 +1419,41 @@ class format_flexsections extends core_courseformat\base {
     }
 
     /**
+     * Can the current user merge the section with its parent
+     *
+     * Merging moves all activities of the section to the parent section. As in core, moving an activity
+     * requires the capability to manage it.
+     *
+     * @param section_info $section
+     * @return bool
+     */
+    public function can_mergeup_section(section_info $section): bool {
+        if (!$section->section || !$section->parent) {
+            return false;
+        }
+        if (!has_capability('moodle/course:update', context_course::instance($this->courseid))) {
+            return false;
+        }
+        foreach (get_fast_modinfo($this->courseid)->sections[$section->section] ?? [] as $cmid) {
+            if (!has_capability('moodle/course:manageactivities', context_module::instance($cmid))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Moves the section content to the parent section and deletes it
      *
      * Moves all activities and subsections to the parent section (section 0
      * can never be deleted)
      *
+     * Do not call this function without checking {@see self::can_mergeup_section()}
+     *
      * @param section_info $section
      */
     public function mergeup_section(section_info $section): void {
-        global $DB;
+        global $DB, $CFG;
         if (!$section->section || !$section->parent) {
             // Section 0 does not have parent.
             return;
@@ -1354,7 +1466,11 @@ class format_flexsections extends core_courseformat\base {
         $parent = $modinfo->get_section_info($section->parent);
         if (!empty($modinfo->sections[$section->section])) {
             foreach ($modinfo->sections[$section->section] as $cmid) {
-                moveto_module($modinfo->get_cm($cmid), $parent);
+                if ($CFG->branch < 502) {
+                    moveto_module($modinfo->get_cm($cmid), $parent);
+                } else {
+                    \core_courseformat\formatactions::cm($this->courseid)->move_end_section($cmid, $parent->id);
+                }
             }
         }
         foreach ($subsections as $subsection) {
@@ -1364,11 +1480,12 @@ class format_flexsections extends core_courseformat\base {
         }
 
         if ($this->get_course()->marker == $section->section) {
-            course_set_marker($this->courseid, 0);
+            $this->update_course_marker(0);
         }
 
         // Move the section to be removed to the end (this will re-number other sections).
         $this->move_section($section->section, 0);
+        $sectionrecord = $DB->get_record('course_sections', ['id' => $section->id], '*', MUST_EXIST);
 
         // Invalidate the section cache by given section id.
         course_modinfo::purge_course_section_cache_by_id($this->courseid, $section->id);
@@ -1383,6 +1500,21 @@ class format_flexsections extends core_courseformat\base {
         $DB->delete_records('course_format_options', ['courseid' => $this->courseid, 'sectionid' => $section->id]);
         $DB->delete_records('course_sections', ['id' => $section->id]);
         $transaction->allow_commit();
+
+        // Trigger an event for course section deletion.
+        $event = \core\event\course_section_deleted::create(
+            [
+                'objectid' => $sectionrecord->id,
+                'courseid' => $this->courseid,
+                'context' => $context,
+                'other' => [
+                    'sectionnum' => $sectionrecord->section,
+                    'sectionname' => $this->get_section_name($sectionrecord),
+                ],
+            ]
+        );
+        $event->add_record_snapshot('course_sections', $sectionrecord);
+        $event->trigger();
 
         // Partial rebuild section cache that has been purged.
         rebuild_course_cache($this->courseid, true, true);
@@ -1490,6 +1622,22 @@ class format_flexsections extends core_courseformat\base {
         course_update_section($course, $newsection, $newsection);
         $this->update_section_format_options($newsection);
 
+        // Copy the files embedded in the section summary.
+        try {
+            $context = context_course::instance($course->id);
+            $fs = get_file_storage();
+            foreach ($fs->get_area_files($context->id, 'course', 'section', $originalsection->id) as $file) {
+                $fs->create_file_from_storedfile([
+                    'contextid' => $context->id,
+                    'component' => 'course',
+                    'filearea' => 'section',
+                    'itemid' => $newsection->id,
+                ], $file);
+            }
+        } catch (\Exception $e) {
+            debugging('Error copying section files.' . $e->getMessage(), DEBUG_DEVELOPER);
+        }
+
         return $newsection;
     }
 
@@ -1541,6 +1689,10 @@ class format_flexsections extends core_courseformat\base {
         foreach ($sectionstocopy as $s) {
             foreach (($modinfo->sections[$s->section] ?? []) as $modnumber) {
                 $originalcm = $modinfo->cms[$modnumber];
+                if ($originalcm->deletioninprogress) {
+                    // Do not duplicate activities that are about to be deleted.
+                    continue;
+                }
                 if ($CFG->branch < 502) {
                     duplicate_module($course, $originalcm, $parentmapping[$s->section]->id, false);
                 } else {
@@ -1576,6 +1728,17 @@ class format_flexsections extends core_courseformat\base {
                 $availableinfo = null;
             }
         }
+    }
+
+    /**
+     * Course deletion hook, removes the section preferences stored in several user preferences
+     */
+    public function delete_format_data() {
+        global $DB;
+        parent::delete_format_data();
+        // See {@see preferences::set_long_preference()} for the names of the additional preferences.
+        $like = $DB->sql_like_escape('coursesectionspreferences_' . $this->get_courseid() . '#') . '%';
+        $DB->delete_records_select('user_preferences', $DB->sql_like('name', ':name'), ['name' => $like]);
     }
 
     /**
