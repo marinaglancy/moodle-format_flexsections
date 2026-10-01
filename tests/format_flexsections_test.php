@@ -632,6 +632,7 @@ final class format_flexsections_test extends \advanced_testcase {
     public function test_mergeup_and_move_require_movesections(): void {
         global $DB, $PAGE;
         $this->resetAfterTest(true);
+        $this->setAdminUser();
 
         $generator = $this->getDataGenerator();
         $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
@@ -654,7 +655,8 @@ final class format_flexsections_test extends \advanced_testcase {
             ))->section_control_items();
 
         // Admin can merge and move sections.
-        $this->setAdminUser();
+        $this->assertEquals(['T1', 'S1'], $this->get_section_names($course->id));
+        $this->assertEquals(1, $format->get_section(2)->parent);
         $this->assertTrue($format->can_mergeup_section($format->get_section(2)));
         $this->assertArrayHasKey('mergeup', $getcontrols(2));
         $this->assertArrayHasKey('moveflexsections', $getcontrols(2));
