@@ -157,7 +157,7 @@ class controlmenu extends \core_courseformat\output\local\content\section\contro
         }
 
         if (
-            has_capability('moodle/course:update', $coursecontext) && $section->section &&
+            has_all_capabilities(['moodle/course:update', 'moodle/course:movesections'], $coursecontext) && $section->section &&
                 (!$section->collapsed || $section->section != $this->format->get_viewed_section())
         ) {
             $moveurl = new moodle_url('#');

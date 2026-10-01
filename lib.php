@@ -1422,7 +1422,8 @@ class format_flexsections extends core_courseformat\base {
      * Can the current user merge the section with its parent
      *
      * Merging moves all activities of the section to the parent section. As in core, moving an activity
-     * requires the capability to manage it.
+     * requires the capability to manage it. Merging also moves and deletes the section, which requires
+     * the capability to move sections, the same as deleting a section.
      *
      * @param section_info $section
      * @return bool
@@ -1431,7 +1432,8 @@ class format_flexsections extends core_courseformat\base {
         if (!$section->section || !$section->parent) {
             return false;
         }
-        if (!has_capability('moodle/course:update', context_course::instance($this->courseid))) {
+        $context = context_course::instance($this->courseid);
+        if (!has_all_capabilities(['moodle/course:update', 'moodle/course:movesections'], $context)) {
             return false;
         }
         foreach (get_fast_modinfo($this->courseid)->sections[$section->section] ?? [] as $cmid) {

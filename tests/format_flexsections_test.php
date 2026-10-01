@@ -627,6 +627,56 @@ final class format_flexsections_test extends \advanced_testcase {
     }
 
     /**
+     * Merging and moving sections require the capability to move sections.
+     */
+    public function test_mergeup_and_move_require_movesections(): void {
+        global $DB, $PAGE;
+        $this->resetAfterTest(true);
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course(['numsections' => 0, 'format' => 'flexsections']);
+        /** @var \format_flexsections_generator $flexgenerator */
+        $flexgenerator = $generator->get_plugin_generator('format_flexsections');
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'T1']);
+        $flexgenerator->create_section(['courseid' => $course->id, 'name' => 'S1', 'parent' => 'T1']);
+        $PAGE->set_url(new moodle_url('/course/view.php', ['id' => $course->id]));
+
+        $teacher = $generator->create_and_enrol($course, 'editingteacher');
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+        assign_capability('moodle/course:movesections', CAP_PROHIBIT, $roleid, context_course::instance($course->id)->id);
+
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course);
+        $getcontrols = fn(int $sectionnum): array =>
+            (new \format_flexsections\output\courseformat\content\section\controlmenu(
+                $format,
+                $format->get_section($sectionnum)
+            ))->section_control_items();
+
+        // Admin can merge and move sections.
+        $this->setAdminUser();
+        $this->assertTrue($format->can_mergeup_section($format->get_section(2)));
+        $this->assertArrayHasKey('mergeup', $getcontrols(2));
+        $this->assertArrayHasKey('moveflexsections', $getcontrols(2));
+
+        // Teacher without the capability to move sections can not merge or move sections.
+        $this->setUser($teacher);
+        $this->assertFalse($format->can_mergeup_section($format->get_section(2)));
+        $this->assertArrayNotHasKey('mergeup', $getcontrols(2));
+        $this->assertArrayNotHasKey('moveflexsections', $getcontrols(1));
+        $this->assertArrayNotHasKey('moveflexsections', $getcontrols(2));
+
+        $actions = $format->get_stateactions_instance();
+        try {
+            $actions->section_mergeup(new \core_courseformat\stateupdates($format), $course, [], $format->get_section(2)->id);
+            $this->fail('Exception expected');
+        } catch (moodle_exception $e) {
+            $this->assertEquals('nopermissions', $e->errorcode);
+        }
+        $this->assertEquals(['T1', 'S1'], $this->get_section_names($course->id));
+    }
+
+    /**
      * Adding a section in the middle of the course requires the capability to move sections.
      */
     public function test_section_add_requires_movesections(): void {
