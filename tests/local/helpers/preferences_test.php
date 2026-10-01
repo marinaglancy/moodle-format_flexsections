@@ -17,6 +17,7 @@
 namespace format_flexsections\local\helpers;
 use format_flexsections;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\format_flexsections\local\helpers\preferences::class)]
 /**
  * Tests for Flexible sections format
  *
@@ -78,8 +79,6 @@ final class preferences_test extends \advanced_testcase {
 
     /**
      * Test for the default delete format data behaviour.
-     *
-     * @covers ::set_sections_preference
      */
     public function test_set_sections_preference(): void {
         $this->resetAfterTest();
@@ -157,8 +156,6 @@ final class preferences_test extends \advanced_testcase {
 
     /**
      * Test remove_section_preference_ids() method.
-     *
-     * @covers \core_courseformat\base::persist_to_user_preference
      */
     public function test_remove_section_preference_ids(): void {
         $this->resetAfterTest();

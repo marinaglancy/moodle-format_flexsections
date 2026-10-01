@@ -23,6 +23,7 @@ use moodle_exception;
 use moodle_url;
 use testable_course_edit_form;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\format_flexsections::class)]
 /**
  * Flexible sections course format related unit tests.
  *

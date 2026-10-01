@@ -21,6 +21,7 @@ use backup_controller;
 use restore_controller;
 use restore_dbops;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\format_flexsections::class)]
 /**
  * Backup and restore tests for flexible sections course format.
  *
