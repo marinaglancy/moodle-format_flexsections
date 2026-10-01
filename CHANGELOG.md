@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [5.0.5] - 2026100100
 ### Added
 - Support for Moodle 5.3: sections are displayed as cards, similar to the core course formats
 ### Fixed
