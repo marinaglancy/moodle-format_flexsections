@@ -699,7 +699,10 @@ final class format_flexsections_test extends \advanced_testcase {
      * Duplicating a section copies the files in the summary and skips the activities that are being deleted.
      */
     public function test_duplicate_section_files_and_deleted_activities(): void {
-        global $DB;
+        global $DB, $CFG;
+        if ((int)$CFG->branch < 402) {
+            $this->markTestSkipped('Duplicating sections is only available in Moodle 4.2 and above');
+        }
         $this->resetAfterTest(true);
         $this->setAdminUser();
 
