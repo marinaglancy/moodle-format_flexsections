@@ -1,6 +1,26 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- Missing sesskey validation for `addchildsection` and `movesection` URL handlers in non-JS fallbacks -
+  detected by https://mdlshield.com/
+- $_SERVER['HTTP_REFERER'] replaced with a safer alternative `get_local_referer()`
+- PARAM_RAW replaced with more specific PARAM_INT for moving section parameters
+- When "Max subsection depth" was set to 1, deleting a subsection also deleted all sections after it
+  together with their activities, and subsections could not be moved to the top level
+- Deleting a section could remove the highlight from another section, and merging a highlighted
+  section with its parent could highlight the next added section
+- Hiding or showing a section that another user had just deleted could hide or show all sections in the course
+- Restoring, copying or importing a whole course deleted all empty sections that had no name. The clean-up
+  after a partial import now runs once per restore instead of after every restored section
+- JavaScript error in the browser console when opening the "Move" dialogue for a section or an activity
+- Deleting and moving sections now require the same permissions as in Moodle core, including
+  the permission to delete each activity in the section and in all its subsections
+- Merging a section with its parent now requires the permissions to move sections and to manage each activity in it
+- The "Move" section menu item is no longer shown to users who can not move sections
+- Duplicating a section now copies the files in the section summary and skips activities that are being deleted
+
 ## [4.1.6] - 2026-07-26
 ### Fixed
 - Restore cleanup no longer runs when restoring into courses using another course format

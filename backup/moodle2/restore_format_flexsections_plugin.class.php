@@ -25,6 +25,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_format_flexsections_plugin extends restore_format_plugin {
+    /** @var array ids of the restores where the cleanup was already performed */
+    protected static $cleanupdone = [];
+
     /**
      * Returns the paths to be handled by the plugin at course level.
      *
@@ -81,10 +84,17 @@ class restore_format_flexsections_plugin extends restore_format_plugin {
     protected function cleanup_after_restore() {
         global $DB;
 
+        // All after_restore hooks are executed when the whole restore is finished, only clean up once.
+        $restoreid = $this->get_restoreid();
+        if (isset(self::$cleanupdone[$restoreid])) {
+            return;
+        }
+        self::$cleanupdone[$restoreid] = true;
+
         $courseid = $this->step->get_task()->get_courseid();
 
         $format = $DB->get_field('course', 'format', ['id' => $courseid]);
-        if ($format !== 'flexsections') {
+        if ($format !== 'flexsections' || !$this->are_some_sections_excluded()) {
             return;
         }
 
@@ -197,5 +207,21 @@ class restore_format_flexsections_plugin extends restore_format_plugin {
         if ($changed || !empty($renumbermap)) {
             rebuild_course_cache($courseid);
         }
+    }
+
+    /**
+     * Checks if some sections from the backup are excluded from this restore (i.e. partial import)
+     *
+     * @return bool
+     */
+    protected function are_some_sections_excluded(): bool {
+        $task = $this->step->get_task();
+        foreach ($task->get_info()->sections ?? [] as $section) {
+            $settingname = 'section_' . $section->sectionid . '_included';
+            if ($task->setting_exists($settingname) && !$task->get_setting_value($settingname)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
