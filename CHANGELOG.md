@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.1.7] - 2026-10-02
 ### Fixed
 - Missing sesskey validation for `addchildsection` and `movesection` URL handlers in non-JS fallbacks -
   detected by https://mdlshield.com/
